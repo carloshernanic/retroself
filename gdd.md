@@ -2,160 +2,158 @@
 
 > *"E se você pudesse voltar e ajudar a si mesmo a não desistir?"*
 
-**Versão:** 0.1 (Draft)
+**Versão:** 0.2 (Draft)
 **Autor:** Carlos
 **Data:** abril de 2026
 
 ---
 
-## 1. Visão Geral
+## 1. Game Concept
 
-**Título:** retroself
-**Gênero:** Puzzle-platformer narrativo com mecânica de manipulação do tempo
-**Estilo visual:** Pixel art 8-bits (paleta restrita, sprites de 16×16 / 16×32)
-**Perspectiva:** 2D side-scroller
-**Modo:** Single-player
-**Plataformas-alvo (MVP):** PC (Steam, itch.io). Stretch goal: Nintendo Switch e mobile (iOS/Android)
-**Engine recomendada:** Godot 4 (alternativas: Unity 2D ou GB Studio para um look mais autêntico de Game Boy)
-**Classificação indicativa:** 12+ (temas de fracasso, despejo, melancolia — sem violência gráfica)
-**Duração estimada da campanha:** 3 a 5 horas (4 fases + hub + epílogo)
+> **[IMAGEM REPRESENTANDO O JOGO]**
+> *Prompt para gerar:* "Pixel art game cover for an indie puzzle-platformer. A tired 30-year-old man in a worn-out coat stands in a rainy city square at night, looking down at a small 7-year-old boy — both are clearly the same person at different ages. Between them, a glowing alien pocket watch floats, freezing a single raindrop mid-air. A retro arcade cabinet glows behind a tree in the background. Cold blue-gray palette with one warm amber glow. 8-bit pixel art, CRT scanlines, melancholic but hopeful mood. --ar 16:9"
 
-### 1.1. Conceito (pitch de uma frase)
-Um homem fracassado e despejado encontra uma máquina alienígena que o leva de volta para quatro momentos decisivos da sua infância e adolescência, onde ele precisa cooperar com seu eu mais novo — usando a diferença de tamanho entre os dois e a habilidade de congelar o tempo — para reescrever a própria história.
+### História + Visão Geral
 
-### 1.2. Pitch longo
-Woody tem 30 anos, foi despejado e dorme num banco de praça. Numa noite chuvosa, encontra uma máquina estranha escondida atrás de uma árvore. Ao entrar, descobre que alienígenas vinham observando ele há anos: não como cobaia, mas como candidato. Eles concluíram que Woody não é um homem mau, apenas alguém que tropeçou nas piores horas. E oferecem um acordo: ele pode escolher **quatro momentos da própria vida**, entre os 5 e os 18 anos, e voltar para ajudar seu eu mais jovem a atravessá-los.
+**Retroself** é um puzzle-platformer narrativo de pixel art 8-bits, single-player, com mecânica de manipulação do tempo. Jogado em 2D side-scroller, tem entre **45 e 60 minutos** de campanha (4 fases + hub + epílogo) e é desenvolvido em **Unity 2D** para **Web (itch.io)**.
 
-A mágica do jogo está no encontro entre os dois Woodys. O Woody-criança é pequeno, ágil, mas frágil e ingênuo. O Woody-adulto é o dobro do tamanho, pesa, alcança coisas que a criança não alcança, e ainda recebe dos alienígenas um relógio que **congela o tempo**. Cada fase é um quebra-cabeça em movimento: o jogador controla o Woody adulto, posiciona o cenário no momento certo, congela o tempo para preparar o caminho, e libera para o Woody-criança seguir adiante.
+Woody tem 30 anos, foi despejado e dorme num banco de praça. Numa noite chuvosa, encontra uma cabine alienígena escondida atrás de uma árvore. Ao entrar, descobre que alienígenas vinham observando ele há anos: não como cobaia, mas como candidato. Eles concluíram que Woody não é um homem mau, apenas alguém que tropeçou nas piores horas. E oferecem um acordo: ele pode voltar para **quatro momentos da própria vida**, entre os 7 e os 18 anos, e ajudar seu eu mais jovem a atravessá-los.
 
-### 1.3. Pilares de design
-1. **Cooperação assimétrica entre eu-de-agora e eu-de-antes.** A mecânica nunca esconde a metáfora: você está literalmente carregando o seu eu mais novo em alguns momentos.
-2. **Tempo como ferramenta de cuidado, não de poder.** Congelar o tempo não serve para combate — serve para preparar o terreno antes que sua versão jovem tropece.
-3. **Estética 8-bits com peso emocional.** A simplicidade visual contrasta com a profundidade temática, no espírito de *Undertale*, *Celeste* e *To the Moon*.
-4. **Fracasso reversível, mas com consequência.** Cada fase pode ser refeita, mas o jogador sente o peso de ter falhado — não há game over agressivo, e sim uma volta ao início da fase com um pequeno diálogo do Woody-adulto consigo mesmo.
-
-### 1.4. Inspirações
-| Jogo / Obra | O que inspira |
-|---|---|
-| *Braid* | Manipulação do tempo como narrativa, não só mecânica |
-| *Celeste* | Plataforma com tema de saúde mental e crescimento pessoal |
-| *Brothers: A Tale of Two Sons* | Dois personagens, dois corpos, uma história |
-| *The Swapper* | Quebra-cabeças baseados em duplicar/coordenar personagens |
-| *Inside / Limbo* | Atmosfera melancólica em plataforma 2D |
-| *Undertale* | Estilo 8/16-bits com peso emocional |
-| *Filme "About Time"* | Premissa de viagem ao passado para corrigir o eu |
-
-### 1.5. Público-alvo
-- **Primário:** Jogadores indie de 18–35 anos que gostam de puzzle-platformers narrativos (público de Celeste, Braid, GRIS).
-- **Secundário:** Público brasileiro adulto que se identifica com a temática de "começar do zero", "segunda chance", "lidar com o eu do passado" — tema que ressoa especialmente em momentos de crise econômica.
-- **Plataforma de descoberta principal:** Steam, TikTok e YouTube (gameplay + storytelling).
-
----
-
-## 2. Narrativa
-
-### 2.1. Sinopse
-Woody, 30 anos, perdeu o emprego, foi despejado e dorme numa praça da periferia de uma cidade grande. Sua vida é uma sequência de pequenas desistências acumuladas. Numa madrugada, ele encontra uma cabine retrô meio escondida na praça, parecida com um fliperama velho. Quando entra, é abduzido. Os alienígenas — uma espécie observadora, não invasora — explicam que ele foi escolhido para receber uma segunda chance. Não porque ele é especial: porque é comum, e merece. Eles lhe dão um relógio capaz de congelar o tempo e o enviam de volta para quatro momentos da própria vida, à sua escolha.
+A mágica do jogo está no encontro entre os dois Woodys. O Woody-criança é pequeno, ágil, frágil. O Woody-adulto é o dobro do tamanho, alcança o que a criança não alcança, e recebe dos alienígenas um relógio que **congela o tempo**. Cada fase é um quebra-cabeça em movimento: o adulto prepara o cenário, congela o tempo, e o jovem segue adiante.
 
 A cada fase concluída, o presente de Woody se altera sutilmente: a praça começa a clarear, o banco onde ele dormia ganha um cobertor, depois um casaco, depois desaparece. O jogo termina quando Woody acorda — talvez na praça, talvez não.
 
-### 2.2. Tema central
-**Auto-compaixão.** O jogo não é sobre apagar o passado, é sobre voltar a ele com o cuidado que você não recebeu na época. A mecânica do tempo congelado é a metáfora central: você não pode mudar o que sua versão jovem fez, mas pode parar o mundo por um instante e arrumar o cenário para que ela tenha alguma chance.
+**Tema central:** Auto-compaixão. O jogo não é sobre apagar o passado, é sobre voltar a ele com o cuidado que você não recebeu na época.
 
-### 2.3. Tom
-Melancólico mas esperançoso. Humor seco do Woody-adulto contrastando com a sinceridade do Woody-criança. Diálogos curtos, em texto 8-bits com efeito de máquina de escrever. Nada de cinemáticas longas — toda a narrativa cabe em pequenos diálogos antes e depois de cada fase, mais detalhes ambientais (pôsteres, bilhetes, fotos) durante.
+**Classificação indicativa:** 12+ (temas de fracasso, despejo, melancolia — sem violência gráfica)
 
-### 2.4. Estrutura narrativa
-1. **Prólogo (10 min).** Praça, chuva, cabine, abdução, conversa com os alienígenas, escolha das 4 memórias.
-2. **Hub: A Sala dos Alienígenas.** Espaço de seleção entre as 4 fases. O jogador escolhe a ordem em que joga.
-3. **Fase 1, 2, 3, 4.** Cada uma com prólogo curto (Woody-adulto narra em off por que aquele momento marcou) e epílogo curto (impacto da fase no presente).
-4. **Epílogo.** Woody acorda. O jogador vê o presente reescrito.
-
-### 2.5. As 4 memórias (ordem sugerida, mas livre)
-| # | Idade | Local | Tema do momento |
-|---|---|---|---|
-| 1 | 7 anos | Pátio da escola pública | Bullying e a primeira vez que ele aprendeu a se calar |
-| 2 | 12 anos | Casa da família, num domingo | A briga dos pais e a primeira vez que ele se sentiu invisível |
-| 3 | 15 anos | Festa de aniversário de um colega | Pressão social, primeira escolha covarde |
-| 4 | 18 anos | Manhã do vestibular | Auto-sabotagem e a primeira grande desistência |
-
-(Essas memórias podem ser ajustadas — o que importa é que cada uma tenha um cenário visualmente forte e um obstáculo emocional concreto traduzível em puzzle.)
+**Público-alvo:** Jogadores indie de 18–35 anos que gostam de puzzle-platformers narrativos (público de Celeste, Braid, GRIS) e público brasileiro adulto que se identifica com a temática de "segunda chance".
 
 ---
 
-## 3. Personagens
+## 2. Design
 
-### 3.1. Woody Adulto (jogável)
-- **Idade:** 30 anos
-- **Aparência:** Sprite de 16×32 (dobro da altura do jovem). Casaco surrado, barba por fazer, olheiras. Paleta apagada (cinzas, marrom).
-- **Personalidade:** Cansado, irônico, mas com um fundo de ternura que aparece quando fala com seu eu mais novo.
-- **Habilidades:**
-  - Pulo médio (não tão alto pelo peso)
-  - Empurrar / puxar caixas pesadas
-  - Carregar o Woody-criança no colo
-  - **Congelar o tempo** (relógio alienígena, recurso central)
-  - Alcançar plataformas e interruptores altos
+> **[IMAGEM ILUSTRANDO O DESIGN DO JOGO]**
+> *Prompt para gerar:* "Pixel art level design mockup, side-scroller perspective. A cross-section of four different scenes stacked: a school courtyard, a family home interior, a teen party at night, and a bright exam room. Two characters visible — a small kid and a tall adult silhouette. Glowing pocket watch icon on a HUD bar. 8-bit pixel art, restricted palette, design document style. --ar 16:9"
 
-### 3.2. Woody Criança/Adolescente (companheiro / parcialmente jogável)
-- **Idade:** 7, 12, 15 ou 18 (varia por fase)
-- **Aparência:** Sprite de 16×16 (metade do tamanho do adulto). Roupa colorida, sprite mais vivo. Em cada fase ele tem uma aparência diferente — mochila escolar aos 7, fone de ouvido aos 12, skate aos 15, uniforme escolar aos 18.
-- **Personalidade:** Muda por fase. Aos 7, curioso e medroso. Aos 12, fechado. Aos 15, debochado. Aos 18, ansioso. Ele **não vê** o Woody-adulto como ele mesmo — vê como um "tio estranho" que apareceu pra ajudar. (Os alienígenas explicam isso no prólogo.)
-- **Habilidades:**
-  - Pulo alto (relativo ao tamanho)
-  - Cabe em passagens estreitas
-  - Corre mais rápido
-  - **Não pode congelar o tempo** nem empurrar objetos pesados
-  - Em algumas fases, segue o Woody-adulto automaticamente; em outras, é controlado diretamente após troca de personagem
+### 2.1. Blueprint
 
-### 3.3. Os Alienígenas (NPCs do hub)
-- Trio de criaturas de pixel, cada uma com uma cor primária (vermelho, azul, amarelo).
-- Falam pouco, em frases curtas e enigmáticas.
-- Funcionam como "tutorial difuso" — explicam o relógio, a regra das 4 memórias, e dão pistas no hub se o jogador empacar.
-- Visualmente: simples, sem boca, com expressões mostradas só pelos olhos.
+#### Art Style
 
-### 3.4. NPCs antagonistas (por fase)
-Eles **não são vilões clássicos**. São obstáculos cotidianos da vida do Woody jovem: o bully da escola, o pai irritado, o amigo que pressiona, o tempo do relógio do vestibular. Mecanicamente, são "inimigos" — patrulham, perseguem, bloqueiam o caminho — mas narrativamente, são pessoas reais. O Woody-adulto tem diálogos internos sobre cada um.
+> **[IMAGEM]**
+> *Prompt:* "Pixel art style reference sheet. NES + Game Boy Color inspired palette. Tile examples (16x16) of grass, brick, wood, metal. Side-scroller environment chunk with 4 distinct color zones: warm school yellow, melancholic home brown, neon party magenta, cold exam white. CRT scanline effect overlay. --ar 16:9"
 
----
+- **Pixel art 8-bits** com paleta restrita (estilo NES + Game Boy Color)
+- Sprites: 16×32 (Woody adulto), 16×16 (Woody jovem), tiles de 16×16
+- Resolução interna: 320×180, escalonada
+- Cada fase tem **identidade cromática própria** para localizar o jogador emocionalmente
+- HUD minimalista: apenas barra de energia do congelamento (canto superior esquerdo)
+- Diálogos: caixa pixelada com retrato 24×24 (estilo Pokémon clássico), fonte custom de 8 pixels
 
-## 4. Gameplay
+#### Narrative Style
 
-### 4.1. Loop principal
-1. **Selecionar memória** no hub alienígena.
-2. **Prólogo curto** (Woody-adulto narra).
-3. **Resolver a fase**: avançar pela plataforma, usar a diferença de tamanho e o congelamento do tempo para que **os dois Woodys** cheguem ao final.
-4. **Epílogo curto** (impacto no presente, mostrado visualmente no hub).
-5. Voltar ao hub. Repetir até completar as 4. Desbloquear epílogo final.
+> **[IMAGEM]**
+> *Prompt:* "Pixel art dialogue box mockup, retro RPG style. Two character portraits side by side — a tired 30-year-old man with stubble and a curious 7-year-old boy. Typewriter text effect mid-sentence. Bottom of screen, classic Pokemon-inspired UI frame. 8-bit pixel art, low resolution. --ar 16:9"
 
-### 4.2. Mecânicas core
+- **Tom:** melancólico mas esperançoso. Humor seco do adulto contra a sinceridade do jovem.
+- **Diálogos curtos**, em texto 8-bits com efeito de máquina de escrever.
+- **Sem cinemáticas longas** — narrativa cabe em pequenos diálogos antes/depois das fases.
+- **Detalhes ambientais**: pôsteres, bilhetes, fotos durante as fases.
+- **Sem voice acting** — apenas blips de texto (grave para o adulto, agudo para o jovem, sintético para os alienígenas).
 
-#### 4.2.1. Dualidade de tamanho
-- O Woody-adulto tem **o dobro da altura** do jovem.
-- Isso cria um sistema de afinidades opostas:
-  - **Só o adulto** alcança plataformas altas, empurra blocos, ativa interruptores de pressão pesados.
-  - **Só o jovem** passa em frestas, cabe em dutos, ativa interruptores delicados, corre por baixo de obstáculos.
-- Em vários momentos, o adulto **carrega** o jovem (sprite combinado de 16×40, movimento mais lento) para atravessar zonas perigosas.
+#### Sound Style
 
-#### 4.2.2. Congelamento do tempo
-- Botão dedicado. Ao apertar, **tudo congela** exceto o Woody-adulto: o jovem para no ar, inimigos param, plataformas móveis param, projéteis param.
-- Enquanto está congelado, o adulto pode:
-  - Reposicionar caixas
-  - Abrir portas
-  - Bloquear inimigos com objetos
-  - Pegar o jovem no colo e movê-lo
-- O congelamento tem **medidor de energia** (barra que recarrega lentamente fora do uso). Não é infinito — exige planejamento.
-- Visual: tela ganha leve filtro azul-acinzentado e granulação. SFX de zumbido elétrico baixo.
+> **[IMAGEM]**
+> *Prompt:* "Pixel art retro audio waveform visualization. Stylized 8-bit chiptune sheet music floating over a moody pixel art landscape. Old NES-style sound chip in foreground. Cold purple and amber accent colors. 8-bit aesthetic, atmospheric. --ar 16:9"
 
-#### 4.2.3. Troca de personagem
-- O jogador pode trocar quem está controlando ativamente (botão dedicado).
-- O personagem inativo fica parado ou segue um padrão simples (idle / patrulha curta).
-- Em algumas fases, há restrições: por exemplo, na fase do vestibular (18 anos), o Woody jovem é controlado mais frequentemente, porque o adulto é mais "ajuda externa".
+- **Direção:** Chiptune com camadas modernas, lo-fi melancólico.
+- **Referências:** Celeste OST (Lena Raine), Undertale (Toby Fox), Hyper Light Drifter, Shovel Knight.
+- **Faixas previstas:** tema da praça, da sala alienígena, dos 4 cenários, e remix final no epílogo.
+- **SFX:** pulo, passos diferentes por personagem, zumbido elétrico do congelamento, ondas sonoras dos pais (fase 2), tique-taque do relógio gigante (fase 4).
 
-#### 4.2.4. Sem morte permanente
-- Se o jovem cai num buraco ou é "pego" por um obstáculo, a fase reinicia do último checkpoint, com um diálogo curto do adulto: *"Ok, de novo. A gente acerta dessa vez."* — reforçando o tema.
-- Sem contador de mortes visível.
+#### Characters
 
-### 4.3. Controles (gamepad / teclado)
+> **[IMAGEM — Woody Adulto]**
+> *Prompt:* "Pixel art character sprite sheet, 16x32 pixels. A tired 30-year-old man with stubble, dark circles under eyes, worn brown coat, slumped posture. Walk cycle, idle pose, jump frame. Muted gray-brown palette. White background, sprite reference. 8-bit pixel art. --ar 1:1"
+
+> **[IMAGEM — Woody Jovem (4 versões)]**
+> *Prompt:* "Pixel art character sprite sheet showing the same boy at 4 ages, all 16x16. At 7 (school uniform, backpack, curious), at 12 (headphones, closed-off), at 15 (skateboard under arm, smug grin), at 18 (school uniform, anxious posture). Bright contrasting palette. 8-bit pixel art, white background. --ar 16:9"
+
+> **[IMAGEM — Alienígenas]**
+> *Prompt:* "Pixel art alien creature trio sprite sheet. Three small round beings, 16x16 each, no mouths, expressive eyes only. One red, one blue, one yellow. Minimalist friendly design. 8-bit pixel art, white background. --ar 16:9"
+
+- **Woody Adulto (jogável):** 30 anos, sprite 16×32. Casaco surrado, barba, olheiras. Cansado, irônico, com ternura escondida.
+- **Woody Jovem (companheiro / parcialmente jogável):** 7, 12, 15 ou 18 anos por fase. Sprite 16×16. Mochila aos 7, fones aos 12, skate aos 15, uniforme aos 18. Não reconhece o adulto como ele mesmo — vê como "tio estranho".
+- **Alienígenas (NPCs do hub):** trio de criaturas, cada uma com cor primária. Tutorial difuso, falam pouco.
+- **NPCs antagonistas:** bully, pais brigando, amigo da festa, relógio do vestibular. Não são vilões — são obstáculos cotidianos.
+
+#### Locations
+
+> **[IMAGEM — Mapa geral / hub estilo mood board]**
+> *Prompt:* "Pixel art map overview showing six interconnected scenes arranged like memory fragments: a rainy city square, an alien ship interior with portals, a school courtyard, a 2-story house at sunset, a teen party house with a pool at night, and a stark exam room. Side-scroller perspective tiles. 8-bit pixel art, varied color palettes per scene. --ar 16:9"
+
+| Local | Paleta | Descrição |
+|---|---|---|
+| **Praça (presente)** | Cinzas, azul-marinho, laranja apagado | Praça chuvosa, banco, cabine alienígena |
+| **Hub — Sala dos Alienígenas** | Roxos, ciano, preto profundo | 4 portais + janela para a praça que vai mudando |
+| **Fase 1 — O Pátio (7 anos)** | Verde-amarelo escolar, marrom de tijolo | Pátio de escola pública com quadra, bebedouro |
+| **Fase 2 — Domingo (12 anos)** | Bege, marrom, vermelho desbotado | Casa de dois andares, cozinha, sala, quarto |
+| **Fase 3 — A Festa (15 anos)** | Magenta, azul neon, preto | Casa de festa adolescente com piscina e telhado |
+| **Fase 4 — A Sala (18 anos)** | Branco frio, cinza, vermelho do relógio | Sala de prova de vestibular, paredes que se movem |
+
+#### Heroes
+
+- **Woody Adulto** — protagonista principal, herói da auto-compaixão. Carrega o relógio alienígena.
+- **Woody Jovem** — co-protagonista, ele mesmo no passado. O herói que precisa ser cuidado.
+
+### 2.2. Mechanics
+
+#### Game Objects
+- **Caixas pesadas** — só o adulto empurra
+- **Frestas e dutos** — só o jovem passa
+- **Interruptores de pressão pesados** — só o adulto ativa
+- **Interruptores delicados** — só o jovem ativa
+- **Relógio alienígena** — equipado pelo adulto, congela o tempo
+- **Fotografias coletáveis** — 3 escondidas por fase, desbloqueiam álbum no hub
+- **Inimigos contextuais** — bully, ondas sonoras, NPCs da festa, fantasmas das fases anteriores
+
+#### Regras de Interação
+- O adulto tem **dobro da altura** do jovem (sistema de afinidades opostas)
+- O adulto pode **carregar** o jovem (sprite 16×40, movimento mais lento)
+- O congelamento de tempo **só funciona com o adulto** ativo
+- O congelamento tem **medidor de energia** (recarrega lentamente fora de uso)
+- Troca de personagem por botão dedicado; o inativo fica em idle ou patrulha curta
+
+#### Condições de Vitória e Derrota
+- **Vitória da fase:** ambos os Woodys chegam ao ponto final
+- **Derrota:** se o jovem cai ou é pego, fase reinicia do último checkpoint
+- **Sem morte permanente, sem contador de mortes** — diálogo do adulto: *"Ok, de novo. A gente acerta dessa vez."*
+- **Vitória do jogo:** completar as 4 memórias → epílogo
+
+#### Comportamentos
+- **Personagem inativo:** idle ou patrulha curta
+- **Inimigos:** patrulham, perseguem ou bloqueiam — nunca podem ser combatidos, só evitados/manipulados
+- **Congelamento ativo:** filtro azul-acinzentado na tela, granulação, zumbido elétrico baixo
+
+#### Sistemas
+- **Progressão por desbloqueio mecânico** (sem XP, sem loot, sem skill tree)
+  - Fase 1: dualidade de tamanho
+  - Fase 2: + congelamento do tempo
+  - Fase 3: + troca livre de personagem
+  - Fase 4: combina tudo, timing apertado
+- **Feedback de progresso:** janela do hub mostra a praça mudando
+
+### 2.3. Interface
+
+> **[IMAGEM — HUD mockup]**
+> *Prompt:* "Pixel art HUD mockup for a retro side-scroller. Top-left corner shows a small energy bar with a clock icon (time-freeze meter). Bottom of screen has dialogue box with character portrait. Otherwise minimal — no map, no quest log. 8-bit pixel art, restricted palette. --ar 16:9"
+
+- HUD minimalista: barra de energia do congelamento (canto superior esquerdo)
+- Sem mapa, sem minimapa, sem missões em texto
+- Diálogos: caixa pixelada estilo Pokémon clássico
+- Animações-chave: idle do adulto suspira a cada ~5s, idle do jovem muda por fase, transição suave do "carregar"
+
+#### Controles
 | Ação | Gamepad | Teclado |
 |---|---|---|
 | Mover | Analógico esquerdo | A / D ou ←/→ |
@@ -165,148 +163,184 @@ Eles **não são vilões clássicos**. São obstáculos cotidianos da vida do Wo
 | Trocar personagem | Y / Triângulo | Tab |
 | Pausar | Start | Esc |
 
-### 4.4. Progressão
-- Não há sistema de XP, loot ou árvore de habilidades. Toda a progressão é **narrativa e mecânica** — cada fase introduz uma nova variação da mecânica principal:
-  - **Fase 1 (7 anos):** introduz dualidade de tamanho.
-  - **Fase 2 (12 anos):** introduz congelamento do tempo.
-  - **Fase 3 (15 anos):** introduz troca livre de personagem (até aqui ela era restrita).
-  - **Fase 4 (18 anos):** combina tudo, com timing apertado.
-- **Coletáveis opcionais por fase:** 3 "fotografias" escondidas em cada fase, que desbloqueiam um álbum no hub. Ele revela detalhes da vida do Woody que não cabem nos diálogos. Pura recompensa narrativa, zero efeito mecânico.
+---
+
+## 3. Dynamics
+
+### 3.1. Player-Player
+**Não se aplica diretamente** — Retroself é single-player.
+
+Porém, há uma **dinâmica simbólica entre dois "jogadores"**: o jogador do presente (adulto) e o jogador-criança (passado). O jogador real ocupa os dois papéis em momentos diferentes.
+
+**Cooperação interna:** o jogador precisa pensar como adulto (planejamento, recursos, paciência) e como jovem (agilidade, ingenuidade, vulnerabilidade) — alternando entre as duas mentalidades.
+
+### 3.2. Player-Game
+
+#### Curva de aprendizado
+- **Fase 1 (7 anos):** ensina movimento e dualidade de tamanho. Puzzle simples, foco em narrativa.
+- **Fase 2 (12 anos):** introduz congelamento do tempo. Curva sobe.
+- **Fase 3 (15 anos):** introduz troca livre, gameplay paralelo. Maior complexidade espacial.
+- **Fase 4 (18 anos):** combina tudo, timing apertado. Ponto alto de desafio.
+
+#### Tipos de interação
+- **Exploração:** descobrir os 3 colecionáveis (fotografias) escondidos em cada fase
+- **Confronto:** evasão e manipulação de antagonistas (nunca combate direto)
+- **Estratégia:** decidir quando congelar, quando carregar, quando trocar personagem
+- **Resolução de puzzle:** o cenário inteiro é o quebra-cabeça
+
+### 3.3. Game-Game
+
+#### Sistemas que conversam entre si
+- **Tempo congelado ↔ Movimento de inimigos:** congelar abre janelas seguras
+- **Dualidade de tamanho ↔ Geometria do nível:** cada nível é desenhado para forçar cooperação
+- **Energia do relógio ↔ Tensão temporal:** recurso limitado força planejamento
+- **Progresso nas fases ↔ Estado do hub:** janela do hub muda visualmente a cada fase concluída
+- **Coletáveis ↔ Final:** 3 finais possíveis baseados em quantas fotos o jogador encontrou
 
 ---
 
-## 5. Design de Níveis
+## 4. Experience
 
-### 5.1. Hub: A Sala dos Alienígenas
-Pequena sala com 4 portais (um por memória) e 1 portal central trancado (epílogo, abre quando os 4 forem resolvidos). Os alienígenas circulam pelo espaço. Há uma janela mostrando a praça do presente — ela vai mudando à medida que as fases são resolvidas. Funciona como feedback visual constante de progresso.
+### 4.1. Senses (feedback sensorial)
 
-### 5.2. Fase 1 — "O Pátio" (7 anos)
-- **Cenário:** Pátio de escola pública, com quadra, bebedouro, árvores, muro do fundo.
-- **Objetivo:** Atravessar o pátio durante o recreio sem que o Woody-criança seja pego pelo bully.
-- **Mecânicas introduzidas:** Movimentação básica, dualidade de tamanho, primeiro uso de carregar o jovem.
-- **Puzzles típicos:** O adulto empurra um banco de madeira para fazer o jovem passar por cima sem ser visto. O jovem se esconde atrás da árvore enquanto o adulto distrai o bully com uma bola. O jovem cabe na fresta sob a quadra; o adulto tem que dar a volta.
-- **Antagonista:** Um bully maior que o jovem, mas menor que o adulto. Visualmente caricato, sem ser cruel.
-- **Trilha:** Recreio em chiptune — barulho de criança brincando ao fundo, traduzido em pixel.
+#### Audiovisual
+- **Visual:** pixel art 8-bits, paleta restrita por fase, CRT scanline sutil
+- **Filtro de congelamento:** azul-acinzentado, granulação leve, pulsação ciano de 3 frames na ativação
+- **Áudio:** chiptune lo-fi, blips de texto por personagem, SFX de zumbido elétrico no congelamento
+- **Háptica:** vibração leve no gamepad ao congelar/descongelar (se aplicável)
 
-### 5.3. Fase 2 — "Domingo" (12 anos)
-- **Cenário:** Casa de dois andares. Cozinha, sala, quarto do Woody, garagem.
-- **Objetivo:** O Woody jovem precisa atravessar a casa, pegar a mochila, e sair pela porta dos fundos sem ouvir a briga dos pais.
-- **Mecânicas introduzidas:** Congelamento do tempo. Congelar é necessário para passar por cômodos onde a "voz" dos pais (representada como ondas sonoras visuais 8-bits) preencheria o espaço.
-- **Puzzles típicos:** Congelar uma onda sonora a meio caminho do corredor para que o jovem passe por baixo. Empurrar a estante para abafar o som. Subir o adulto para pegar a mochila do alto do armário enquanto o jovem distrai o gato (sim, tem um gato).
-- **Antagonista:** As "ondas sonoras" da briga. Não há violência mostrada — só o efeito sonoro/visual sobre a casa.
-- **Trilha:** Música de domingo apagado, melancólica, lo-fi 8-bits.
+### 4.2. Cerebellum (emoções)
+- **Nostalgia:** cenários reconhecíveis da infância brasileira
+- **Culpa:** o adulto revive erros que nunca resolveu
+- **Ternura:** carregar literalmente o seu eu mais novo
+- **Tensão:** recurso de tempo limitado, antagonistas que se aproximam
+- **Esperança:** o presente clareando a cada fase resolvida
+- **Auto-compaixão:** sentimento culminante do epílogo
 
-### 5.4. Fase 3 — "A Festa" (15 anos)
-- **Cenário:** Casa de festa adolescente, com piscina, garagem, telhado.
-- **Objetivo:** O Woody jovem precisa **sair da festa** sem aceitar uma proposta de um amigo (não detalhada — fica ambígua de propósito).
-- **Mecânicas introduzidas:** Troca livre entre personagens. O jogador alterna ativamente entre os dois.
-- **Puzzles típicos:** O jovem tem que atravessar a multidão (sprites de NPCs em movimento que bloqueiam passagem), enquanto o adulto, do telhado, congela o tempo para criar brechas. O adulto baixa uma escada pelo lado de fora, o jovem desce. Há uma seção em que o jogador precisa fazer os dois andarem **em paralelo** em duas faixas (telhado e térreo).
-- **Antagonista:** O "amigo", representado como um NPC que persegue o jovem com diálogo em balão. Não pode ser combatido, só evitado.
-- **Trilha:** Festa pulsante 8-bits com bateria distorcida.
+### 4.3. Cerebrum (cognição)
 
-### 5.5. Fase 4 — "A Sala" (18 anos)
-- **Cenário:** Sala de prova do vestibular. Mesa, relógio gigante na parede, fileiras de carteiras.
-- **Objetivo:** O Woody jovem precisa **terminar a prova**. Mas o cenário é abstrato — paredes se movem, o relógio acelera, fantasmas das fases anteriores aparecem como obstáculos (o bully de novo, o pai irritado, o amigo da festa).
-- **Mecânicas introduzidas:** Combinação de tudo. Timing apertado.
-- **Puzzles típicos:** O adulto congela o relógio gigante para dar tempo ao jovem. Carrega o jovem por seções caóticas. Empurra os "fantasmas" para fora da sala.
-- **Antagonista:** O próprio tempo (relógio gigante) e os ecos das fases anteriores.
-- **Trilha:** Versão remixada e mais densa dos temas das 3 fases anteriores. É a fase em que a música conta tanto quanto o gameplay.
+#### Desafios
+- Planejamento espacial (qual Woody passa por onde)
+- Timing (quando congelar, quanto tempo segurar)
+- Gerenciamento de recurso (energia do relógio)
 
-### 5.6. Epílogo — "A Praça"
-- Curto, sem puzzle. Woody-adulto acorda na praça. O cenário ao redor pode ter mudado bastante, pouco, ou nada — depende de **quantas fases o jogador completou perfeitamente** (com todos os coletáveis). Três finais possíveis, sem julgamento moral, mas com mudanças visuais finas. O jogo termina com Woody se levantando do banco e caminhando para fora da tela.
+#### Descobertas
+- Colecionáveis escondidos
+- Detalhes ambientais que enriquecem a narrativa (pôsteres, bilhetes, fotos)
+- Múltiplos finais
+
+#### Auto-expressão
+- Ordem livre de jogar as 4 memórias
+- Estilo de jogo (perfeccionista coletando tudo vs. apenas atravessando)
+
+### 4.4. Perception (interpretação do mundo)
+
+O jogador deve perceber que:
+- **Os dois personagens são a mesma pessoa em tempos diferentes** — mas o jovem não sabe disso (vê o adulto como "tio estranho")
+- **O tempo congelado é uma metáfora de cuidado**, não de poder — você para o mundo para arrumar o caminho da sua versão jovem
+- **Os "vilões" são pessoas reais** — bully, pais, amigos — não monstros. Eles patrulham e bloqueiam, mas têm humanidade
+- **Falhar não é punido** — a fase reinicia com leveza, reforçando o tema de auto-compaixão
+- **O presente reflete o esforço**: a praça muda visualmente, dando sentido emocional à progressão
 
 ---
 
-## 6. Direção de Arte
+## 5. Pilares de Design
 
-### 6.1. Estilo visual
-- **Pixel art 8-bits** com paleta restrita (estilo NES + influência Game Boy Color).
-- Sprites do protagonista: 16×32 (adulto), 16×16 (jovem).
-- Tiles de cenário: 16×16.
-- Resolução interna do jogo: 320×180, escalonada para a resolução do monitor.
+1. **Cooperação assimétrica entre eu-de-agora e eu-de-antes.** A mecânica nunca esconde a metáfora.
+2. **Tempo como ferramenta de cuidado, não de poder.** Congelar prepara o terreno, não combate.
+3. **Estética 8-bits com peso emocional.** Simplicidade visual contrasta com profundidade temática.
+4. **Fracasso reversível, mas com consequência.** Sem game over agressivo — só o peso de ter falhado.
 
-### 6.2. Paleta de cores
-| Cena | Paleta dominante |
+## 6. Inspirações
+
+| Jogo / Obra | O que inspira |
 |---|---|
-| Praça (presente) | Cinzas, azul-marinho, laranja apagado dos postes |
-| Sala alienígena | Roxos, ciano, preto profundo |
-| Fase 1 (Pátio) | Verde-amarelo escolar, marrom de tijolo |
-| Fase 2 (Casa) | Bege, marrom, vermelho desbotado |
-| Fase 3 (Festa) | Magenta, azul neon, preto |
-| Fase 4 (Vestibular) | Branco frio, cinza, vermelho do relógio |
-
-A ideia é que **cada fase tenha uma identidade cromática própria**, o que ajuda o jogador a se localizar emocionalmente.
-
-### 6.3. HUD / Interface
-- HUD minimalista: apenas a barra de energia do congelamento do tempo (canto superior esquerdo, estilo retrô).
-- Sem mapa, sem minimapa, sem missões em texto. Tudo é orientação espacial direta.
-- Diálogos: caixa de texto pixelada com retrato do personagem em 24×24 (estilo Pokémon clássico). Texto em pt-BR, fonte custom de 8 pixels.
-
-### 6.4. Animações-chave
-- Idle do adulto: ele suspira a cada ~5 segundos.
-- Idle do jovem: muda por fase (chuta uma pedra aos 7, mexe no fone aos 12, anda no skate aos 15, mexe a perna nervosamente aos 18).
-- Carregar: o adulto pega o jovem no colo com cuidado, transição suave.
-- Congelamento: tela ganha um quadro de pulsação ciano por 3 frames, depois entra o filtro azul.
+| *Braid* | Manipulação do tempo como narrativa |
+| *Celeste* | Plataforma com tema de saúde mental |
+| *Brothers: A Tale of Two Sons* | Dois personagens, dois corpos, uma história |
+| *Inside / Limbo* | Atmosfera melancólica em 2D |
+| *Undertale* | Estilo 8/16-bits com peso emocional |
+| *Filme "About Time"* | Viagem ao passado para corrigir o eu |
 
 ---
 
-## 7. Som e Música
+## 7. Estrutura Narrativa e Fases
 
-### 7.1. Trilha sonora
-- **Direção:** Chiptune com camadas modernas. Cada fase tem um tema próprio, e a trilha do epílogo é um remix de todos.
-- **Referências sonoras:** *Celeste OST* (Lena Raine), *Undertale OST* (Toby Fox), *Hyper Light Drifter*, e a estética chiptune do *Shovel Knight*.
-- **Faixas previstas:**
-  1. Tema da praça (prólogo + epílogo)
-  2. Tema da sala alienígena (hub)
-  3. Tema do pátio (fase 1)
-  4. Tema do domingo (fase 2)
-  5. Tema da festa (fase 3)
-  6. Tema da sala de prova (fase 4)
-  7. Tema final (epílogo)
+### 7.1. Estrutura
+1. **Prólogo (~5 min).** Praça, chuva, cabine, abdução, escolha das memórias.
+2. **Hub: Sala dos Alienígenas.** Seleção livre das 4 fases.
+3. **Fases 1-4.** Cada uma com prólogo curto + epílogo curto.
+4. **Epílogo.** Woody acorda. Presente reescrito.
 
-### 7.2. SFX
-- Pulo, passos (diferentes para adulto e jovem), congelamento, descongelamento, pegar item, abrir porta, ondas sonoras dos pais (fase 2), passos do bully (fase 1), música distorcida da festa (fase 3), tique-taque do relógio gigante (fase 4).
-- Vozes: **sem voice acting**. Apenas blips de texto em diferentes tons (mais grave para o adulto, mais agudo para o jovem, sintético para os alienígenas).
+### 7.2. As 4 memórias
+
+| # | Idade | Local | Tema | Mecânica nova |
+|---|---|---|---|---|
+| 1 | 7 anos | Pátio da escola pública | Bullying e o aprender a se calar | Dualidade de tamanho |
+| 2 | 12 anos | Casa da família, num domingo | Briga dos pais, sentir-se invisível | Congelamento do tempo |
+| 3 | 15 anos | Festa de aniversário | Pressão social, escolha covarde | Troca livre de personagem |
+| 4 | 18 anos | Manhã do vestibular | Auto-sabotagem, primeira desistência | Combinação total |
+
+### 7.3. Detalhes por fase
+
+#### Fase 1 — "O Pátio" (7 anos)
+- **Objetivo:** Atravessar o pátio sem o jovem ser pego pelo bully.
+- **Puzzles:** adulto empurra banco; jovem se esconde atrás da árvore; jovem na fresta sob a quadra.
+- **Antagonista:** bully maior que o jovem, menor que o adulto.
+
+#### Fase 2 — "Domingo" (12 anos)
+- **Objetivo:** Atravessar a casa, pegar a mochila, sair pela porta dos fundos sem ouvir a briga.
+- **Puzzles:** congelar ondas sonoras visuais 8-bits; empurrar estante para abafar som; jovem distrai o gato.
+- **Antagonista:** ondas sonoras da briga (sem violência mostrada).
+
+#### Fase 3 — "A Festa" (15 anos)
+- **Objetivo:** Sair da festa sem aceitar a proposta ambígua do amigo.
+- **Puzzles:** atravessar multidão de NPCs; gameplay em duas faixas paralelas (telhado + térreo).
+- **Antagonista:** o amigo, NPC com balão de diálogo que persegue.
+
+#### Fase 4 — "A Sala" (18 anos)
+- **Objetivo:** Terminar a prova. Cenário abstrato, paredes se movem, fantasmas das fases anteriores reaparecem.
+- **Puzzles:** congelar relógio gigante; carregar jovem por seções caóticas; expulsar fantasmas.
+- **Antagonista:** o tempo (relógio gigante) e ecos das fases.
+
+### 7.4. Epílogo — "A Praça"
+Sem puzzle. Woody acorda. Cenário ao redor mudou pouco/médio/muito conforme **quantos coletáveis** o jogador encontrou. Três finais possíveis, sem julgamento moral.
 
 ---
 
 ## 8. Tecnologia e Produção
 
 ### 8.1. Engine e ferramentas
-- **Godot 4** (motor principal). Open-source, leve, ótimo para 2D.
-- **Aseprite** para pixel art e animações.
-- **FamiStudio** ou **DefleMask** para a trilha chiptune.
-- **Tiled** para mapas de níveis (se não usar o editor nativo da Godot).
+- **Unity 2D** (build WebGL para itch.io)
+- **Aseprite** para pixel art
+- **FamiStudio** ou **DefleMask** para chiptune
+- **Tiled** para mapas (opcional)
 
-### 8.2. Plataformas-alvo
-- **MVP:** Steam (Windows + Linux), itch.io.
-- **Stretch:** Nintendo Switch (via Godot console export), Mac, mobile com ajustes de controle.
-
-### 8.3. Equipe mínima ideal
-- 1 game designer / programador (você?)
+### 8.2. Equipe mínima
+- 1 game designer / programador
 - 1 pixel artist / animador
 - 1 compositor chiptune
-- 1 escritor / revisor narrativo (pode ser o próprio designer)
-- Total: 2–4 pessoas para um escopo de 6–9 meses.
+- 1 escritor / revisor narrativo
+- Total: 2–4 pessoas, escopo de 6–9 meses
 
-### 8.4. Cronograma (alto nível, 9 meses)
+### 8.3. Cronograma (alto nível, 9 meses)
 | Mês | Marco |
 |---|---|
-| 1 | Pré-produção: protótipo da mecânica core (dualidade + tempo) |
-| 2 | Vertical slice: 30% da fase 1 jogável, com arte e som finais |
-| 3–4 | Produção da fase 1 e 2 |
-| 5–6 | Produção da fase 3 e 4 |
-| 7 | Hub, epílogo, polimento de transições |
+| 1 | Protótipo da mecânica core |
+| 2 | Vertical slice da fase 1 |
+| 3–4 | Produção fase 1 e 2 |
+| 5–6 | Produção fase 3 e 4 |
+| 7 | Hub, epílogo, polimento |
 | 8 | Playtest fechado, balanceamento |
-| 9 | Polimento final, marketing pré-lançamento, lançamento |
+| 9 | Polimento final, lançamento |
 
 ---
 
-## 9. Monetização e Escopo
+## 9. Monetização
 
-- **Modelo:** Pago, preço único. Faixa sugerida: **US$ 9,99 / R$ 29,90**.
-- **Sem DLC, sem microtransações, sem season pass.** O jogo é uma obra fechada.
-- **Possíveis expansões pós-lançamento (gratuitas):** modo "speedrun", modo "+1 memória" (5ª fase opcional, talvez baseada em escolhas do jogador via comunidade).
+- **Modelo:** Pago, preço único. **US$ 4,99 / R$ 14,90** (ajustável para escopo web).
+- **Sem DLC, sem microtransações.** Obra fechada.
+- **Possíveis expansões gratuitas:** modo speedrun, 5ª memória opcional.
 
 ---
 
@@ -315,25 +349,25 @@ A ideia é que **cada fase tenha uma identidade cromática própria**, o que aju
 ### 10.1. Riscos
 | Risco | Mitigação |
 |---|---|
-| Mecânica do tempo congelado pode ficar trivial ou frustrante | Fazer protótipo cedo (mês 1) e iterar com playtesters externos |
-| Tema melancólico pode afastar parte do público | Reforçar humor e ternura nos diálogos; trailer focado na esperança |
-| Escopo das 4 fases pode crescer demais | Definir limite rígido de 30 min por fase no documento de level design |
-| Carregamento do jovem pelo adulto pode ficar técnico chato | Animar com peso, dar SFX gostoso, tornar a ação prazerosa em si |
+| Mecânica do tempo trivial ou frustrante | Protótipo cedo + playtest externo |
+| Tema melancólico afasta público | Reforçar humor e ternura nos diálogos |
+| Escopo cresce demais | Limite rígido de ~10–15 min por fase |
+| Carregar o jovem pode ser técnico chato | Animar com peso, SFX gostoso |
 
-### 10.2. Próximos passos imediatos
-1. **Protótipo de uma tela única** com dualidade de tamanho + congelamento do tempo (sem arte final, retângulos coloridos). Meta: 2 semanas.
-2. **Fechar o roteiro** das 4 memórias com diálogos completos.
-3. **Mood board visual** por fase.
-4. **Definir paleta** e fazer o sprite final do Woody-adulto e Woody-criança (todas as 4 idades).
-5. **Música:** compor o tema da praça primeiro — é o que define o tom de tudo.
+### 10.2. Próximos passos
+1. Protótipo de tela única com dualidade + congelamento (2 semanas)
+2. Fechar roteiro das 4 memórias
+3. Mood board visual por fase
+4. Sprite final do Woody-adulto e 4 versões do jovem
+5. Compor tema da praça primeiro
 
 ---
 
-## Apêndice A — Glossário rápido
+## Apêndice — Glossário
 
-- **Woody-adulto / Woody-presente:** Protagonista jogável principal, 30 anos, dobro da altura do jovem.
-- **Woody-jovem:** Versão de 7, 12, 15 ou 18 anos do mesmo personagem. Companheiro, parcialmente jogável.
-- **Memória:** Cada uma das 4 fases. Internamente, equivale a um nível.
+- **Woody-adulto / Woody-presente:** Protagonista jogável, 30 anos.
+- **Woody-jovem:** Versão de 7, 12, 15 ou 18 anos. Companheiro.
+- **Memória:** Cada uma das 4 fases.
 - **Hub:** Sala dos alienígenas, espaço entre fases.
-- **Congelamento:** Habilidade do adulto que para tudo no cenário menos ele.
-- **Dualidade:** Princípio de design que estrutura todas as fases — o que um Woody pode, o outro não.
+- **Congelamento:** Habilidade do adulto de parar o tempo.
+- **Dualidade:** Princípio de que o que um Woody pode, o outro não.
