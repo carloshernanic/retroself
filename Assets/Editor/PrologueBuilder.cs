@@ -119,14 +119,15 @@ public static class PrologueBuilder
         typewriter.charsPerSecond = 32f;
         typewriter.blipSource = blipSource;
 
-        // Continue indicator (▼)
-        var contGO = CreateUIText(dialogueBox.transform, "Continue", "▼", 36, FontStyles.Bold);
+        // Continue indicator ([Enter] ▼)
+        var contGO = CreateUIText(dialogueBox.transform, "Continue", "[Enter] ▼", 28, FontStyles.Bold);
         var contRT = contGO.GetComponent<RectTransform>();
         contRT.anchorMin = new Vector2(1, 0);
         contRT.anchorMax = new Vector2(1, 0);
         contRT.pivot = new Vector2(1, 0);
         contRT.anchoredPosition = new Vector2(-30, 20);
-        contRT.sizeDelta = new Vector2(60, 60);
+        contRT.sizeDelta = new Vector2(220, 50);
+        contGO.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Right;
         contGO.GetComponent<TextMeshProUGUI>().color = new Color(0.78f, 0.95f, 1f, 0.9f);
         contGO.AddComponent<BlinkUI>();
 
@@ -140,15 +141,15 @@ public static class PrologueBuilder
         faderGOObj.defaultDuration = 0.6f;
 
         // Skip hint (top-right) — fica acima do fader pra continuar visível durante transições
-        var hintGO = CreateUIText(canvasGO.transform, "SkipHint", "[Esc] pular", 22, FontStyles.Italic);
+        var hintGO = CreateUIText(canvasGO.transform, "SkipHint", "[Enter] avançar   ·   [Esc] pular", 22, FontStyles.Italic);
         var hintRT = hintGO.GetComponent<RectTransform>();
         hintRT.anchorMin = new Vector2(1, 1);
         hintRT.anchorMax = new Vector2(1, 1);
         hintRT.pivot = new Vector2(1, 1);
         hintRT.anchoredPosition = new Vector2(-30, -30);
-        hintRT.sizeDelta = new Vector2(220, 40);
+        hintRT.sizeDelta = new Vector2(420, 40);
         hintGO.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Right;
-        hintGO.GetComponent<TextMeshProUGUI>().color = new Color(1, 1, 1, 0.45f);
+        hintGO.GetComponent<TextMeshProUGUI>().color = new Color(1, 1, 1, 0.55f);
 
         // ---------- CutsceneController ----------
         var ctrlGO = new GameObject("CutsceneController");

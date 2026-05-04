@@ -26,7 +26,7 @@ Assets/
 ├── Audio/        (autoral chiptune tracks — added by user, not us)
 ├── Editor/       (editor-only scripts; gated with #if UNITY_EDITOR)
 ├── Prefabs/
-├── Scenes/       (MainMenu.unity, Prologue.unity, SampleScene.unity)
+├── Scenes/       (MainMenu.unity, Prologue.unity, Memory_01_Patio.unity, SampleScene.unity)
 ├── Scripts/      (runtime MonoBehaviours — flat, no subfolders)
 ├── Settings/     (URP renderer assets)
 ├── Sprites/      (autoral pixel art — added by user)
@@ -57,12 +57,19 @@ Project script GUIDs (in `Assets/Scripts/*.meta`):
 - `MenuMusic` → `d53f3246e3ae931458c1c89e61651333`
 - `CabinPulse` → `05c761f7ebed82d4f8fe0284038dc14f`
 - `SceneNames` → `c0ccef824e254c7459c0e7c66693f46f`
+- `CutsceneController` → `9f64ff45bd52b63489bbae7d7d579685`
+- `TypewriterText` → `1312f3e45bbc55247bfef98501666c88`
+- `CutsceneFader` → `71905f66a1a0e4d4cbab0ad8b6bcc1cb`
+- `BlinkUI` → `6039163247a0b09488946dd6e21898d5`
 
 After editing a `.unity` file from outside the editor, the user must `Assets → Refresh` (Ctrl+R) or reopen the scene — Unity caches scene data in memory and won't pick up disk edits otherwise.
 
 ## Editor utilities
 
-[Assets/Editor/MainMenuBuilder.cs](Assets/Editor/MainMenuBuilder.cs) builds the main menu scene programmatically via `EditorSceneManager` and the `UnityEditor.Events` API. Run it via menu **Retroself → Build Main Menu Scene**. This is the fallback when YAML hand-editing breaks; it's idempotent and replaces the existing `Assets/Scenes/MainMenu.unity`.
+Both builders are idempotent (re-running replaces the scene file) and add their scenes to Build Settings automatically.
+
+- [Assets/Editor/MainMenuBuilder.cs](Assets/Editor/MainMenuBuilder.cs) — menu **Retroself → Build Main Menu Scene**. Builds `Assets/Scenes/MainMenu.unity`. ⚠️ Still uses legacy `StandaloneInputModule` (line 33) — não foi migrado pro `InputSystemUIInputModule` ainda; corrigir quando tocar nele.
+- [Assets/Editor/PrologueBuilder.cs](Assets/Editor/PrologueBuilder.cs) — menu **Retroself → Build Prologue Scene** (gera `Prologue.unity` com 7 painéis populados + `Memory_01_Patio.unity` placeholder) e **Retroself → Build Memory_01_Patio Placeholder** (só o placeholder). Já usa `InputSystemUIInputModule`.
 
 ## Working style
 
@@ -77,3 +84,13 @@ This is an academic project for Insper, Jogos Digitais 2026. Tracking docs:
 - [docs/gdd.md](docs/gdd.md) — GDD in DDE format (Game Concept / Design / Dynamics / Experience / Inspirações).
 
 Team: Alex Chequer, Carlos Hernani, Lucas Ikawa.
+
+## Próxima entrega (tutorial em `Memory_01_Patio`)
+
+Estado atual: `MainMenu` → `Prologue` (cutscene de 7 painéis funcional) → `Memory_01_Patio` (cena placeholder vazia, só com texto "em construção"). Próximo passo é transformar `Memory_01_Patio` no **nível tutorial** que ensina os fundamentos do jogo enquanto cumpre 3 rubricas:
+
+1. **Player completo** — movimento (correr/pular), animações (idle/walk/jump), e "ataques". ⚠️ **Conflito GDD vs rubric:** GDD §2.2 Mechanics é explícito que **não há combate** ("inimigos nunca podem ser combatidos, só evitados/manipulados"). Antes de implementar "ataque", alinhar com o usuário se vai (a) ajustar GDD pra incluir combate, (b) negociar a rubric com o professor, ou (c) reinterpretar "ataque" como **ações de interação não-letais** alinhadas ao design — empurrar caixa pesada (adulto), congelar tempo (adulto), passar por fresta (jovem), trocar de personagem. Opção (c) é a default até o usuário decidir o contrário.
+2. **Mapa com pós-processamento** — primeiro nível real (não placeholder) com tilemap, paleta amarelo-escolar/marrom-tijolo da Fase 1 (GDD §2.1 Locations), e Volume URP com pós-processamento (bloom, vignette, color grading) conforme exemplo de aula + tutorial Notion (link a ser fornecido pelo usuário).
+3. **Inimigo completo** — primeiro antagonista (bully da Fase 1 segundo o GDD): patrulha, detecção do player, "ataque" (no design = bloquear/empurrar de volta, não dano letal — fase reinicia do checkpoint, sem morte permanente), animações (idle/walk/attack). Vide GDD §2.2 ("inimigos patrulham, perseguem ou bloqueiam — nunca podem ser combatidos, só evitados/manipulados") e §3.3 ("Tempo congelado ↔ Movimento de inimigos: congelar abre janelas seguras").
+
+Tom da fase tutorial: o jovem Woody (7 anos, sprite 16×16) é o protagonista jogável principal aqui; o adulto entra como "tio estranho" que ajuda. Curva de aprendizado da Fase 1 segundo GDD §3.2: ensina **movimento e dualidade de tamanho**, sem congelamento de tempo ainda (esse só vem na Fase 2).
