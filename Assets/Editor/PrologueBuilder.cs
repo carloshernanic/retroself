@@ -203,8 +203,10 @@ public static class PrologueBuilder
 
         AddSceneToBuildSettings(scenePath);
 
-        // ---------- Memory_01_Patio placeholder ----------
-        BuildMemory01Placeholder();
+        // Memory_01_Patio é montado pelo Memory01Builder (menu separado).
+        // Só cria placeholder se ainda não existir, pra não sobrescrever o tutorial.
+        if (!System.IO.File.Exists("Assets/Scenes/Memory_01_Patio.unity"))
+            BuildMemory01Placeholder();
     }
 
     [MenuItem("Retroself/Build Memory_01_Patio Placeholder")]

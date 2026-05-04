@@ -116,6 +116,8 @@ A cada fase concluída, o presente de Woody se altera sutilmente: a praça come�
 - **Relógio alienígena** — equipado pelo adulto, congela o tempo
 - **Fotografias coletáveis** — 3 escondidas por fase, desbloqueiam álbum no hub
 - **Inimigos contextuais** — bully, ondas sonoras, NPCs da festa, fantasmas das fases anteriores
+- **Ataque do jovem** — arremesso de pedras / objetos pequenos (curto alcance, atordoa)
+- **Ataque do adulto** — golpe corpo-a-corpo (empurra / derruba; reaproveita a animação de empurrar caixa)
 
 #### Regras de Interação
 - O adulto tem **dobro da altura** do jovem (sistema de afinidades opostas)
@@ -126,13 +128,13 @@ A cada fase concluída, o presente de Woody se altera sutilmente: a praça come�
 
 #### Condições de Vitória e Derrota
 - **Vitória da fase:** ambos os Woodys chegam ao ponto final
-- **Derrota:** se o jovem cai ou é pego, fase reinicia do último checkpoint
+- **Derrota:** barra de vida do personagem ativo zerada, ou jovem cai/é pego → fase reinicia do último checkpoint
 - **Sem morte permanente, sem contador de mortes** — diálogo do adulto: *"Ok, de novo. A gente acerta dessa vez."*
 - **Vitória do jogo:** completar as 4 memórias → epílogo
 
 #### Comportamentos
 - **Personagem inativo:** idle ou patrulha curta
-- **Inimigos:** patrulham, perseguem ou bloqueiam — nunca podem ser combatidos, só evitados/manipulados
+- **Inimigos:** patrulham, perseguem ou bloqueiam. Podem ser **combatidos (atordoados/empurrados, sem morte gráfica)**, evitados ou manipulados — combate é último recurso, não objetivo central
 - **Congelamento ativo:** filtro azul-acinzentado na tela, granulação, zumbido elétrico baixo
 
 #### Sistemas
@@ -148,7 +150,7 @@ A cada fase concluída, o presente de Woody se altera sutilmente: a praça come�
 > **[IMAGEM — HUD mockup]**
 > *Prompt:* "Pixel art HUD mockup for a retro side-scroller. Top-left corner shows a small energy bar with a clock icon (time-freeze meter). Bottom of screen has dialogue box with character portrait. Otherwise minimal — no map, no quest log. 8-bit pixel art, restricted palette. --ar 16:9"
 
-- HUD minimalista: barra de energia do congelamento (canto superior esquerdo)
+- HUD minimalista: barra de energia do congelamento (canto superior esquerdo) e barra de vida do personagem ativo (logo abaixo)
 - Sem mapa, sem minimapa, sem missões em texto
 - Diálogos: caixa pixelada estilo Pokémon clássico
 - Animações-chave: idle do adulto suspira a cada ~5s, idle do jovem muda por fase, transição suave do "carregar"
@@ -159,6 +161,7 @@ A cada fase concluída, o presente de Woody se altera sutilmente: a praça come�
 | Mover | Analógico esquerdo | A / D ou ←/→ |
 | Pular | A / X | Espaço |
 | Interagir / pegar | B / Círculo | E |
+| Atacar | X / Quadrado | K |
 | Congelar tempo | RT / R2 | Shift |
 | Trocar personagem | Y / Triângulo | Tab |
 | Pausar | Start | Esc |
@@ -184,7 +187,7 @@ Porém, há uma **dinâmica simbólica entre dois "jogadores"**: o jogador do pr
 
 #### Tipos de interação
 - **Exploração:** descobrir os 3 colecionáveis (fotografias) escondidos em cada fase
-- **Confronto:** evasão e manipulação de antagonistas (nunca combate direto)
+- **Confronto:** combate não-letal (atordoar/empurrar), evasão ou manipulação — preferir manipulação quando possível
 - **Estratégia:** decidir quando congelar, quando carregar, quando trocar personagem
 - **Resolução de puzzle:** o cenário inteiro é o quebra-cabeça
 
@@ -238,7 +241,7 @@ Porém, há uma **dinâmica simbólica entre dois "jogadores"**: o jogador do pr
 O jogador deve perceber que:
 - **Os dois personagens são a mesma pessoa em tempos diferentes** — mas o jovem não sabe disso (vê o adulto como "tio estranho")
 - **O tempo congelado é uma metáfora de cuidado**, não de poder — você para o mundo para arrumar o caminho da sua versão jovem
-- **Os "vilões" são pessoas reais** — bully, pais, amigos — não monstros. Eles patrulham e bloqueiam, mas têm humanidade
+- **Os "vilões" são pessoas reais** — bully, pais, amigos — não monstros. Podem ser combatidos quando necessário, mas o combate é não-letal (atordoa/empurra) e nunca é o caminho mais elegante: manipular o cenário continua sendo a graça do jogo
 - **Falhar não é punido** — a fase reinicia com leveza, reforçando o tema de auto-compaixão
 - **O presente reflete o esforço**: a praça muda visualmente, dando sentido emocional à progressão
 
