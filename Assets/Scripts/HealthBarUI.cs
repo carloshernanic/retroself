@@ -12,14 +12,43 @@ public class HealthBarUI : MonoBehaviour
     void Start()
     {
         if (fillRect != null) maxWidth = fillRect.sizeDelta.x;
-        if (target != null)
+        if (PlayerSwap.Instance != null)
         {
-            target.OnHealthChanged += HandleChanged;
-            HandleChanged(target.CurrentHealth, target.maxHealth);
+            PlayerSwap.Instance.OnActiveChanged += HandleActiveChanged;
+            if (PlayerSwap.Instance.ActivePlayer != null)
+                Bind(PlayerSwap.Instance.ActivePlayer.GetComponent<PlayerHealth>());
+            else
+                Bind(target);
+        }
+        else
+        {
+            Bind(target);
         }
     }
 
     void OnDestroy()
+    {
+        if (PlayerSwap.Instance != null)
+            PlayerSwap.Instance.OnActiveChanged -= HandleActiveChanged;
+        Unbind();
+    }
+
+    void HandleActiveChanged(GameObject newActive)
+    {
+        if (newActive == null) return;
+        Bind(newActive.GetComponent<PlayerHealth>());
+    }
+
+    void Bind(PlayerHealth ph)
+    {
+        Unbind();
+        target = ph;
+        if (target == null) return;
+        target.OnHealthChanged += HandleChanged;
+        HandleChanged(target.CurrentHealth, target.maxHealth);
+    }
+
+    void Unbind()
     {
         if (target != null) target.OnHealthChanged -= HandleChanged;
     }

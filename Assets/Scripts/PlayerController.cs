@@ -17,10 +17,14 @@ public class PlayerController : MonoBehaviour
     [Header("Visual")]
     public SpriteRenderer body;
 
+    [Header("Identidade")]
+    public PlayerKind kind = PlayerKind.Young;
+
     private Rigidbody2D rb;
     private float coyoteCounter;
     private float jumpBufferCounter;
     private bool isGrounded;
+    private bool wasGrounded;
     private float moveX;
     private bool facingRight = true;
 
@@ -34,6 +38,10 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         rb.freezeRotation = true;
         if (body == null) body = GetComponentInChildren<SpriteRenderer>();
+        // Alinha transforms ao engine de física antes do primeiro FixedUpdate.
+        // Sem isso, a transição Prologue → Memory_01 às vezes deixa o Woody atravessar
+        // o chão na primeira step (CompositeCollider2D ainda regenerando).
+        Physics2D.SyncTransforms();
     }
 
     void Update()
@@ -46,7 +54,15 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        isGrounded = CheckGrounded();
+        bool nowGrounded = CheckGrounded();
+        if (nowGrounded && !wasGrounded)
+        {
+            // Pousou: dispara puff de poeira nos pés
+            Vector3 puffPos = groundCheck != null ? groundCheck.position : transform.position;
+            DustPuff.Spawn(puffPos);
+        }
+        wasGrounded = nowGrounded;
+        isGrounded = nowGrounded;
         rb.linearVelocity = new Vector2(moveX * moveSpeed, rb.linearVelocity.y);
     }
 

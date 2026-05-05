@@ -16,9 +16,14 @@ public static class Memory01Builder
     const string ScenePath = "Assets/Scenes/Memory_01_Patio.unity";
 
     static readonly Color BgSky = new Color(0.32f, 0.36f, 0.18f, 1f);   // amarelo-esverdeado escolar
-    static readonly Color PlayerCol = new Color(1f, 0.78f, 0.32f, 1f);   // jovem (jaqueta amarela)
+    static readonly Color YoungCol = new Color(1f, 0.78f, 0.32f, 1f);    // jovem (jaqueta amarela)
+    static readonly Color AdultCol = new Color(0.45f, 0.32f, 0.22f, 1f); // adulto (sobretudo marrom)
     static readonly Color HazardCol = new Color(0.20f, 0.05f, 0.05f, 1f); // poço escuro
     static readonly Color DummyCol = new Color(0.85f, 0.30f, 0.30f, 1f);  // alvo de teste
+    static readonly Color BoxCol = new Color(0.55f, 0.36f, 0.22f, 1f);    // caixa pesada
+    static readonly Color DoorCol = new Color(0.32f, 0.18f, 0.10f, 1f);   // porta da escola
+    static readonly Color DoorFrameCol = new Color(0.62f, 0.46f, 0.22f, 1f); // moldura clara
+    static readonly Color CreamCol = new Color(1f, 0.92f, 0.55f, 1f);     // creme do tema
 
     [MenuItem("Retroself/Build Memory_01_Patio Tutorial")]
     public static void BuildMemory01Tutorial()
@@ -28,17 +33,22 @@ public static class Memory01Builder
         var camera = BuildCamera();
         BuildEventSystem();
         BuildGround();
-        BuildHazard();
-        BuildBully(new Vector3(11f, -2.5f, 0));
-        var player = BuildPlayer(new Vector3(-7f, 0f, 0));
-        AttachCameraFollow(camera, player);
+        BuildHeavyBox(new Vector3(0f, -3f, 0));
+        var door = BuildSchoolDoor(new Vector3(18.5f, -2.7f, 0));
+        var bully = BuildBully(new Vector3(11f, -2.5f, 0));
+
+        var young = BuildYoung(new Vector3(-7f, -2f, 0));
+        var adult = BuildAdult(new Vector3(-5.5f, -2f, 0));
+        var swap = BuildSwap(young, adult);
+
+        AttachCameraFollow(camera, young);
         BuildPostProcessing(camera);
-        BuildHUD(player);
+        BuildHUD(young, swap, young, adult, bully, door);
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene, ScenePath);
         AddSceneToBuildSettings(ScenePath);
-        Debug.Log($"[Memory01Builder] Tutorial montado em {ScenePath}. Player em {player.transform.position}.");
+        Debug.Log($"[Memory01Builder] Tutorial montado em {ScenePath}. Jovem em {young.transform.position}, Adulto em {adult.transform.position}.");
     }
 
     static GameObject BuildCamera()
@@ -124,9 +134,11 @@ public static class Memory01Builder
         var follow = camGO.AddComponent<CameraFollow2D>();
         follow.target = player.transform;
         follow.offset = new Vector2(0f, 1.5f);
-        // Limita pra câmera não passar do extremo esquerdo do mapa nem subir de mais
-        follow.minX = -3f;
-        follow.maxX = 11f;
+        // Limita pra câmera não passar dos extremos do mapa (chão vai de -16 a +20).
+        // minX=-7 deixa a câmera seguir o jovem (spawn -7) e o adulto (spawn -5.5)
+        // em posições distintas, então o Tab faz a câmera realmente saltar entre eles.
+        follow.minX = -7f;
+        follow.maxX = 16f;
         follow.minY = -1f;
         follow.maxY = 2f;
     }
@@ -164,25 +176,35 @@ public static class Memory01Builder
         var cc = tmGO.AddComponent<CompositeCollider2D>();
         cc.geometryType = CompositeCollider2D.GeometryType.Polygons;
 
-        // Chão esquerdo: x ∈ [-13, -1) — superfície (grass) em y=-4, subterrâneo (dirt) em y=-5
-        for (int x = -13; x < -1; x++)
+        // Chão contínuo: x ∈ [-16, 20) — superfície (grass) em y=-4, subterrâneo (dirt) em y=-5
+        for (int x = -16; x < 20; x++)
         {
             tm.SetTile(new Vector3Int(x, -4, 0), grassTile);
             tm.SetTile(new Vector3Int(x, -5, 0), dirtTile);
         }
 
-        // Chão direito: x ∈ [3, 15)
-        for (int x = 3; x < 15; x++)
-        {
-            tm.SetTile(new Vector3Int(x, -4, 0), grassTile);
-            tm.SetTile(new Vector3Int(x, -5, 0), dirtTile);
-        }
+        // Parede de 3 tiles em x=4 (y=-3,-2,-1): topo em y=0, alta demais
+        // pra ambos pularem do chão. Precisa da HeavyBox como degrau (top em y=-2.2):
+        // do degrau, jovem alcança bottom y=0.26 (passa); adulto fica abaixo.
+        for (int y = -3; y <= -1; y++) tm.SetTile(new Vector3Int(4, y, 0), platformTile);
 
-        // Gap de morte: x ∈ [-1, 3) — sem tiles
+        // "Ponte" decorativa por cima do bully (y=-1, x=8..10) — caminho alternativo aéreo.
+        for (int x = 8; x <= 10; x++) tm.SetTile(new Vector3Int(x, -1, 0), platformTile);
 
-        // Plataformas (top em y=-1 e y=0 respectivamente)
-        for (int x = -1; x <= 1; x++) tm.SetTile(new Vector3Int(x, -2, 0), platformTile);
-        for (int x = 3; x <= 5; x++) tm.SetTile(new Vector3Int(x, -1, 0), platformTile);
+        // Fresta baixa em x=16..17 (teto a y=-2): jovem cabe (1u alto), adulto (~2u) bate a cabeça.
+        tm.SetTile(new Vector3Int(16, -2, 0), platformTile);
+        tm.SetTile(new Vector3Int(17, -2, 0), platformTile);
+        // Parede de fundo em x=20 (bloqueia também por cima)
+        for (int y = -3; y <= 0; y++) tm.SetTile(new Vector3Int(20, y, 0), platformTile);
+
+        // Força a geração da geometria do CompositeCollider2D no momento do build
+        // pra que ela já fique cacheada no .unity. Sem isso, a 1ª FixedUpdate após
+        // SceneManager.LoadScene roda enquanto o composite ainda regenera, e os Woody
+        // atravessam o chão. Em Play direto na cena o Editor já pré-processa.
+        tm.RefreshAllTiles();
+        tc.ProcessTilemapChanges();
+        cc.GenerateGeometry();
+        EditorUtility.SetDirty(tmGO);
     }
 
     static Tile LoadOrCreateTile(string path, Color color)
@@ -223,10 +245,10 @@ public static class Memory01Builder
 
     static void BuildHazard()
     {
-        // ocupa o gap (x de -1 a +3) e desce pra fora da tela
+        // ocupa o gap (x de -1 a +5) e desce pra fora da tela
         var go = new GameObject("HazardPit");
-        go.transform.position = new Vector3(1f, -4f, 0);
-        go.transform.localScale = new Vector3(4f, 2f, 1f);
+        go.transform.position = new Vector3(2f, -4f, 0);
+        go.transform.localScale = new Vector3(6f, 2f, 1f);
 
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sprite = SolidSprite();
@@ -238,7 +260,7 @@ public static class Memory01Builder
         go.AddComponent<HazardZone>();
     }
 
-    static void BuildBully(Vector3 pos)
+    static GameObject BuildBully(Vector3 pos)
     {
         var root = new GameObject("Bully");
         root.transform.position = pos;
@@ -267,29 +289,56 @@ public static class Memory01Builder
 
         var ai = root.AddComponent<BullyController>();
         ai.body = sr;
-        // patrulha entre x=+5 e x=+13 (chão direito vai de +3 a +15)
+        // patrulha entre x=+5 e x=+13 (chão direito vai de +3 a +20; +13 fica antes da fresta)
         ai.patrolMinX = 5f;
         ai.patrolMaxX = 13f;
         ai.detectionRange = 6f;
+
+        // Bobbing leve pra ele não ficar 100% rígido visualmente
+        var bob = body.AddComponent<IdleBob>();
+        bob.amplitude = 0.05f;
+        bob.speed = 2.2f;
+        return root;
     }
 
-    static GameObject BuildPlayer(Vector3 pos)
+    static GameObject BuildYoung(Vector3 pos)
     {
-        var root = new GameObject("Player");
+        // Jovem: 16×16 (collider 0.55×0.85). Cabe em fresta baixa com folga ~0.15u.
+        return BuildPlayerInternal("PlayerYoung", pos, PlayerKind.Young,
+            bodyScale: new Vector3(0.6f, 1f, 1f),
+            colliderSize: new Vector2(0.55f, 0.85f),
+            color: YoungCol,
+            groundCheckY: -0.5f);
+    }
+
+    static GameObject BuildAdult(Vector3 pos)
+    {
+        // Adulto: 16×32 (collider 0.55×1.9). Não cabe em fresta de 1u, empurra HeavyBox.
+        return BuildPlayerInternal("PlayerAdult", pos, PlayerKind.Adult,
+            bodyScale: new Vector3(0.6f, 2f, 1f),
+            colliderSize: new Vector2(0.55f, 1.9f),
+            color: AdultCol,
+            groundCheckY: -1.05f);
+    }
+
+    static GameObject BuildPlayerInternal(string name, Vector3 pos, PlayerKind kind,
+        Vector3 bodyScale, Vector2 colliderSize, Color color, float groundCheckY)
+    {
+        var root = new GameObject(name);
         root.tag = "Player";
         root.transform.position = pos;
 
         var body = new GameObject("Body");
         body.transform.SetParent(root.transform, false);
-        body.transform.localScale = new Vector3(0.6f, 1f, 1f); // jovem ~16×16, mas alongado pra ler em tela
+        body.transform.localScale = bodyScale;
         var sr = body.AddComponent<SpriteRenderer>();
         sr.sprite = SolidSprite();
-        sr.color = PlayerCol;
+        sr.color = color;
         sr.sortingOrder = 10;
 
         var groundCheck = new GameObject("GroundCheck");
         groundCheck.transform.SetParent(root.transform, false);
-        groundCheck.transform.localPosition = new Vector3(0, -0.6f, 0);
+        groundCheck.transform.localPosition = new Vector3(0, groundCheckY, 0);
 
         var rb = root.AddComponent<Rigidbody2D>();
         rb.gravityScale = 3.5f;
@@ -298,15 +347,16 @@ public static class Memory01Builder
         rb.freezeRotation = true;
 
         var col = root.AddComponent<BoxCollider2D>();
-        col.size = new Vector2(0.55f, 0.95f);
-        col.offset = new Vector2(0, 0);
-        col.sharedMaterial = new PhysicsMaterial2D("PlayerNoFriction") { friction = 0f, bounciness = 0f };
+        col.size = colliderSize;
+        col.offset = Vector2.zero;
+        col.sharedMaterial = new PhysicsMaterial2D(name + "NoFriction") { friction = 0f, bounciness = 0f };
 
         var pc = root.AddComponent<PlayerController>();
         pc.body = sr;
         pc.groundCheck = groundCheck.transform;
         pc.groundCheckRadius = 0.12f;
-        pc.groundMask = ~0; // tudo; o controller filtra a si mesmo
+        pc.groundMask = ~0;
+        pc.kind = kind;
 
         root.AddComponent<PlayerHealth>();
         var atk = root.AddComponent<PlayerAttack>();
@@ -319,11 +369,87 @@ public static class Memory01Builder
         return root;
     }
 
-    static void BuildHUD(GameObject player)
+    static GameObject BuildSwap(GameObject young, GameObject adult)
+    {
+        var go = new GameObject("PlayerSwap");
+        var sw = go.AddComponent<PlayerSwap>();
+        sw.young = young.GetComponent<PlayerController>();
+        sw.adult = adult.GetComponent<PlayerController>();
+        return go;
+    }
+
+    static void BuildHeavyBox(Vector3 pos)
+    {
+        var go = new GameObject("HeavyBox");
+        go.transform.position = pos;
+        go.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = SolidSprite();
+        sr.color = BoxCol;
+        sr.sortingOrder = 8;
+
+        var col = go.AddComponent<BoxCollider2D>();
+        col.size = Vector2.one;
+
+        // O componente HeavyBox configura o RB no Awake.
+        go.AddComponent<Rigidbody2D>();
+        go.AddComponent<HeavyBox>();
+    }
+
+    static GameObject BuildSchoolDoor(Vector3 pos)
+    {
+        var root = new GameObject("SchoolDoor");
+        root.transform.position = pos;
+
+        // Moldura externa (mais clara) — visual de parede ao redor da porta
+        var frame = new GameObject("Frame");
+        frame.transform.SetParent(root.transform, false);
+        frame.transform.localScale = new Vector3(1.1f, 2.2f, 1f);
+        var fsr = frame.AddComponent<SpriteRenderer>();
+        fsr.sprite = SolidSprite();
+        fsr.color = DoorFrameCol;
+        fsr.sortingOrder = 6;
+
+        // Folha da porta (mais escura)
+        var leaf = new GameObject("Leaf");
+        leaf.transform.SetParent(root.transform, false);
+        leaf.transform.localScale = new Vector3(0.85f, 1.95f, 1f);
+        var lsr = leaf.AddComponent<SpriteRenderer>();
+        lsr.sprite = SolidSprite();
+        lsr.color = DoorCol;
+        lsr.sortingOrder = 7;
+
+        // Maçaneta (creme)
+        var knob = new GameObject("Knob");
+        knob.transform.SetParent(root.transform, false);
+        knob.transform.localPosition = new Vector3(0.25f, 0f, 0f);
+        knob.transform.localScale = new Vector3(0.12f, 0.12f, 1f);
+        var ksr = knob.AddComponent<SpriteRenderer>();
+        ksr.sprite = SolidSprite();
+        ksr.color = CreamCol;
+        ksr.sortingOrder = 8;
+
+        // Trigger que dispara o SchoolDoor
+        var col = root.AddComponent<BoxCollider2D>();
+        col.size = new Vector2(1.0f, 2.0f);
+        col.isTrigger = true;
+
+        root.AddComponent<SchoolDoor>();
+
+        // Bobbing leve pra a porta "respirar" e chamar atenção
+        var bob = root.AddComponent<IdleBob>();
+        bob.amplitude = 0.05f;
+        bob.speed = 1.5f;
+        return root;
+    }
+
+    static void BuildHUD(GameObject player, GameObject swap, GameObject young, GameObject adult, GameObject bully, GameObject door)
     {
         var canvasGO = new GameObject("Canvas");
         var canvas = canvasGO.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 50;
         var scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
@@ -331,18 +457,107 @@ public static class Memory01Builder
         canvasGO.AddComponent<GraphicRaycaster>();
 
         CreateUIText(canvasGO.transform, "TutorialHint",
-            "[A]/[D] mover   ·   [Espaço] pular   ·   [K] arremessar",
-            36, FontStyles.Bold,
-            new Vector2(0, -440), new Vector2(1400, 80),
+            "[A]/[D] mover   ·   [Espaço] pular   ·   [K] arremessar   ·   [Tab] trocar Woody   ·   chegue na porta",
+            30, FontStyles.Bold,
+            new Vector2(0, -440), new Vector2(1700, 80),
             new Color(1, 0.95f, 0.7f, 0.9f));
 
         CreateUIText(canvasGO.transform, "Title", "MEMORY 01 — O PÁTIO",
             48, FontStyles.Bold,
             new Vector2(0, 460), new Vector2(1200, 80),
-            new Color(1, 0.92f, 0.55f, 1f),
+            CreamCol,
             TextAlignmentOptions.Center);
 
         BuildHealthBar(canvasGO.transform, player);
+        BuildIntroDialogue(canvasGO.transform, swap, young, adult, bully);
+
+        // Overlay de fade pra porta usar (Image preto cobrindo a tela, alpha 0).
+        var fadeGO = new GameObject("FadeOverlay");
+        fadeGO.transform.SetParent(canvasGO.transform, false);
+        var fadeRt = fadeGO.AddComponent<RectTransform>();
+        fadeRt.anchorMin = Vector2.zero; fadeRt.anchorMax = Vector2.one;
+        fadeRt.offsetMin = fadeRt.offsetMax = Vector2.zero;
+        var fadeImg = fadeGO.AddComponent<Image>();
+        fadeImg.color = new Color(0f, 0f, 0f, 0f);
+        fadeImg.raycastTarget = false;
+        // O FadeOverlay precisa estar sobre o intro dialogue mas ele só mostra quando porta dispara.
+        fadeGO.transform.SetAsLastSibling();
+
+        if (door != null)
+        {
+            var sd = door.GetComponent<SchoolDoor>();
+            if (sd != null) sd.fadeOverlay = fadeImg;
+        }
+    }
+
+    static void BuildIntroDialogue(Transform parent, GameObject swap, GameObject young, GameObject adult, GameObject bully)
+    {
+        // Painel inferior tipo dialog box
+        var box = new GameObject("IntroDialogueBox");
+        box.transform.SetParent(parent, false);
+        var rt = box.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0f);
+        rt.anchorMax = new Vector2(0.5f, 0f);
+        rt.pivot = new Vector2(0.5f, 0f);
+        rt.anchoredPosition = new Vector2(0, 60);
+        rt.sizeDelta = new Vector2(1700, 280);
+
+        var bg = box.AddComponent<Image>();
+        bg.color = new Color(0.05f, 0.04f, 0.03f, 0.92f);
+        bg.raycastTarget = false;
+
+        // Portrait (quad colorido — placeholder do retrato do adulto)
+        var portraitGO = new GameObject("Portrait");
+        portraitGO.transform.SetParent(box.transform, false);
+        var prt = portraitGO.AddComponent<RectTransform>();
+        prt.anchorMin = prt.anchorMax = new Vector2(0, 0.5f);
+        prt.pivot = new Vector2(0, 0.5f);
+        prt.anchoredPosition = new Vector2(40, 0);
+        prt.sizeDelta = new Vector2(180, 220);
+        var pimg = portraitGO.AddComponent<Image>();
+        pimg.color = AdultCol;
+        pimg.raycastTarget = false;
+
+        // Nome do speaker
+        CreateUIText(box.transform, "SpeakerLabel", "Woody (adulto)", 28, FontStyles.Bold,
+            new Vector2(120, 100), new Vector2(400, 40), CreamCol, TextAlignmentOptions.Left);
+
+        // Texto principal
+        var textGO = CreateUIText(box.transform, "DialogText", "", 32, FontStyles.Normal,
+            new Vector2(140, -10), new Vector2(1280, 200),
+            new Color(1f, 0.96f, 0.85f, 1f), TextAlignmentOptions.TopLeft);
+        // Recoloca pra ficar à direita do retrato
+        var textRt = textGO.GetComponent<RectTransform>();
+        textRt.anchorMin = textRt.anchorMax = new Vector2(0, 0.5f);
+        textRt.pivot = new Vector2(0, 0.5f);
+        textRt.anchoredPosition = new Vector2(250, 0);
+        textRt.sizeDelta = new Vector2(1400, 220);
+        var tmp = textGO.GetComponent<TextMeshProUGUI>();
+
+        var typewriter = box.AddComponent<TypewriterText>();
+        typewriter.target = tmp;
+        typewriter.charsPerSecond = 38f;
+
+        // Continue indicator (seta piscando no canto inferior direito).
+        // Usa ">>" em vez de "▶" porque a LiberationSans SDF default não tem esse glyph.
+        var contGO = CreateUIText(box.transform, "Continue", ">> Espaço/Enter", 24, FontStyles.Italic,
+            new Vector2(0, 0), new Vector2(360, 32), CreamCol, TextAlignmentOptions.Right);
+        var contRt = contGO.GetComponent<RectTransform>();
+        contRt.anchorMin = contRt.anchorMax = new Vector2(1, 0);
+        contRt.pivot = new Vector2(1, 0);
+        contRt.anchoredPosition = new Vector2(-30, 18);
+        contRt.sizeDelta = new Vector2(360, 32);
+        contGO.AddComponent<BlinkUI>();
+
+        // Componente que orquestra
+        var intro = box.AddComponent<IntroDialogue>();
+        intro.dialogueBox = box;
+        intro.typewriter = typewriter;
+        intro.continueIndicator = contGO;
+        if (swap != null) intro.playerSwap = swap.GetComponent<PlayerSwap>();
+        if (young != null) intro.young = young.GetComponent<PlayerController>();
+        if (adult != null) intro.adult = adult.GetComponent<PlayerController>();
+        if (bully != null) intro.bully = bully.GetComponent<BullyController>();
     }
 
     static void BuildHealthBar(Transform parent, GameObject player)

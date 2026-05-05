@@ -283,16 +283,22 @@ public static class PrologueBuilder
         CreateSprite("StreetLamp", root, new Vector2(5, 0), new Vector2(0.25f, 4f), new Color(0.30f, 0.25f, 0.18f), -5);
         CreateSprite("LampGlow", root, new Vector2(5, 1.8f), new Vector2(1.5f, 1.5f), new Color(0.95f, 0.78f, 0.42f, 0.45f), -3);
 
+        GameObject woody;
         if (sleeping)
         {
-            CreateSprite("Woody_Sleeping", root, new Vector2(2, -2f), new Vector2(2f, 0.5f), new Color(0.45f, 0.32f, 0.22f), -3);
+            woody = CreateSprite("Woody_Sleeping", root, new Vector2(2, -2f), new Vector2(2f, 0.5f), new Color(0.45f, 0.32f, 0.22f), -3);
+            var br = woody.AddComponent<BreathingScale>();
+            br.amplitude = 0.05f; br.speed = 1.4f; br.xWeight = -0.3f;
         }
         else
         {
-            CreateSprite("Woody_Sitting", root, new Vector2(2, -1.6f), new Vector2(0.6f, 1.4f), new Color(0.45f, 0.32f, 0.22f), -3);
+            woody = CreateSprite("Woody_Sitting", root, new Vector2(2, -1.6f), new Vector2(0.6f, 1.4f), new Color(0.45f, 0.32f, 0.22f), -3);
+            var br = woody.AddComponent<BreathingScale>();
+            br.amplitude = 0.025f; br.speed = 2f; br.xWeight = -0.4f;
         }
 
         AddRain(root.gameObject, intensity: 200);
+        AddLightning(root.gameObject);
         return root.gameObject;
     }
 
@@ -314,9 +320,17 @@ public static class PrologueBuilder
         pulse.pulseSpeed = 1.8f;
 
         CreateSprite("CabinDoor", cabin.transform, new Vector2(0, -0.25f), new Vector2(0.4f, 0.5f), new Color(0.92f, 0.78f, 1f, 0.7f), -3);
-        CreateSprite("Woody", root, new Vector2(3.5f, -2f), new Vector2(0.6f, 1.5f), new Color(0.45f, 0.32f, 0.22f), -2);
+        var woodyCabine = CreateSprite("Woody", root, new Vector2(3.5f, -2f), new Vector2(0.6f, 1.5f), new Color(0.45f, 0.32f, 0.22f), -2);
+        var brWC = woodyCabine.AddComponent<BreathingScale>();
+        brWC.amplitude = 0.025f; brWC.speed = 2.2f; brWC.xWeight = -0.4f;
+
+        // Cabine treme suavemente — sensação de "porta vibrando"
+        var cabinBob = cabin.AddComponent<IdleBob>();
+        cabinBob.amplitude = 0.04f;
+        cabinBob.speed = 3.5f;
 
         AddRain(root.gameObject, intensity: 220);
+        AddLightning(root.gameObject);
         return root.gameObject;
     }
 
@@ -337,10 +351,18 @@ public static class PrologueBuilder
         CreateSprite("FloorBand", root, new Vector2(0, -3.5f), new Vector2(20, 3), new Color(0.05f, 0.03f, 0.12f), -8);
         CreateSprite("Window", root, new Vector2(-6, 1), new Vector2(3, 2), new Color(0.18f, 0.20f, 0.30f), -7);
 
-        // Trio de aliens (RGB-ish: vermelho, azul, amarelo conforme GDD)
-        CreateSprite("Alien_Red", root, new Vector2(-2, 0), new Vector2(0.8f, 0.8f), new Color(0.95f, 0.40f, 0.45f), -3);
-        CreateSprite("Alien_Blue", root, new Vector2(0, 0.4f), new Vector2(0.8f, 0.8f), new Color(0.45f, 0.70f, 1f), -3);
-        CreateSprite("Alien_Yellow", root, new Vector2(2, 0), new Vector2(0.8f, 0.8f), new Color(0.98f, 0.90f, 0.45f), -3);
+        // Trio de aliens (RGB-ish: vermelho, azul, amarelo conforme GDD) — bobbing com fases offset
+        var alienR = CreateSprite("Alien_Red", root, new Vector2(-2, 0), new Vector2(0.8f, 0.8f), new Color(0.95f, 0.40f, 0.45f), -3);
+        var bobR = alienR.AddComponent<IdleBob>();
+        bobR.amplitude = 0.18f; bobR.speed = 2.3f; bobR.phase = 0f;
+
+        var alienB = CreateSprite("Alien_Blue", root, new Vector2(0, 0.4f), new Vector2(0.8f, 0.8f), new Color(0.45f, 0.70f, 1f), -3);
+        var bobB = alienB.AddComponent<IdleBob>();
+        bobB.amplitude = 0.18f; bobB.speed = 2.3f; bobB.phase = Mathf.PI * 0.66f;
+
+        var alienY = CreateSprite("Alien_Yellow", root, new Vector2(2, 0), new Vector2(0.8f, 0.8f), new Color(0.98f, 0.90f, 0.45f), -3);
+        var bobY = alienY.AddComponent<IdleBob>();
+        bobY.amplitude = 0.18f; bobY.speed = 2.3f; bobY.phase = Mathf.PI * 1.33f;
 
         // Adulto à direita
         CreateSprite("Woody", root, new Vector2(5, -1.2f), new Vector2(0.7f, 1.7f), new Color(0.45f, 0.32f, 0.22f), -2);
@@ -413,6 +435,28 @@ public static class PrologueBuilder
         _unitSprite = Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
         _unitSprite.name = "UnitSquare";
         return _unitSprite;
+    }
+
+    static void AddLightning(GameObject parent)
+    {
+        // Overlay branco em screen-space pra dar a sensação de relâmpago.
+        var go = new GameObject("LightningOverlay");
+        go.transform.SetParent(parent.transform, false);
+        go.transform.localPosition = new Vector3(0, 0, -0.5f);
+        go.transform.localScale = new Vector3(40, 24, 1);
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = UnitSprite();
+        sr.color = new Color(1f, 1f, 1f, 0f);
+        sr.sortingOrder = 8;
+
+        var lf = go.AddComponent<LightningFlash>();
+        lf.targetSprite = sr;
+        lf.minInterval = 7f;
+        lf.maxInterval = 14f;
+        lf.flashDuration = 0.07f;
+        lf.fadeDuration = 0.45f;
+        lf.peakAlpha = 0.55f;
     }
 
     static void AddRain(GameObject parent, int intensity)

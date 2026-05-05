@@ -29,14 +29,22 @@ public class BullyController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         health = GetComponent<EnemyHealth>();
         if (body == null) body = GetComponentInChildren<SpriteRenderer>();
-
-        var p = GameObject.FindGameObjectWithTag("Player");
-        if (p != null) target = p.transform;
     }
 
     void Update()
     {
         if (attackCounter > 0f) attackCounter -= Time.deltaTime;
+
+        // Polling do alvo: evita race entre Awake/OnEnable e a inscrição em PlayerSwap.
+        if (PlayerSwap.Instance != null && PlayerSwap.Instance.ActivePlayer != null)
+        {
+            target = PlayerSwap.Instance.ActivePlayer.transform;
+        }
+        else if (target == null)
+        {
+            var p = GameObject.FindGameObjectWithTag("Player");
+            if (p != null) target = p.transform;
+        }
     }
 
     void FixedUpdate()
