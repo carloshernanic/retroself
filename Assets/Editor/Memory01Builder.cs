@@ -37,7 +37,9 @@ public static class Memory01Builder
 
         var camera = BuildCamera();
         BuildEventSystem();
+        BuildPatioBackground(camera);
         BuildGround();
+        BuildPatioProps();
         BuildHeavyBox(new Vector3(0f, -3f, 0));
         // Ground top y=-3 (tilemap grass at cell y=-4, span -4..-3). Visual frame
         // 2.2u tall com pivot center → pos.y = -3 + 1.1 = -1.9 deixa a base no chão.
@@ -64,7 +66,9 @@ public static class Memory01Builder
         camGO.tag = "MainCamera";
         var cam = camGO.AddComponent<Camera>();
         cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.backgroundColor = BgSky;
+        // BG é coberto pelas layers do CityNight parentadas na câmera; cor sólida só
+        // aparece se as layers falharem (asset não importado).
+        cam.backgroundColor = new Color(0.04f, 0.05f, 0.10f, 1f);
         cam.orthographic = true;
         cam.orthographicSize = 5f;
         camGO.transform.position = new Vector3(0, 0, -10);
@@ -159,9 +163,11 @@ public static class Memory01Builder
 
     static void BuildGround()
     {
-        var dirtTile = LoadOrCreateTile("Assets/Settings/Tiles/Ground_Dirt.asset", new Color(0.38f, 0.24f, 0.16f));
-        var grassTile = LoadOrCreateTile("Assets/Settings/Tiles/Ground_GrassTop.asset", new Color(0.55f, 0.62f, 0.22f));
-        var platformTile = LoadOrCreateTile("Assets/Settings/Tiles/Platform_Wood.asset", new Color(0.62f, 0.42f, 0.26f));
+        // Tiles do residential-area pack. Sprites reais (32×32 px, PPU 32 → 1 cell = 1u).
+        var dirtTile = LoadResidentialTile(SceneArtCatalog.TileAssetGround,   SceneArtCatalog.TileGround);
+        var grassTile = LoadResidentialTile(SceneArtCatalog.TileAssetGrassTop, SceneArtCatalog.TileGrassTop);
+        var wallTile = LoadResidentialTile(SceneArtCatalog.TileAssetWall,     SceneArtCatalog.TileWall);
+        var platformTile = LoadResidentialTile(SceneArtCatalog.TileAssetPlatform, SceneArtCatalog.TilePlatform);
 
         var gridGO = new GameObject("Grid");
         gridGO.AddComponent<Grid>();
@@ -193,7 +199,7 @@ public static class Memory01Builder
         // Parede de 3 tiles em x=4 (y=-3,-2,-1): topo em y=0, alta demais
         // pra ambos pularem do chão. Precisa da HeavyBox como degrau (top em y=-2.2):
         // do degrau, jovem alcança bottom y=0.26 (passa); adulto fica abaixo.
-        for (int y = -3; y <= -1; y++) tm.SetTile(new Vector3Int(4, y, 0), platformTile);
+        for (int y = -3; y <= -1; y++) tm.SetTile(new Vector3Int(4, y, 0), wallTile);
 
         // "Ponte" decorativa por cima do bully (y=-1, x=8..10) — caminho alternativo aéreo.
         for (int x = 8; x <= 10; x++) tm.SetTile(new Vector3Int(x, -1, 0), platformTile);
@@ -202,7 +208,7 @@ public static class Memory01Builder
         tm.SetTile(new Vector3Int(16, -2, 0), platformTile);
         tm.SetTile(new Vector3Int(17, -2, 0), platformTile);
         // Parede de fundo em x=20 (bloqueia também por cima)
-        for (int y = -3; y <= 0; y++) tm.SetTile(new Vector3Int(20, y, 0), platformTile);
+        for (int y = -3; y <= 0; y++) tm.SetTile(new Vector3Int(20, y, 0), wallTile);
 
         // Força a geração da geometria do CompositeCollider2D no momento do build
         // pra que ela já fique cacheada no .unity. Sem isso, a 1ª FixedUpdate após
@@ -214,40 +220,93 @@ public static class Memory01Builder
         EditorUtility.SetDirty(tmGO);
     }
 
-    static Tile LoadOrCreateTile(string path, Color color)
+    // Cria/atualiza um Tile.asset apontando pro sprite real do residential pack.
+    // Idempotente: só atualiza a ref de sprite se já existir.
+    static Tile LoadResidentialTile(string assetPath, string spritePath)
     {
-        var dir = System.IO.Path.GetDirectoryName(path);
+        var dir = System.IO.Path.GetDirectoryName(assetPath);
         if (!System.IO.Directory.Exists(dir)) System.IO.Directory.CreateDirectory(dir);
 
-        var existing = AssetDatabase.LoadAssetAtPath<Tile>(path);
+        var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+        if (sprite == null)
+        {
+            Debug.LogError($"[Memory01Builder] sprite não encontrado em {spritePath} — rode Retroself → Configure Scene Art Imports.");
+        }
+
+        var existing = AssetDatabase.LoadAssetAtPath<Tile>(assetPath);
         if (existing != null)
         {
-            existing.color = color;
+            existing.sprite = sprite;
+            existing.color = Color.white;
+            existing.colliderType = Tile.ColliderType.Sprite;
             EditorUtility.SetDirty(existing);
             return existing;
         }
 
-        var tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
-        var px = new Color[16];
-        for (int i = 0; i < 16; i++) px[i] = Color.white;
-        tex.SetPixels(px);
-        tex.Apply();
-        tex.filterMode = FilterMode.Point;
-        tex.name = "TileTex";
-
-        var sprite = Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
-        sprite.name = "TileSprite";
-
         var tile = ScriptableObject.CreateInstance<Tile>();
         tile.sprite = sprite;
-        tile.color = color;
+        tile.color = Color.white;
         tile.colliderType = Tile.ColliderType.Sprite;
-
-        AssetDatabase.CreateAsset(tile, path);
-        AssetDatabase.AddObjectToAsset(tex, tile);
-        AssetDatabase.AddObjectToAsset(sprite, tile);
+        AssetDatabase.CreateAsset(tile, assetPath);
         AssetDatabase.SaveAssets();
         return tile;
+    }
+
+    // BG do pátio: 5 layers do CityNight pack parentadas na câmera (seguem o player
+    // automaticamente, sem precisar de script de parallax tracking). Camera ortho
+    // size 5 = 10u altura; layers em PPU 50 ficam 11.52×6.48u — cobre a altura
+    // visível e o ortho center fica abaixo do skyline. Sortings -100..-92 deixam
+    // tudo atrás do tilemap (sortingOrder 5).
+    static void BuildPatioBackground(GameObject camGO)
+    {
+        var bgRoot = new GameObject("Background_CityNight");
+        bgRoot.transform.SetParent(camGO.transform, false);
+        // Z=10 fica à frente da câmera (câmera em z=-10) e atrás de tudo na cena.
+        // Y=0 centraliza vertical (PPU 32 → 10.125u alto cobre ortho 10u).
+        bgRoot.transform.localPosition = new Vector3(0, 0f, 10f);
+
+        for (int i = 0; i < SceneArtCatalog.CityNightLayers.Length; i++)
+        {
+            var path = SceneArtCatalog.CityNightLayers[i];
+            var sprite = SceneArtCatalog.LoadSprite(path);
+            var go = new GameObject($"Layer_{i}");
+            go.transform.SetParent(bgRoot.transform, false);
+            go.transform.localPosition = new Vector3(0, 0, i * 0.01f); // pequena separação z só pra evitar z-fighting
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = sprite;
+            sr.sortingOrder = -100 + i; // -100 (céu) → -96 (chão BG)
+
+            // Sway leve só nas camadas mais distantes (i=0..2). Camera move horizontal
+            // → BG inteiro segue (parented), mas sway dá vida ao skyline.
+            if (i <= 2)
+            {
+                var px = go.AddComponent<ParallaxLayer>();
+                px.swayAmplitude = 0.06f - i * 0.015f;
+                px.swaySpeed = 0.18f + i * 0.05f;
+                px.phase = i * 0.7f;
+            }
+        }
+    }
+
+    // Props decorativos no pátio (sem colliders) — só dão presença visual ao chão
+    // que antes era só tilemap. Sortings 4 ficam à frente do BG (-100..-96) e do
+    // tilemap (5? — na verdade o tilemap tá em 5; usamos 4 pros props ficarem
+    // ATRÁS da grama sliced top mas à frente do BG).
+    static void BuildPatioProps()
+    {
+        AddProp("Bench",    SceneArtCatalog.PropBench,    new Vector3(-10f, -3f, 0), 4);
+        AddProp("Trashcan", SceneArtCatalog.PropTrashcan, new Vector3(  2f, -3f, 0), 4);
+        AddProp("Lamp",     SceneArtCatalog.PropLamp,     new Vector3( 14f, -3f, 0), 4);
+    }
+
+    static void AddProp(string name, string spritePath, Vector3 worldPos, int sortingOrder)
+    {
+        var sprite = SceneArtCatalog.LoadSprite(spritePath);
+        var go = new GameObject(name);
+        go.transform.position = worldPos;
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = sprite;
+        sr.sortingOrder = sortingOrder;
     }
 
     static void BuildHazard()
@@ -423,15 +482,19 @@ public static class Memory01Builder
     {
         var go = new GameObject("HeavyBox");
         go.transform.position = pos;
-        go.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+        go.transform.localScale = Vector3.one;
 
         var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = SolidSprite();
-        sr.color = BoxCol;
+        var boxSprite = SceneArtCatalog.LoadSprite(SceneArtCatalog.PropBox);
+        sr.sprite = boxSprite != null ? boxSprite : SolidSprite();
+        sr.color = boxSprite != null ? Color.white : BoxCol;
         sr.sortingOrder = 8;
 
+        // Box é PPU 32 com pivot BottomCenter (config do Configurator). 1 cell = 1u,
+        // sprite ~1×1u → collider 0.95×0.95 com offset y=0.5 fica certinho na base.
         var col = go.AddComponent<BoxCollider2D>();
-        col.size = Vector2.one;
+        col.size = new Vector2(0.95f, 0.95f);
+        col.offset = new Vector2(0f, 0.5f);
 
         // O componente HeavyBox configura o RB no Awake.
         go.AddComponent<Rigidbody2D>();
@@ -498,14 +561,14 @@ public static class Memory01Builder
         canvasGO.AddComponent<GraphicRaycaster>();
 
         CreateUIText(canvasGO.transform, "TutorialHint",
-            "[A]/[D] mover   ·   [Espaço] pular   ·   [K] arremessar   ·   [Tab] trocar Woody   ·   leve os dois Woody até a porta",
-            30, FontStyles.Bold,
-            new Vector2(0, -440), new Vector2(1700, 80),
+            "[A]/[D] mover  [Espaço] pular  [K] arremessar  [Tab] trocar Woody  -  leve os dois ate a porta",
+            16, FontStyles.Bold,
+            new Vector2(0, -440), new Vector2(1820, 60),
             new Color(1, 0.95f, 0.7f, 0.9f));
 
-        CreateUIText(canvasGO.transform, "Title", "MEMORY 01 — O PÁTIO",
-            48, FontStyles.Bold,
-            new Vector2(0, 460), new Vector2(1200, 80),
+        CreateUIText(canvasGO.transform, "Title", "MEMORY 01 - O PATIO",
+            28, FontStyles.Bold,
+            new Vector2(0, 460), new Vector2(1200, 60),
             CreamCol,
             TextAlignmentOptions.Center);
 
@@ -563,7 +626,7 @@ public static class Memory01Builder
         pimg.raycastTarget = false;
 
         // Speaker label — ancorada ao top-left do box (não centralizada, pra não sobrepor texto).
-        var labelGO = CreateUIText(box.transform, "SpeakerLabel", "Woody (adulto)", 28, FontStyles.Bold,
+        var labelGO = CreateUIText(box.transform, "SpeakerLabel", "Woody (adulto)", 18, FontStyles.Bold,
             Vector2.zero, Vector2.zero, CreamCol, TextAlignmentOptions.Left);
         var labelRt = labelGO.GetComponent<RectTransform>();
         labelRt.anchorMin = labelRt.anchorMax = new Vector2(0, 1);
@@ -572,7 +635,7 @@ public static class Memory01Builder
         labelRt.sizeDelta = new Vector2(1200, 36);
 
         // Texto principal — abaixo da label, ancorado ao top-left.
-        var textGO = CreateUIText(box.transform, "DialogText", "", 30, FontStyles.Normal,
+        var textGO = CreateUIText(box.transform, "DialogText", "", 18, FontStyles.Normal,
             Vector2.zero, Vector2.zero,
             new Color(1f, 0.96f, 0.85f, 1f), TextAlignmentOptions.TopLeft);
         var textRt = textGO.GetComponent<RectTransform>();
@@ -590,7 +653,7 @@ public static class Memory01Builder
 
         // Continue indicator (seta piscando no canto inferior direito).
         // Usa ">>" em vez de "▶" porque a LiberationSans SDF default não tem esse glyph.
-        var contGO = CreateUIText(box.transform, "Continue", ">> Espaço/Enter", 22, FontStyles.Italic,
+        var contGO = CreateUIText(box.transform, "Continue", ">> Espaco/Enter", 14, FontStyles.Italic,
             Vector2.zero, Vector2.zero, CreamCol, TextAlignmentOptions.Right);
         var contRt = contGO.GetComponent<RectTransform>();
         contRt.anchorMin = contRt.anchorMax = new Vector2(1, 0);
@@ -639,7 +702,7 @@ public static class Memory01Builder
         var fill = fillGO.AddComponent<Image>();
         fill.color = new Color(0.55f, 0.85f, 0.4f);
 
-        CreateUIText(root.transform, "Label", "VIDA", 22, FontStyles.Bold,
+        CreateUIText(root.transform, "Label", "VIDA", 14, FontStyles.Bold,
             new Vector2(0, 32), new Vector2(120, 24),
             new Color(1, 0.95f, 0.7f, 0.85f), TextAlignmentOptions.Left);
 
@@ -677,6 +740,8 @@ public static class Memory01Builder
         rt.anchoredPosition = anchored;
         rt.sizeDelta = sizeDelta;
         var tmp = go.AddComponent<TextMeshProUGUI>();
+        var pixelFont = SceneArtCatalog.GetPixelFont();
+        if (pixelFont != null) tmp.font = pixelFont;
         tmp.text = text;
         tmp.fontSize = size;
         tmp.fontStyle = style;

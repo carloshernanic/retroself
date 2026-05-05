@@ -92,7 +92,7 @@ public static class PrologueBuilder
         portraitImg.color = ColAdult;
 
         // Speaker label
-        var speakerGO = CreateUIText(dialogueBox.transform, "Speaker", "", 28, FontStyles.Bold);
+        var speakerGO = CreateUIText(dialogueBox.transform, "Speaker", "", 18, FontStyles.Bold);
         var spRT = speakerGO.GetComponent<RectTransform>();
         spRT.anchorMin = new Vector2(0, 1);
         spRT.anchorMax = new Vector2(0, 1);
@@ -104,7 +104,7 @@ public static class PrologueBuilder
         speakerTMP.color = new Color(0.78f, 0.95f, 1f, 1f);
 
         // Body text
-        var bodyGO = CreateUIText(dialogueBox.transform, "Body", "", 36, FontStyles.Normal);
+        var bodyGO = CreateUIText(dialogueBox.transform, "Body", "", 18, FontStyles.Normal);
         var bodyRT = bodyGO.GetComponent<RectTransform>();
         bodyRT.anchorMin = new Vector2(0, 0);
         bodyRT.anchorMax = new Vector2(1, 1);
@@ -120,7 +120,7 @@ public static class PrologueBuilder
         typewriter.blipSource = blipSource;
 
         // Continue indicator ([Enter] ▼)
-        var contGO = CreateUIText(dialogueBox.transform, "Continue", "[Enter] ▼", 28, FontStyles.Bold);
+        var contGO = CreateUIText(dialogueBox.transform, "Continue", "[Enter] >>", 16, FontStyles.Bold);
         var contRT = contGO.GetComponent<RectTransform>();
         contRT.anchorMin = new Vector2(1, 0);
         contRT.anchorMax = new Vector2(1, 0);
@@ -141,7 +141,7 @@ public static class PrologueBuilder
         faderGOObj.defaultDuration = 0.6f;
 
         // Skip hint (top-right) — fica acima do fader pra continuar visível durante transições
-        var hintGO = CreateUIText(canvasGO.transform, "SkipHint", "[Enter] avançar   ·   [Esc] pular", 22, FontStyles.Italic);
+        var hintGO = CreateUIText(canvasGO.transform, "SkipHint", "[Enter] avancar  [Esc] pular", 14, FontStyles.Italic);
         var hintRT = hintGO.GetComponent<RectTransform>();
         hintRT.anchorMin = new Vector2(1, 1);
         hintRT.anchorMax = new Vector2(1, 1);
@@ -237,13 +237,13 @@ public static class PrologueBuilder
         scaler.matchWidthOrHeight = 0.5f;
         canvasGO.AddComponent<GraphicRaycaster>();
 
-        var titleGO = CreateUIText(canvasGO.transform, "Title", "MEMORY 01 — O PÁTIO", 96, FontStyles.Bold);
+        var titleGO = CreateUIText(canvasGO.transform, "Title", "MEMORY 01 - O PATIO", 36, FontStyles.Bold);
         var trt = titleGO.GetComponent<RectTransform>();
         trt.anchoredPosition = new Vector2(0, 80);
         trt.sizeDelta = new Vector2(1600, 160);
         titleGO.GetComponent<TextMeshProUGUI>().color = new Color(1f, 0.92f, 0.55f, 1f);
 
-        var subGO = CreateUIText(canvasGO.transform, "Subtitle", "(em construção — tutorial de movimento na próxima sprint)", 36, FontStyles.Italic);
+        var subGO = CreateUIText(canvasGO.transform, "Subtitle", "(em construcao - tutorial de movimento na proxima sprint)", 16, FontStyles.Italic);
         var srt = subGO.GetComponent<RectTransform>();
         srt.anchoredPosition = new Vector2(0, -60);
         srt.sizeDelta = new Vector2(1500, 80);
@@ -263,9 +263,8 @@ public static class PrologueBuilder
         var root = new GameObject(name).transform;
         root.SetParent(parent, false);
 
-        CreateSprite("Sky", root, new Vector2(0, 0), new Vector2(20, 12), new Color(0.04f, 0.05f, 0.10f), -10);
-        CreateSprite("BuildingsBack", root, new Vector2(0, 1.5f), new Vector2(20, 5), new Color(0.07f, 0.08f, 0.15f), -8);
-        CreateSprite("Tree", root, new Vector2(-5, -1), new Vector2(2.5f, 5f), new Color(0.08f, 0.13f, 0.09f), -6);
+        // BG real: 5 layers do CityNight pack. Sortings -100..-96 atrás de tudo.
+        BuildCityNightBackdrop(root, yOffset: 0f);
 
         if (showCabinGlow)
         {
@@ -277,11 +276,11 @@ public static class PrologueBuilder
             pulse.pulseSpeed = 1.6f;
         }
 
-        CreateSprite("Bench", root, new Vector2(2, -2.5f), new Vector2(3f, 0.7f), new Color(0.30f, 0.20f, 0.13f), -4);
-        CreateSprite("BenchLeg1", root, new Vector2(0.8f, -3.1f), new Vector2(0.2f, 0.9f), new Color(0.22f, 0.15f, 0.10f), -4);
-        CreateSprite("BenchLeg2", root, new Vector2(3.2f, -3.1f), new Vector2(0.2f, 0.9f), new Color(0.22f, 0.15f, 0.10f), -4);
-        CreateSprite("StreetLamp", root, new Vector2(5, 0), new Vector2(0.25f, 4f), new Color(0.30f, 0.25f, 0.18f), -5);
-        CreateSprite("LampGlow", root, new Vector2(5, 1.8f), new Vector2(1.5f, 1.5f), new Color(0.95f, 0.78f, 0.42f, 0.45f), -3);
+        // Banco e poste reais (PPU 32, pivot BottomCenter — sentam no chão).
+        CreateRealSprite("Bench", root, SceneArtCatalog.PropBench, new Vector2(2, -3f), -4);
+        CreateRealSprite("StreetLamp", root, SceneArtCatalog.PropLamp, new Vector2(5, -3f), -5);
+        // Glow do poste fica como quad colorido — sem asset condizente.
+        CreateSprite("LampGlow", root, new Vector2(5, 1.0f), new Vector2(1.5f, 1.5f), new Color(0.95f, 0.78f, 0.42f, 0.45f), -3);
 
         GameObject woody;
         if (sleeping)
@@ -423,6 +422,46 @@ public static class PrologueBuilder
         return go;
     }
 
+    // Cria sprite com asset real do projeto (sem stretch — usa scale 1, PPU define escala).
+    static GameObject CreateRealSprite(string name, Transform parent, string spritePath, Vector2 pos, int sortingOrder)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = new Vector3(pos.x, pos.y, 0);
+        go.transform.localScale = Vector3.one;
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = SceneArtCatalog.LoadSprite(spritePath);
+        sr.color = Color.white;
+        sr.sortingOrder = sortingOrder;
+        return go;
+    }
+
+    // 5 layers do CityNight pack (PPU 50 → 11.52×6.48u por layer cobre ortho 10u
+    // alto). Sortings -100..-96. Layers 0..2 ganham sway leve via ParallaxLayer.
+    static void BuildCityNightBackdrop(Transform parent, float yOffset)
+    {
+        var bgRoot = new GameObject("BG_CityNight");
+        bgRoot.transform.SetParent(parent, false);
+        bgRoot.transform.localPosition = new Vector3(0, yOffset, 0);
+        for (int i = 0; i < SceneArtCatalog.CityNightLayers.Length; i++)
+        {
+            var go = new GameObject($"Layer_{i}");
+            go.transform.SetParent(bgRoot.transform, false);
+            go.transform.localPosition = new Vector3(0, 0, i * 0.01f);
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = SceneArtCatalog.LoadSprite(SceneArtCatalog.CityNightLayers[i]);
+            sr.color = Color.white;
+            sr.sortingOrder = -100 + i;
+            if (i <= 2)
+            {
+                var px = go.AddComponent<ParallaxLayer>();
+                px.swayAmplitude = 0.06f - i * 0.015f;
+                px.swaySpeed = 0.18f + i * 0.05f;
+                px.phase = i * 0.7f;
+            }
+        }
+    }
+
     static Sprite _unitSprite;
     static Sprite UnitSprite()
     {
@@ -487,6 +526,8 @@ public static class PrologueBuilder
         var go = new GameObject(name, typeof(RectTransform));
         go.transform.SetParent(parent, false);
         var tmp = go.AddComponent<TextMeshProUGUI>();
+        var pixelFont = SceneArtCatalog.GetPixelFont();
+        if (pixelFont != null) tmp.font = pixelFont;
         tmp.text = text;
         tmp.fontSize = fontSize;
         tmp.fontStyle = style;
