@@ -28,13 +28,20 @@ public static class Memory01Builder
     [MenuItem("Retroself/Build Memory_01_Patio Tutorial")]
     public static void BuildMemory01Tutorial()
     {
+        // NÃO chama SpriteImportConfigurator aqui — ele reescreve o spritesheet do
+        // importer e zera qualquer slicing/pivot manual feito no Sprite Editor.
+        // Pra setar PPU/Point/no-compression em sprites NOVOS, rode
+        // "Retroself → Configure Character Sprites" manualmente uma vez.
+
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
         var camera = BuildCamera();
         BuildEventSystem();
         BuildGround();
         BuildHeavyBox(new Vector3(0f, -3f, 0));
-        var door = BuildSchoolDoor(new Vector3(18.5f, -2.7f, 0));
+        // Ground top y=-3 (tilemap grass at cell y=-4, span -4..-3). Visual frame
+        // 2.2u tall com pivot center → pos.y = -3 + 1.1 = -1.9 deixa a base no chão.
+        var door = BuildSchoolDoor(new Vector3(18.5f, -1.9f, 0));
         var bully = BuildBully(new Vector3(11f, -2.5f, 0));
 
         var young = BuildYoung(new Vector3(-7f, -2f, 0));
@@ -265,12 +272,13 @@ public static class Memory01Builder
         var root = new GameObject("Bully");
         root.transform.position = pos;
 
+        var colliderSize = new Vector2(0.7f, 1.1f);
         var body = new GameObject("Body");
         body.transform.SetParent(root.transform, false);
-        body.transform.localScale = new Vector3(0.8f, 1.2f, 1f);
+        body.transform.localPosition = new Vector3(0, -colliderSize.y * 0.5f, 0);
+        body.transform.localScale = Vector3.one;
         var sr = body.AddComponent<SpriteRenderer>();
-        sr.sprite = SolidSprite();
-        sr.color = DummyCol;
+        sr.color = Color.white;
         sr.sortingOrder = 9;
 
         var rb = root.AddComponent<Rigidbody2D>();
@@ -280,7 +288,7 @@ public static class Memory01Builder
         rb.mass = 5f;
 
         var col = root.AddComponent<BoxCollider2D>();
-        col.size = new Vector2(0.7f, 1.1f);
+        col.size = colliderSize;
         col.sharedMaterial = new PhysicsMaterial2D("BullyNoFriction") { friction = 0f, bounciness = 0f };
 
         var hp = root.AddComponent<EnemyHealth>();
@@ -289,15 +297,18 @@ public static class Memory01Builder
 
         var ai = root.AddComponent<BullyController>();
         ai.body = sr;
-        // patrulha entre x=+5 e x=+13 (chão direito vai de +3 a +20; +13 fica antes da fresta)
         ai.patrolMinX = 5f;
         ai.patrolMaxX = 13f;
         ai.detectionRange = 6f;
 
-        // Bobbing leve pra ele não ficar 100% rígido visualmente
-        var bob = body.AddComponent<IdleBob>();
-        bob.amplitude = 0.05f;
-        bob.speed = 2.2f;
+        // Animator simples: recebe listas de Sprite já fatiadas (Multiple mode no
+        // SpriteImportConfigurator) e cicla. Sem Unity Animator nem Sprite.Create.
+        var anim = body.AddComponent<SimpleSpriteAnimator>();
+        anim.idleSprites = LoadSpriteFrames("Assets/Sprites/gangsters/Gangsters_2/Idle.png");
+        anim.walkSprites = LoadSpriteFrames("Assets/Sprites/gangsters/Gangsters_2/Walk.png");
+        anim.jumpSprites = LoadSpriteFrames("Assets/Sprites/gangsters/Gangsters_2/Jump.png");
+        anim.rb = rb;
+
         return root;
     }
 
@@ -305,9 +316,9 @@ public static class Memory01Builder
     {
         // Jovem: 16×16 (collider 0.55×0.85). Cabe em fresta baixa com folga ~0.15u.
         return BuildPlayerInternal("PlayerYoung", pos, PlayerKind.Young,
-            bodyScale: new Vector3(0.6f, 1f, 1f),
             colliderSize: new Vector2(0.55f, 0.85f),
-            color: YoungCol,
+            spriteFolder: "Assets/Sprites/criancas/Child_3",
+            hasJump: false, // Child_3 sem Jump.png — fallback p/ Idle
             groundCheckY: -0.5f);
     }
 
@@ -315,14 +326,14 @@ public static class Memory01Builder
     {
         // Adulto: 16×32 (collider 0.55×1.9). Não cabe em fresta de 1u, empurra HeavyBox.
         return BuildPlayerInternal("PlayerAdult", pos, PlayerKind.Adult,
-            bodyScale: new Vector3(0.6f, 2f, 1f),
             colliderSize: new Vector2(0.55f, 1.9f),
-            color: AdultCol,
+            spriteFolder: "Assets/Sprites/mendigos/Homeless_1",
+            hasJump: true,
             groundCheckY: -1.05f);
     }
 
     static GameObject BuildPlayerInternal(string name, Vector3 pos, PlayerKind kind,
-        Vector3 bodyScale, Vector2 colliderSize, Color color, float groundCheckY)
+        Vector2 colliderSize, string spriteFolder, bool hasJump, float groundCheckY)
     {
         var root = new GameObject(name);
         root.tag = "Player";
@@ -330,10 +341,10 @@ public static class Memory01Builder
 
         var body = new GameObject("Body");
         body.transform.SetParent(root.transform, false);
-        body.transform.localScale = bodyScale;
+        body.transform.localPosition = new Vector3(0, -colliderSize.y * 0.5f, 0);
+        body.transform.localScale = Vector3.one;
         var sr = body.AddComponent<SpriteRenderer>();
-        sr.sprite = SolidSprite();
-        sr.color = color;
+        sr.color = Color.white;
         sr.sortingOrder = 10;
 
         var groundCheck = new GameObject("GroundCheck");
@@ -361,12 +372,42 @@ public static class Memory01Builder
         root.AddComponent<PlayerHealth>();
         var atk = root.AddComponent<PlayerAttack>();
 
-        var anim = root.AddComponent<PlayerAnimator>();
-        anim.controller = pc;
-        anim.attack = atk;
-        anim.body = sr;
+        // Animator simples — listas de Sprite já fatiadas pelo SpriteImportConfigurator.
+        var anim = body.AddComponent<SimpleSpriteAnimator>();
+        anim.idleSprites = LoadSpriteFrames($"{spriteFolder}/Idle.png");
+        anim.walkSprites = LoadSpriteFrames($"{spriteFolder}/Walk.png");
+        if (hasJump) anim.jumpSprites = LoadSpriteFrames($"{spriteFolder}/Jump.png");
+        anim.playerController = pc;
 
         return root;
+    }
+
+    // Carrega só os sub-sprites (slices) de um spritesheet em Multiple mode,
+    // ordenados pelo índice numérico no sufixo "_N". Filtra fora a Texture2D
+    // principal e qualquer sprite "whole-texture" que sobre quando o import vai
+    // de Single→Multiple.
+    static Sprite[] LoadSpriteFrames(string sheetPath)
+    {
+        var subs = AssetDatabase.LoadAllAssetRepresentationsAtPath(sheetPath);
+        string baseName = System.IO.Path.GetFileNameWithoutExtension(sheetPath);
+        string prefix = baseName + "_";
+        var list = new System.Collections.Generic.List<Sprite>();
+        foreach (var obj in subs)
+        {
+            if (obj is Sprite s && s.name.StartsWith(prefix))
+                list.Add(s);
+        }
+        list.Sort((a, b) => SpriteIndex(a.name).CompareTo(SpriteIndex(b.name)));
+        if (list.Count == 0)
+            Debug.LogWarning($"[Memory01Builder] sem sub-sprites em {sheetPath} — rode Retroself → Configure Character Sprites primeiro");
+        return list.ToArray();
+    }
+
+    static int SpriteIndex(string spriteName)
+    {
+        int u = spriteName.LastIndexOf('_');
+        if (u < 0 || u + 1 >= spriteName.Length) return 0;
+        return int.TryParse(spriteName.Substring(u + 1), out var i) ? i : 0;
     }
 
     static GameObject BuildSwap(GameObject young, GameObject adult)
@@ -457,7 +498,7 @@ public static class Memory01Builder
         canvasGO.AddComponent<GraphicRaycaster>();
 
         CreateUIText(canvasGO.transform, "TutorialHint",
-            "[A]/[D] mover   ·   [Espaço] pular   ·   [K] arremessar   ·   [Tab] trocar Woody   ·   chegue na porta",
+            "[A]/[D] mover   ·   [Espaço] pular   ·   [K] arremessar   ·   [Tab] trocar Woody   ·   leve os dois Woody até a porta",
             30, FontStyles.Bold,
             new Vector2(0, -440), new Vector2(1700, 80),
             new Color(1, 0.95f, 0.7f, 0.9f));
@@ -492,7 +533,9 @@ public static class Memory01Builder
 
     static void BuildIntroDialogue(Transform parent, GameObject swap, GameObject young, GameObject adult, GameObject bully)
     {
-        // Painel inferior tipo dialog box
+        // Painel inferior tipo dialog box. Layout em coordenadas absolutas dentro do box:
+        //   Portrait esquerda (x=40..220), texto à direita (x=260..1660), labels do topo
+        //   ancorados em top-left, continue ancorado bottom-right.
         var box = new GameObject("IntroDialogueBox");
         box.transform.SetParent(parent, false);
         var rt = box.AddComponent<RectTransform>();
@@ -503,7 +546,8 @@ public static class Memory01Builder
         rt.sizeDelta = new Vector2(1700, 280);
 
         var bg = box.AddComponent<Image>();
-        bg.color = new Color(0.05f, 0.04f, 0.03f, 0.92f);
+        // Preto sólido (sem transparência) — o usuário pediu fundo opaco.
+        bg.color = Color.black;
         bg.raycastTarget = false;
 
         // Portrait (quad colorido — placeholder do retrato do adulto)
@@ -518,21 +562,27 @@ public static class Memory01Builder
         pimg.color = AdultCol;
         pimg.raycastTarget = false;
 
-        // Nome do speaker
-        CreateUIText(box.transform, "SpeakerLabel", "Woody (adulto)", 28, FontStyles.Bold,
-            new Vector2(120, 100), new Vector2(400, 40), CreamCol, TextAlignmentOptions.Left);
+        // Speaker label — ancorada ao top-left do box (não centralizada, pra não sobrepor texto).
+        var labelGO = CreateUIText(box.transform, "SpeakerLabel", "Woody (adulto)", 28, FontStyles.Bold,
+            Vector2.zero, Vector2.zero, CreamCol, TextAlignmentOptions.Left);
+        var labelRt = labelGO.GetComponent<RectTransform>();
+        labelRt.anchorMin = labelRt.anchorMax = new Vector2(0, 1);
+        labelRt.pivot = new Vector2(0, 1);
+        labelRt.anchoredPosition = new Vector2(250, -20);
+        labelRt.sizeDelta = new Vector2(1200, 36);
 
-        // Texto principal
-        var textGO = CreateUIText(box.transform, "DialogText", "", 32, FontStyles.Normal,
-            new Vector2(140, -10), new Vector2(1280, 200),
+        // Texto principal — abaixo da label, ancorado ao top-left.
+        var textGO = CreateUIText(box.transform, "DialogText", "", 30, FontStyles.Normal,
+            Vector2.zero, Vector2.zero,
             new Color(1f, 0.96f, 0.85f, 1f), TextAlignmentOptions.TopLeft);
-        // Recoloca pra ficar à direita do retrato
         var textRt = textGO.GetComponent<RectTransform>();
-        textRt.anchorMin = textRt.anchorMax = new Vector2(0, 0.5f);
-        textRt.pivot = new Vector2(0, 0.5f);
-        textRt.anchoredPosition = new Vector2(250, 0);
-        textRt.sizeDelta = new Vector2(1400, 220);
+        textRt.anchorMin = textRt.anchorMax = new Vector2(0, 1);
+        textRt.pivot = new Vector2(0, 1);
+        textRt.anchoredPosition = new Vector2(250, -65);
+        textRt.sizeDelta = new Vector2(1400, 160);
         var tmp = textGO.GetComponent<TextMeshProUGUI>();
+        tmp.enableWordWrapping = true;
+        tmp.overflowMode = TextOverflowModes.Truncate;
 
         var typewriter = box.AddComponent<TypewriterText>();
         typewriter.target = tmp;
@@ -540,8 +590,8 @@ public static class Memory01Builder
 
         // Continue indicator (seta piscando no canto inferior direito).
         // Usa ">>" em vez de "▶" porque a LiberationSans SDF default não tem esse glyph.
-        var contGO = CreateUIText(box.transform, "Continue", ">> Espaço/Enter", 24, FontStyles.Italic,
-            new Vector2(0, 0), new Vector2(360, 32), CreamCol, TextAlignmentOptions.Right);
+        var contGO = CreateUIText(box.transform, "Continue", ">> Espaço/Enter", 22, FontStyles.Italic,
+            Vector2.zero, Vector2.zero, CreamCol, TextAlignmentOptions.Right);
         var contRt = contGO.GetComponent<RectTransform>();
         contRt.anchorMin = contRt.anchorMax = new Vector2(1, 0);
         contRt.pivot = new Vector2(1, 0);

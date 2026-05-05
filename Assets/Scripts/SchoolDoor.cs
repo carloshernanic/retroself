@@ -1,11 +1,12 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-// Trigger da porta de saída do tutorial. Quando qualquer Woody encosta, faz um
-// fade preto e carrega a cena alvo. Por padrão vai pra Memory_01_School (placeholder
-// "Fim do tutorial").
+// Trigger da porta de saída do tutorial. Só dispara o fade + load quando AMBOS
+// os Woody (jovem e adulto) estão dentro do trigger ao mesmo tempo — a fala da
+// intro deixa claro que essa fase é sobre os dois entrarem juntos na escola.
 [RequireComponent(typeof(Collider2D))]
 public class SchoolDoor : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class SchoolDoor : MonoBehaviour
     public Image fadeOverlay;
 
     private bool triggered;
+    private readonly HashSet<PlayerController> inside = new HashSet<PlayerController>();
 
     void Awake()
     {
@@ -28,6 +30,28 @@ public class SchoolDoor : MonoBehaviour
         if (triggered) return;
         var pc = other.GetComponent<PlayerController>();
         if (pc == null) return;
+        inside.Add(pc);
+        TryFire();
+    }
+
+    void OnTriggerExit2D(Collider2D other)
+    {
+        if (triggered) return;
+        var pc = other.GetComponent<PlayerController>();
+        if (pc == null) return;
+        inside.Remove(pc);
+    }
+
+    void TryFire()
+    {
+        bool hasYoung = false, hasAdult = false;
+        foreach (var pc in inside)
+        {
+            if (pc == null) continue;
+            if (pc.kind == PlayerKind.Young) hasYoung = true;
+            else if (pc.kind == PlayerKind.Adult) hasAdult = true;
+        }
+        if (!(hasYoung && hasAdult)) return;
         triggered = true;
         StartCoroutine(GoToScene());
     }

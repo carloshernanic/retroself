@@ -14,6 +14,9 @@ public class BullyController : MonoBehaviour
 
     [Header("Visual")]
     public SpriteRenderer body;
+    // tintColors fica false quando há sprite autoral — tintar com vermelho mascara
+    // o pixel art. Mantido como flag pra reativar em testes/placeholder.
+    public bool tintColors = false;
     public Color patrolColor = new Color(0.85f, 0.30f, 0.30f, 1f);
     public Color chaseColor = new Color(0.95f, 0.45f, 0.20f, 1f);
 
@@ -63,7 +66,10 @@ public class BullyController : MonoBehaviour
             if (Mathf.Abs(dx) < detectionRange && Mathf.Abs(dy) < verticalDetect)
             {
                 chasing = true;
-                dir = dx > 0f ? 1 : -1;
+                // Deadzone: sem isso, dx oscila perto de 0 quando o player está sobre
+                // o bully, e dir flipa toda FixedUpdate → flickering visual ("travando
+                // virando de lugar"). Mantém dir até o player se afastar > 0.5u.
+                if (Mathf.Abs(dx) > 0.5f) dir = dx > 0f ? 1 : -1;
             }
         }
 
@@ -77,7 +83,7 @@ public class BullyController : MonoBehaviour
         if (body != null)
         {
             body.flipX = dir < 0;
-            body.color = chasing ? chaseColor : patrolColor;
+            if (tintColors) body.color = chasing ? chaseColor : patrolColor;
         }
     }
 
