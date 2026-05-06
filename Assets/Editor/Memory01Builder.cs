@@ -15,6 +15,16 @@ public static class Memory01Builder
 {
     const string ScenePath = "Assets/Scenes/Memory_01_Patio.unity";
 
+    // Roots que o builder cria. Tudo fora dessa lista sobrevive ao rebuild —
+    // assim luzes/Volumes/decorações manuais que o usuário adicionar não somem.
+    static readonly string[] OwnedRoots = {
+        "Main Camera", "EventSystem", "Grid",
+        "Bench", "Trashcan", "Lamp",
+        "HeavyBox", "SchoolDoor", "Bully",
+        "PlayerYoung", "PlayerAdult", "PlayerSwap",
+        "Global Volume", "Canvas",
+    };
+
     static readonly Color BgSky = new Color(0.32f, 0.36f, 0.18f, 1f);   // amarelo-esverdeado escolar
     static readonly Color YoungCol = new Color(1f, 0.78f, 0.32f, 1f);    // jovem (jaqueta amarela)
     static readonly Color AdultCol = new Color(0.45f, 0.32f, 0.22f, 1f); // adulto (sobretudo marrom)
@@ -33,7 +43,11 @@ public static class Memory01Builder
         // Pra setar PPU/Point/no-compression em sprites NOVOS, rode
         // "Retroself → Configure Character Sprites" manualmente uma vez.
 
-        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        // Abre cena existente (preservando luzes/Volumes manuais) e remove só os
+        // roots gerenciados. Em first-run cria uma cena vazia.
+        var scene = SceneRebuildHelpers.OpenOrNew(ScenePath);
+        if (!SceneRebuildHelpers.ConfirmRebuild(scene, OwnedRoots)) return;
+        SceneRebuildHelpers.WipeOwnedRoots(scene, OwnedRoots);
 
         var camera = BuildCamera();
         BuildEventSystem();
@@ -45,6 +59,11 @@ public static class Memory01Builder
         // 2.2u tall com pivot center → pos.y = -3 + 1.1 = -1.9 deixa a base no chão.
         var door = BuildSchoolDoor(new Vector3(18.5f, -1.9f, 0));
         var bully = BuildBully(new Vector3(11f, -2.5f, 0));
+
+        // Porta só abre quando bully cair (ref vira null) + chave coletada + ambos os Woody dentro.
+        // A chave é dropada pelo bully quando ele morre — KeyDropper anexado em BuildBully.
+        var doorComp = door.GetComponent<SchoolDoor>();
+        if (doorComp != null && bully != null) doorComp.bullyToDefeat = bully.GetComponent<EnemyHealth>();
 
         var young = BuildYoung(new Vector3(-7f, -2f, 0));
         var adult = BuildAdult(new Vector3(-5.5f, -2f, 0));
@@ -92,47 +111,44 @@ public static class Memory01Builder
         if (!System.IO.Directory.Exists("Assets/Settings"))
             System.IO.Directory.CreateDirectory("Assets/Settings");
 
+        // Carrega o profile existente. Se ele já tem overrides, **não toca em nada** —
+        // o usuário tuna manualmente os valores no Inspector (Vignette/FilmGrain/etc.)
+        // e rebuilds não podem zerar esse trabalho. Mesma lição do SpriteImportConfigurator.
         var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(profilePath);
         if (profile == null)
         {
+            // First-run: inicializa com defaults razoáveis. Próximos rebuilds preservam tweaks.
             profile = ScriptableObject.CreateInstance<VolumeProfile>();
             AssetDatabase.CreateAsset(profile, profilePath);
+
+            var bloom = profile.Add<Bloom>(true);
+            bloom.intensity.Override(0.18f);
+            bloom.threshold.Override(1.1f);
+            bloom.scatter.Override(0.55f);
+            bloom.tint.Override(new Color(1f, 0.94f, 0.7f, 1f));
+
+            var vignette = profile.Add<Vignette>(true);
+            vignette.intensity.Override(0.35f);
+            vignette.smoothness.Override(0.45f);
+            vignette.color.Override(new Color(0.03f, 0.02f, 0.01f, 1f));
+
+            var color = profile.Add<ColorAdjustments>(true);
+            color.postExposure.Override(-0.2f);
+            color.contrast.Override(10f);
+            color.saturation.Override(-3f);
+            color.colorFilter.Override(new Color(0.97f, 0.95f, 0.85f, 1f));
+
+            EditorUtility.SetDirty(profile);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(profilePath);
         }
-        else
-        {
-            // limpa overrides antigos pra reaplicar valores frescos
-            for (int i = profile.components.Count - 1; i >= 0; i--)
-                Object.DestroyImmediate(profile.components[i], true);
-            profile.components.Clear();
-        }
 
-        var bloom = profile.Add<Bloom>(true);
-        bloom.intensity.Override(0.18f);
-        bloom.threshold.Override(1.1f);
-        bloom.scatter.Override(0.55f);
-        bloom.tint.Override(new Color(1f, 0.94f, 0.7f, 1f));
-
-        var vignette = profile.Add<Vignette>(true);
-        vignette.intensity.Override(0.35f);
-        vignette.smoothness.Override(0.45f);
-        vignette.color.Override(new Color(0.03f, 0.02f, 0.01f, 1f));
-
-        var color = profile.Add<ColorAdjustments>(true);
-        color.postExposure.Override(-0.2f);
-        color.contrast.Override(10f);
-        color.saturation.Override(-3f);
-        color.colorFilter.Override(new Color(0.97f, 0.95f, 0.85f, 1f));
-
-        EditorUtility.SetDirty(profile);
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
-
-        // recarrega como asset salvo pra garantir GUID válido na referência
-        profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(profilePath);
-
-        // 3) Adiciona um Global Volume na cena ligado ao profile (sharedProfile, não clona)
-        var volGO = new GameObject("Global Volume");
-        var vol = volGO.AddComponent<Volume>();
+        // 3) Adiciona um Global Volume na cena ligado ao profile (sharedProfile, não clona).
+        // Reutiliza um existente se houver pra evitar duplicar Volumes empilhados.
+        var existingVol = GameObject.Find("Global Volume");
+        var volGO = existingVol != null ? existingVol : new GameObject("Global Volume");
+        var vol = volGO.GetComponent<Volume>() ?? volGO.AddComponent<Volume>();
         vol.isGlobal = true;
         vol.priority = 0;
         vol.weight = 1f;
@@ -354,6 +370,9 @@ public static class Memory01Builder
         hp.maxHealth = 3;
         hp.stunTime = 0.6f;
 
+        // Quando o bully cair, dropa a chave necessária pra abrir a porta.
+        root.AddComponent<KeyDropper>();
+
         var ai = root.AddComponent<BullyController>();
         ai.body = sr;
         ai.patrolMinX = 5f;
@@ -569,8 +588,8 @@ public static class Memory01Builder
         canvasGO.AddComponent<GraphicRaycaster>();
 
         CreateUIText(canvasGO.transform, "TutorialHint",
-            "[A]/[D] mover  [Espaço] pular  [K] arremessar  [Tab] trocar Woody  -  leve os dois ate a porta",
-            16, FontStyles.Bold,
+            "[A]/[D] mover  [Espaco] pular  [K] arremessar (so o jovem)  [Tab] trocar  -  derrote o porteiro, pegue a chave e leve os dois ate a porta",
+            14, FontStyles.Bold,
             new Vector2(0, -440), new Vector2(1820, 60),
             new Color(1, 0.95f, 0.7f, 0.9f));
 

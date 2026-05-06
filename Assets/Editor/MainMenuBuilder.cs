@@ -11,11 +11,24 @@ using TMPro;
 
 public static class MainMenuBuilder
 {
+    const string ScenePath = "Assets/Scenes/MainMenu.unity";
+
+    // Roots que o builder cria — tudo fora dessa lista sobrevive ao rebuild
+    // (Light2D, Volumes extras, decorações manuais que você adicionar).
+    static readonly string[] OwnedRoots = {
+        "Main Camera", "EventSystem", "Background",
+        "LightningOverlay", "Rain",
+        "MenuController", "MenuMusicSource", "MenuCanvas",
+    };
+
     [MenuItem("Retroself/Build Main Menu Scene")]
     public static void BuildMainMenu()
     {
-        // Cria uma cena nova vazia
-        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        // Abre cena existente (preservando luzes/Volumes manuais) e remove só os
+        // roots gerenciados. Em first-run cria uma cena vazia.
+        var scene = SceneRebuildHelpers.OpenOrNew(ScenePath);
+        if (!SceneRebuildHelpers.ConfirmRebuild(scene, OwnedRoots)) return;
+        SceneRebuildHelpers.WipeOwnedRoots(scene, OwnedRoots);
 
         // ---------- Camera ----------
         var camGO = new GameObject("Main Camera");
@@ -202,12 +215,11 @@ public static class MainMenuBuilder
         so.ApplyModifiedProperties();
 
         // ---------- Salva a cena ----------
-        const string scenePath = "Assets/Scenes/MainMenu.unity";
-        EditorSceneManager.SaveScene(scene, scenePath);
-        Debug.Log($"Cena MainMenu criada em {scenePath}");
+        EditorSceneManager.SaveScene(scene, ScenePath);
+        Debug.Log($"Cena MainMenu criada em {ScenePath}");
 
         // Adiciona ao Build Settings
-        AddSceneToBuildSettings(scenePath);
+        AddSceneToBuildSettings(ScenePath);
     }
 
     static GameObject CreatePlaceholderSprite(string name, Transform parent, Vector2 pos, Vector2 size, Color color, int sortingOrder)

@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 public class IntroDialogue : MonoBehaviour
 {
     [TextArea(2, 6)]
-    public string line = "Lembro bem deste dia… foi quando eu me atrasei pra escola e o porteiro não me deixou entrar. Mas agora vai ser diferente — vou conseguir entrar, não vou ser reprovado dessa vez. Agora vai dar certo.";
+    public string line = "Lembro bem deste dia… foi quando eu me atrasei pra escola e o porteiro não me deixou entrar. Dessa vez vai ser diferente: vou enfrentar o porteiro, achar a chave perdida, e nós dois vamos entrar juntos.";
 
     [Header("Refs")]
     public GameObject dialogueBox;
