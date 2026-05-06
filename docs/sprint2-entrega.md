@@ -31,7 +31,5 @@
 
 ### Rubricas eliminadas (descartadas da avaliação)
 3. **#4 — UI/HUD/Menus**
-
-
 4. **#9 — Replayability**
 
