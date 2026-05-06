@@ -18,7 +18,7 @@
 
 ## 3. Vídeo (YouTube — não listado)
 
-**Link:** [COLAR LINK DO YOUTUBE AQUI]
+**Link:** https://youtu.be/NDNo-OE8UCY
 
 ---
 
@@ -29,7 +29,7 @@
    *Justificativa:* É o coração do Retroself. Premissa original (homem volta no tempo para cuidar do próprio eu jovem), personagens com profundidade, narrativa coesa em torno do tema de auto-compaixão. Já documentado no GDD em DDE.
 
 2. **#2 — Mechanics**
-   *Justificativa:* A combinação de **dualidade de tamanho** + **congelar o tempo** + **cooperação assimétrica entre adulto e jovem** é mecanicamente diferenciada e suporta toda a metáfora narrativa do jogo.
+
 
 ### Rubricas eliminadas (descartadas da avaliação)
 3. **#4 — UI/HUD/Menus**
