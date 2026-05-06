@@ -17,10 +17,20 @@ public static class PrologueBuilder
     static readonly float PitchAlien     = 1.45f;
     static readonly float PitchNarration = 1.0f;
 
+    const string ScenePath = "Assets/Scenes/Prologue.unity";
+
+    // Roots que o builder cria — luzes/Volumes/extras manuais sobrevivem ao rebuild.
+    static readonly string[] OwnedRoots = {
+        "Main Camera", "EventSystem", "BlipSource", "Panels",
+        "CutsceneCanvas", "CutsceneController",
+    };
+
     [MenuItem("Retroself/Build Prologue Scene")]
     public static void BuildPrologue()
     {
-        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        var scene = SceneRebuildHelpers.OpenOrNew(ScenePath);
+        if (!SceneRebuildHelpers.ConfirmRebuild(scene, OwnedRoots)) return;
+        SceneRebuildHelpers.WipeOwnedRoots(scene, OwnedRoots);
 
         // ---------- Camera ----------
         var camGO = new GameObject("Main Camera");
@@ -196,12 +206,11 @@ public static class PrologueBuilder
         };
 
         // ---------- Save scene ----------
-        const string scenePath = "Assets/Scenes/Prologue.unity";
         EditorSceneManager.MarkSceneDirty(scene);
-        EditorSceneManager.SaveScene(scene, scenePath);
-        Debug.Log($"[PrologueBuilder] Cena Prologue criada em {scenePath}");
+        EditorSceneManager.SaveScene(scene, ScenePath);
+        Debug.Log($"[PrologueBuilder] Cena Prologue criada em {ScenePath}");
 
-        AddSceneToBuildSettings(scenePath);
+        AddSceneToBuildSettings(ScenePath);
 
         // Memory_01_Patio é montado pelo Memory01Builder (menu separado).
         // Só cria placeholder se ainda não existir, pra não sobrescrever o tutorial.

@@ -24,6 +24,9 @@ public class PlayerAttack : MonoBehaviour
     {
         if (cooldownCounter > 0f) cooldownCounter -= Time.deltaTime;
 
+        // Só o jovem arremessa pedras. O adulto resolve via puzzle físico (HeavyBox).
+        if (controller != null && controller.kind != PlayerKind.Young) return;
+
         var kb = Keyboard.current;
         if (kb == null) return;
         if (kb.kKey.wasPressedThisFrame && cooldownCounter <= 0f)

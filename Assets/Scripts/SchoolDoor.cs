@@ -16,6 +16,13 @@ public class SchoolDoor : MonoBehaviour
     [Header("Overlay (opcional)")]
     public Image fadeOverlay;
 
+    [Header("Requisitos extras")]
+    // Quando setado, a porta só abre depois desse inimigo ter sido derrotado
+    // (EnemyHealth se auto-destrói em Defeat → ref vira null).
+    public EnemyHealth bullyToDefeat;
+    // Quando true, exige KeyPickup.Collected antes de abrir.
+    public bool requireKey = true;
+
     private bool triggered;
     private readonly HashSet<PlayerController> inside = new HashSet<PlayerController>();
 
@@ -42,6 +49,15 @@ public class SchoolDoor : MonoBehaviour
         inside.Remove(pc);
     }
 
+    // Re-checa todo frame enquanto os Woody estão dentro: bully pode cair ou
+    // chave pode ser pega DEPOIS dos dois entrarem no trigger, e só TryFire em
+    // OnTriggerEnter perderia esses casos.
+    void Update()
+    {
+        if (triggered) return;
+        if (inside.Count > 0) TryFire();
+    }
+
     void TryFire()
     {
         bool hasYoung = false, hasAdult = false;
@@ -52,6 +68,9 @@ public class SchoolDoor : MonoBehaviour
             else if (pc.kind == PlayerKind.Adult) hasAdult = true;
         }
         if (!(hasYoung && hasAdult)) return;
+        // Bully derrotado = ref originalmente válida e agora null (EnemyHealth.TakeDamage destrói o GameObject).
+        if (bullyToDefeat != null) return;
+        if (requireKey && !KeyPickup.Collected) return;
         triggered = true;
         StartCoroutine(GoToScene());
     }
