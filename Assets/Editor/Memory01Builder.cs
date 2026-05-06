@@ -358,7 +358,15 @@ public static class Memory01Builder
         ai.body = sr;
         ai.patrolMinX = 5f;
         ai.patrolMaxX = 13f;
-        ai.detectionRange = 6f;
+        // Em chase pode passar do poste (x=14) e ir até pouco antes da fresta (x=16).
+        // Sem isso o Bully ficava preso oscilando contra o limite da patrulha.
+        ai.chaseMinX = 5f;
+        ai.chaseMaxX = 16f;
+        ai.detectionRange = 8f;
+        // verticalDetect 2 era estreito demais — Woody pulando ou na plataforma
+        // saía da janela vertical e o Bully voltava a patrulhar. 6u cobre pulo
+        // típico (~2u) + plataforma alta (y≈3) sem o Bully perder o alvo.
+        ai.verticalDetect = 6f;
 
         // Animator simples: recebe listas de Sprite já fatiadas (Multiple mode no
         // SpriteImportConfigurator) e cicla. Sem Unity Animator nem Sprite.Create.

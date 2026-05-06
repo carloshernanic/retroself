@@ -9,6 +9,11 @@ public class BullyController : MonoBehaviour
     public float verticalDetect = 2f;
     public float patrolMinX = -5f;
     public float patrolMaxX = 5f;
+    // Chase pode ir além da patrulha (default = mesmas bounds). Se o Bully
+    // precisa passar por um obstáculo decorativo (poste) só durante perseguição,
+    // setar chaseMaxX > patrolMaxX no Builder.
+    public float chaseMinX = float.NegativeInfinity;
+    public float chaseMaxX = float.PositiveInfinity;
     public int contactDamage = 1;
     public float attackCooldown = 1f;
 
@@ -73,12 +78,26 @@ public class BullyController : MonoBehaviour
             }
         }
 
-        // Mantém o bully dentro da área de patrulha (mesmo perseguindo) pra não cair em poço
-        if (transform.position.x <= patrolMinX && dir < 0) dir = 1;
-        else if (transform.position.x >= patrolMaxX && dir > 0) dir = -1;
+        // Bounds dependem do estado: patrulhando usa patrolMin/Max; perseguindo usa
+        // chaseMin/Max (default ±inf → sem limite, vai até onde precisar pra alcançar).
+        float minX = chasing ? chaseMinX : patrolMinX;
+        float maxX = chasing ? chaseMaxX : patrolMaxX;
+        bool atMin = transform.position.x <= minX;
+        bool atMax = transform.position.x >= maxX;
+
+        // Patrulhando: flipa direção ao bater no limite (vai-e-volta).
+        // Perseguindo: NÃO flipa — chasing reasserta dir todo frame, então flipar
+        // gera oscilação visível ("travando" no obstáculo). Em vez disso, zera vx.
+        if (!chasing)
+        {
+            if (atMin && dir < 0) dir = 1;
+            else if (atMax && dir > 0) dir = -1;
+        }
 
         float speed = chasing ? chaseSpeed : patrolSpeed;
-        rb.linearVelocity = new Vector2(dir * speed, rb.linearVelocity.y);
+        float vx = dir * speed;
+        if (chasing && ((atMin && vx < 0f) || (atMax && vx > 0f))) vx = 0f;
+        rb.linearVelocity = new Vector2(vx, rb.linearVelocity.y);
 
         if (body != null)
         {

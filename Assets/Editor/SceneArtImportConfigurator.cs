@@ -48,6 +48,11 @@ public static class SceneArtImportConfigurator
 
         // Ghetto Boxes (caso a gente reuse no futuro) — PPU 32.
         new Rule { folder = "Assets/Sprites/ghetto-tileset-pixel-art/3 Objects", ppu = 32, alignment = (int)SpriteAlignment.BottomCenter, recursive = false },
+
+        // Cyberpunk vending machines (usado como "portal" no Panel_03_Cabine do Prologue).
+        // Restringido só à pasta Vending machines/ — outras subpastas de 3 Objects/ (ARMs,
+        // Boxes, etc.) ficam de fora pra não tocarmos no que não estamos usando.
+        new Rule { folder = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Vending machines", ppu = 32, alignment = (int)SpriteAlignment.BottomCenter, recursive = false },
     };
 
     [MenuItem("Retroself/Configure Scene Art Imports")]

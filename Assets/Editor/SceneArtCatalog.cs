@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System.Collections.Generic;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -33,6 +34,18 @@ public static class SceneArtCatalog
         "Assets/Sprites/free-scrolling-city-backgrounds-pixel-art/1 Backgrounds/1/Night/5.png",
     };
 
+    // ----- Woody adulto sentado (sleep loop do prologue) -----
+    // Idle_2.png já vem sliced em 11 sub-sprites (Idle_2_0..10) — postura curvada/sentada.
+    public const string WoodySittingSheet = "Assets/Sprites/mendigos/Homeless_1/Idle_2.png";
+
+    // ----- Portal cyberpunk (vending machine #5 do cyberpunk-market-street pack) -----
+    public const string PortalVendingMachine = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Vending machines/5.png";
+
+    // ----- Aliens (free-pixel-art-tiny-hero-sprites: 3 monstros, Idle 4 frames cada) -----
+    public const string AlienPinkSheet  = "Assets/Sprites/free-pixel-art-tiny-hero-sprites/1 Pink_Monster/Pink_Monster_Idle_4.png";
+    public const string AlienOwletSheet = "Assets/Sprites/free-pixel-art-tiny-hero-sprites/2 Owlet_Monster/Owlet_Monster_Idle_4.png";
+    public const string AlienDudeSheet  = "Assets/Sprites/free-pixel-art-tiny-hero-sprites/3 Dude_Monster/Dude_Monster_Idle_4.png";
+
     // ----- Tile assets gerados em Settings/Tiles -----
     public const string TileAssetGround   = "Assets/Settings/Tiles/Residential_Ground.asset";
     public const string TileAssetGrassTop = "Assets/Settings/Tiles/Residential_GrassTop.asset";
@@ -41,6 +54,32 @@ public static class SceneArtCatalog
 
     // ----- Fonte pixel (TMP SDF gerado a partir de Press Start 2P) -----
     public const string PixelFontPath = "Assets/Fonts/PressStart2P-SDF.asset";
+
+    // Carrega só os sub-sprites (slices) de um spritesheet em Multiple mode,
+    // ordenados pelo índice numérico no sufixo "_N". Filtra fora a Texture2D
+    // principal. Espelha a lógica que o Memory01Builder já usa pros personagens.
+    public static Sprite[] LoadSpriteFrames(string sheetPath, string namePrefix = null)
+    {
+        var subs = AssetDatabase.LoadAllAssetRepresentationsAtPath(sheetPath);
+        string prefix = namePrefix ?? (System.IO.Path.GetFileNameWithoutExtension(sheetPath) + "_");
+        var list = new List<Sprite>();
+        foreach (var obj in subs)
+        {
+            if (obj is Sprite s && s.name.StartsWith(prefix))
+                list.Add(s);
+        }
+        list.Sort((a, b) => SpriteIndex(a.name).CompareTo(SpriteIndex(b.name)));
+        if (list.Count == 0)
+            Debug.LogWarning($"[SceneArtCatalog] Nenhum sprite com prefixo '{prefix}' em {sheetPath} — rode Retroself → Configure Character Sprites?");
+        return list.ToArray();
+    }
+
+    static int SpriteIndex(string spriteName)
+    {
+        int u = spriteName.LastIndexOf('_');
+        if (u < 0 || u + 1 >= spriteName.Length) return 0;
+        return int.TryParse(spriteName.Substring(u + 1), out var i) ? i : 0;
+    }
 
     public static Sprite LoadSprite(string path)
     {

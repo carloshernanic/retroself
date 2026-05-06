@@ -3,40 +3,41 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-// Aplica TextureImporter settings de pixel art e fatia os spritesheets dos
-// 3 personagens (Child_3, Homeless_1, Gangsters_2) por contagem horizontal de
-// frames. Idempotente — re-rodar reescreve as mesmas configs e o mesmo slice.
+// Aplica TextureImporter settings de pixel art e fatia spritesheets por contagem
+// horizontal de frames. **Só usado pra packs novos** que ainda não foram sliced
+// manualmente — reescreve `importer.spritesheet` sempre, então rodar isso em
+// cima de um sheet já fatiado no Sprite Editor zera o slicing/pivot manual.
+//
+// Os 3 personagens (Child_3, Homeless_1, Gangsters_2) **NÃO ficam mais aqui** —
+// o usuário já sliciou eles à mão e qualquer rerodagem deste menu antes resetava
+// o trabalho. Pra adicionar um pack novo, coloca uma entry em `Sheets` e roda
+// 1× pelo menu; depois disso, **deletar a entry** pra proteger os slices.
 public static class SpriteImportConfigurator
 {
-    // Pixels-per-unit por personagem. PPU menor = sprite renderiza maior.
-    // Adulto e porteiro com PPU bem mais baixo que a criança pra estabelecer
-    // hierarquia de altura e ficar visível no mundo (a frame inteira tem muito
-    // padding em volta do char, então PPU 64 ficava todo mundo do mesmo tamanho).
-    const int PPU_Crianca = 64;   // kid pequeno
-    const int PPU_Adulto = 28;    // adulto ~2× kid
-    const int PPU_Porteiro = 32;  // porteiro intimidador
+    const int PPU_Alien = 32;     // monstros decorativos do prologue
 
-    // Pra cada PNG: (frame count, PPU).
+    // Pra cada PNG: (frame count, PPU). Lista deve ficar **vazia** quando não há
+    // pack novo pra slicar — assim o menu vira no-op seguro.
     static readonly Dictionary<string, (int frames, int ppu)> Sheets = new Dictionary<string, (int, int)>
     {
-        // Woody criança
-        { "Assets/Sprites/criancas/Child_3/Idle.png", (6, PPU_Crianca) },
-        { "Assets/Sprites/criancas/Child_3/Walk.png", (10, PPU_Crianca) },
-
-        // Woody adulto
-        { "Assets/Sprites/mendigos/Homeless_1/Idle.png", (6, PPU_Adulto) },
-        { "Assets/Sprites/mendigos/Homeless_1/Walk.png", (10, PPU_Adulto) },
-        { "Assets/Sprites/mendigos/Homeless_1/Jump.png", (1, PPU_Adulto) },
-
-        // Porteiro (= bully reframed)
-        { "Assets/Sprites/gangsters/Gangsters_2/Idle.png", (7, PPU_Porteiro) },
-        { "Assets/Sprites/gangsters/Gangsters_2/Walk.png", (10, PPU_Porteiro) },
-        { "Assets/Sprites/gangsters/Gangsters_2/Jump.png", (1, PPU_Porteiro) },
+        // Aliens decorativos do Prologue (Panel_05/06). Os 3 monstros do tiny-hero pack —
+        // só Idle por enquanto. Suffix "_4" no nome do arquivo = 4 frames horizontais.
+        // Depois de rodar 1× e os slices ficarem registrados no .meta, **remover** estas
+        // 3 linhas pra proteger eventuais ajustes manuais futuros.
+        { "Assets/Sprites/free-pixel-art-tiny-hero-sprites/1 Pink_Monster/Pink_Monster_Idle_4.png",  (4, PPU_Alien) },
+        { "Assets/Sprites/free-pixel-art-tiny-hero-sprites/2 Owlet_Monster/Owlet_Monster_Idle_4.png", (4, PPU_Alien) },
+        { "Assets/Sprites/free-pixel-art-tiny-hero-sprites/3 Dude_Monster/Dude_Monster_Idle_4.png",  (4, PPU_Alien) },
     };
 
-    [MenuItem("Retroself/Configure Character Sprites")]
+    [MenuItem("Retroself/Slice New Sprite Sheets")]
     public static void Configure()
     {
+        if (Sheets.Count == 0)
+        {
+            Debug.Log("[SpriteImportConfigurator] Nada pra slicear — dicionário Sheets está vazio (esperado quando não há pack novo).");
+            return;
+        }
+
         int ok = 0, miss = 0;
         foreach (var kv in Sheets)
         {
@@ -44,7 +45,7 @@ public static class SpriteImportConfigurator
         }
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log($"[SpriteImportConfigurator] {ok} sheets configurados, {miss} ausentes (PPUs por pasta: kid={PPU_Crianca}, adulto={PPU_Adulto}, porteiro={PPU_Porteiro}).");
+        Debug.Log($"[SpriteImportConfigurator] {ok} sheets configurados, {miss} ausentes. **Lembrete:** remova as entries em Sheets agora pra evitar resetar slicing manual em rebuilds futuros.");
     }
 
     static bool ConfigureSheet(string path, int frames, int ppu)
@@ -94,8 +95,7 @@ public static class SpriteImportConfigurator
         EditorUtility.SetDirty(importer);
         importer.SaveAndReimport();
         // Força import síncrono — sem isso, o pipeline às vezes deixa o slice em
-        // fila e LoadAllAssetsAtPath devolve ainda o sprite whole-texture (efeito
-        // "todos os frames juntos como um sprite gigante" no PlayerAdult).
+        // fila e LoadAllAssetsAtPath devolve ainda o sprite whole-texture.
         AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
         return true;
     }
