@@ -92,7 +92,7 @@ public static class PrologueBuilder
         portraitImg.color = ColAdult;
 
         // Speaker label
-        var speakerGO = CreateUIText(dialogueBox.transform, "Speaker", "", 28, FontStyles.Bold);
+        var speakerGO = CreateUIText(dialogueBox.transform, "Speaker", "", 18, FontStyles.Bold);
         var spRT = speakerGO.GetComponent<RectTransform>();
         spRT.anchorMin = new Vector2(0, 1);
         spRT.anchorMax = new Vector2(0, 1);
@@ -104,7 +104,7 @@ public static class PrologueBuilder
         speakerTMP.color = new Color(0.78f, 0.95f, 1f, 1f);
 
         // Body text
-        var bodyGO = CreateUIText(dialogueBox.transform, "Body", "", 36, FontStyles.Normal);
+        var bodyGO = CreateUIText(dialogueBox.transform, "Body", "", 18, FontStyles.Normal);
         var bodyRT = bodyGO.GetComponent<RectTransform>();
         bodyRT.anchorMin = new Vector2(0, 0);
         bodyRT.anchorMax = new Vector2(1, 1);
@@ -119,14 +119,15 @@ public static class PrologueBuilder
         typewriter.charsPerSecond = 32f;
         typewriter.blipSource = blipSource;
 
-        // Continue indicator (▼)
-        var contGO = CreateUIText(dialogueBox.transform, "Continue", "▼", 36, FontStyles.Bold);
+        // Continue indicator ([Enter] ▼)
+        var contGO = CreateUIText(dialogueBox.transform, "Continue", "[Enter] >>", 16, FontStyles.Bold);
         var contRT = contGO.GetComponent<RectTransform>();
         contRT.anchorMin = new Vector2(1, 0);
         contRT.anchorMax = new Vector2(1, 0);
         contRT.pivot = new Vector2(1, 0);
         contRT.anchoredPosition = new Vector2(-30, 20);
-        contRT.sizeDelta = new Vector2(60, 60);
+        contRT.sizeDelta = new Vector2(220, 50);
+        contGO.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Right;
         contGO.GetComponent<TextMeshProUGUI>().color = new Color(0.78f, 0.95f, 1f, 0.9f);
         contGO.AddComponent<BlinkUI>();
 
@@ -140,15 +141,15 @@ public static class PrologueBuilder
         faderGOObj.defaultDuration = 0.6f;
 
         // Skip hint (top-right) — fica acima do fader pra continuar visível durante transições
-        var hintGO = CreateUIText(canvasGO.transform, "SkipHint", "[Esc] pular", 22, FontStyles.Italic);
+        var hintGO = CreateUIText(canvasGO.transform, "SkipHint", "[Enter] avancar  [Esc] pular", 14, FontStyles.Italic);
         var hintRT = hintGO.GetComponent<RectTransform>();
         hintRT.anchorMin = new Vector2(1, 1);
         hintRT.anchorMax = new Vector2(1, 1);
         hintRT.pivot = new Vector2(1, 1);
         hintRT.anchoredPosition = new Vector2(-30, -30);
-        hintRT.sizeDelta = new Vector2(220, 40);
+        hintRT.sizeDelta = new Vector2(420, 40);
         hintGO.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Right;
-        hintGO.GetComponent<TextMeshProUGUI>().color = new Color(1, 1, 1, 0.45f);
+        hintGO.GetComponent<TextMeshProUGUI>().color = new Color(1, 1, 1, 0.55f);
 
         // ---------- CutsceneController ----------
         var ctrlGO = new GameObject("CutsceneController");
@@ -202,8 +203,10 @@ public static class PrologueBuilder
 
         AddSceneToBuildSettings(scenePath);
 
-        // ---------- Memory_01_Patio placeholder ----------
-        BuildMemory01Placeholder();
+        // Memory_01_Patio é montado pelo Memory01Builder (menu separado).
+        // Só cria placeholder se ainda não existir, pra não sobrescrever o tutorial.
+        if (!System.IO.File.Exists("Assets/Scenes/Memory_01_Patio.unity"))
+            BuildMemory01Placeholder();
     }
 
     [MenuItem("Retroself/Build Memory_01_Patio Placeholder")]
@@ -234,13 +237,13 @@ public static class PrologueBuilder
         scaler.matchWidthOrHeight = 0.5f;
         canvasGO.AddComponent<GraphicRaycaster>();
 
-        var titleGO = CreateUIText(canvasGO.transform, "Title", "MEMORY 01 — O PÁTIO", 96, FontStyles.Bold);
+        var titleGO = CreateUIText(canvasGO.transform, "Title", "MEMORY 01 - O PATIO", 36, FontStyles.Bold);
         var trt = titleGO.GetComponent<RectTransform>();
         trt.anchoredPosition = new Vector2(0, 80);
         trt.sizeDelta = new Vector2(1600, 160);
         titleGO.GetComponent<TextMeshProUGUI>().color = new Color(1f, 0.92f, 0.55f, 1f);
 
-        var subGO = CreateUIText(canvasGO.transform, "Subtitle", "(em construção — tutorial de movimento na próxima sprint)", 36, FontStyles.Italic);
+        var subGO = CreateUIText(canvasGO.transform, "Subtitle", "(em construcao - tutorial de movimento na proxima sprint)", 16, FontStyles.Italic);
         var srt = subGO.GetComponent<RectTransform>();
         srt.anchoredPosition = new Vector2(0, -60);
         srt.sizeDelta = new Vector2(1500, 80);
@@ -260,9 +263,8 @@ public static class PrologueBuilder
         var root = new GameObject(name).transform;
         root.SetParent(parent, false);
 
-        CreateSprite("Sky", root, new Vector2(0, 0), new Vector2(20, 12), new Color(0.04f, 0.05f, 0.10f), -10);
-        CreateSprite("BuildingsBack", root, new Vector2(0, 1.5f), new Vector2(20, 5), new Color(0.07f, 0.08f, 0.15f), -8);
-        CreateSprite("Tree", root, new Vector2(-5, -1), new Vector2(2.5f, 5f), new Color(0.08f, 0.13f, 0.09f), -6);
+        // BG real: 5 layers do CityNight pack. Sortings -100..-96 atrás de tudo.
+        BuildCityNightBackdrop(root, yOffset: 0f);
 
         if (showCabinGlow)
         {
@@ -274,22 +276,38 @@ public static class PrologueBuilder
             pulse.pulseSpeed = 1.6f;
         }
 
-        CreateSprite("Bench", root, new Vector2(2, -2.5f), new Vector2(3f, 0.7f), new Color(0.30f, 0.20f, 0.13f), -4);
-        CreateSprite("BenchLeg1", root, new Vector2(0.8f, -3.1f), new Vector2(0.2f, 0.9f), new Color(0.22f, 0.15f, 0.10f), -4);
-        CreateSprite("BenchLeg2", root, new Vector2(3.2f, -3.1f), new Vector2(0.2f, 0.9f), new Color(0.22f, 0.15f, 0.10f), -4);
-        CreateSprite("StreetLamp", root, new Vector2(5, 0), new Vector2(0.25f, 4f), new Color(0.30f, 0.25f, 0.18f), -5);
-        CreateSprite("LampGlow", root, new Vector2(5, 1.8f), new Vector2(1.5f, 1.5f), new Color(0.95f, 0.78f, 0.42f, 0.45f), -3);
+        // Banco e poste reais (PPU 32, pivot BottomCenter — sentam no chão).
+        CreateRealSprite("Bench", root, SceneArtCatalog.PropBench, new Vector2(2, -3f), -4);
+        CreateRealSprite("StreetLamp", root, SceneArtCatalog.PropLamp, new Vector2(5, -3f), -5);
+        // Glow do poste fica como quad colorido — sem asset condizente.
+        CreateSprite("LampGlow", root, new Vector2(5, 1.0f), new Vector2(1.5f, 1.5f), new Color(0.95f, 0.78f, 0.42f, 0.45f), -3);
 
+        // Woody adulto sentado/deitado no banco — sprite real do Homeless_1 Idle_2 (11 frames).
+        // Loop lento (idleFps 6) dá vibe de respiração no sleep. Decorativo, sem collider.
+        // sortingOrder 6 = à frente do banco (-4) e do poste (-5).
         if (sleeping)
         {
-            CreateSprite("Woody_Sleeping", root, new Vector2(2, -2f), new Vector2(2f, 0.5f), new Color(0.45f, 0.32f, 0.22f), -3);
+            var woody = CreateAnimatedSprite(
+                "Woody_Sleeping", root, SceneArtCatalog.WoodySittingSheet, "Idle_2_",
+                new Vector3(2.0f, -2.4f, 0f), scale: 3.0f, sortingOrder: 6, idleFps: 5f);
+            // Deita inclinando 90° — simula encolhido no banco.
+            woody.transform.localRotation = Quaternion.Euler(0, 0, 75f);
+            var br = woody.AddComponent<BreathingScale>();
+            br.amplitude = 0.04f; br.speed = 1.4f; br.xWeight = -0.3f;
         }
         else
         {
-            CreateSprite("Woody_Sitting", root, new Vector2(2, -1.6f), new Vector2(0.6f, 1.4f), new Color(0.45f, 0.32f, 0.22f), -3);
+            var woody = CreateAnimatedSprite(
+                "Woody_Sitting", root, SceneArtCatalog.WoodySittingSheet, "Idle_2_",
+                new Vector3(2.0f, -2.0f, 0f), scale: 3.0f, sortingOrder: 6, idleFps: 6f);
+            // Aparição 2: olhando pro lado oposto (flipX) — pose sentado de perfil.
+            woody.GetComponent<SpriteRenderer>().flipX = true;
+            var br = woody.AddComponent<BreathingScale>();
+            br.amplitude = 0.025f; br.speed = 2f; br.xWeight = -0.4f;
         }
 
         AddRain(root.gameObject, intensity: 200);
+        AddLightning(root.gameObject);
         return root.gameObject;
     }
 
@@ -301,19 +319,31 @@ public static class PrologueBuilder
         CreateSprite("Sky", root, new Vector2(0, 0), new Vector2(20, 12), new Color(0.04f, 0.05f, 0.10f), -10);
         CreateSprite("Tree", root, new Vector2(-3, -1), new Vector2(3f, 5.5f), new Color(0.07f, 0.11f, 0.08f), -7);
 
-        var cabin = CreateSprite("Cabin", root, new Vector2(0, -0.5f), new Vector2(2.6f, 4.4f), new Color(0.18f, 0.10f, 0.28f), -5);
-        var glow = CreateSprite("CabinGlow", cabin.transform, Vector2.zero, new Vector2(1.6f, 1.6f), new Color(0.70f, 0.42f, 1f, 0.85f), -4);
-        glow.transform.localPosition = new Vector3(0, 0, 0);
-        var pulse = cabin.AddComponent<CabinPulse>();
+        // Vending machine cyberpunk = "portal" do prologue. Sprite real (PPU 32, BottomCenter).
+        // Glow roxo atrás continua dando a aura — CabinPulse se mantém no glow agora.
+        var cabin = CreateRealSprite("Cabin", root, SceneArtCatalog.PortalVendingMachine, new Vector2(0, -3f), -5);
+        var glow = CreateSprite("CabinGlow", cabin.transform, new Vector2(0, 1.5f), new Vector2(2.4f, 3.2f), new Color(0.70f, 0.42f, 1f, 0.85f), -6);
+        var pulse = glow.AddComponent<CabinPulse>();
         pulse.cabinGlow = glow.GetComponent<SpriteRenderer>();
-        pulse.minAlpha = 0.55f;
-        pulse.maxAlpha = 1f;
+        pulse.minAlpha = 0.45f;
+        pulse.maxAlpha = 0.95f;
         pulse.pulseSpeed = 1.8f;
+        // Woody adulto à direita olhando pra cabine — sprite real animado.
+        var woodyCabine = CreateAnimatedSprite(
+            "Woody", root, SceneArtCatalog.WoodySittingSheet, "Idle_2_",
+            new Vector3(3.5f, -3f, 0f), scale: 3.0f, sortingOrder: -2, idleFps: 6f);
+        // Aparição 3: virado de lado (flipX) — encarando a vending machine à esquerda.
+        woodyCabine.GetComponent<SpriteRenderer>().flipX = true;
+        var brWC = woodyCabine.AddComponent<BreathingScale>();
+        brWC.amplitude = 0.025f; brWC.speed = 2.2f; brWC.xWeight = -0.4f;
 
-        CreateSprite("CabinDoor", cabin.transform, new Vector2(0, -0.25f), new Vector2(0.4f, 0.5f), new Color(0.92f, 0.78f, 1f, 0.7f), -3);
-        CreateSprite("Woody", root, new Vector2(3.5f, -2f), new Vector2(0.6f, 1.5f), new Color(0.45f, 0.32f, 0.22f), -2);
+        // Cabine treme suavemente — sensação de "porta vibrando"
+        var cabinBob = cabin.AddComponent<IdleBob>();
+        cabinBob.amplitude = 0.04f;
+        cabinBob.speed = 3.5f;
 
         AddRain(root.gameObject, intensity: 220);
+        AddLightning(root.gameObject);
         return root.gameObject;
     }
 
@@ -334,13 +364,32 @@ public static class PrologueBuilder
         CreateSprite("FloorBand", root, new Vector2(0, -3.5f), new Vector2(20, 3), new Color(0.05f, 0.03f, 0.12f), -8);
         CreateSprite("Window", root, new Vector2(-6, 1), new Vector2(3, 2), new Color(0.18f, 0.20f, 0.30f), -7);
 
-        // Trio de aliens (RGB-ish: vermelho, azul, amarelo conforme GDD)
-        CreateSprite("Alien_Red", root, new Vector2(-2, 0), new Vector2(0.8f, 0.8f), new Color(0.95f, 0.40f, 0.45f), -3);
-        CreateSprite("Alien_Blue", root, new Vector2(0, 0.4f), new Vector2(0.8f, 0.8f), new Color(0.45f, 0.70f, 1f), -3);
-        CreateSprite("Alien_Yellow", root, new Vector2(2, 0), new Vector2(0.8f, 0.8f), new Color(0.98f, 0.90f, 0.45f), -3);
+        // Trio de aliens (sprites reais do tiny-hero pack) — Pink/Owlet/Dude com Idle de 4 frames,
+        // bobbing com fases offset pra cada um respirar fora de fase. Decorativo: sem collider.
+        var alienP = CreateAnimatedSprite(
+            "Alien_Pink", root, SceneArtCatalog.AlienPinkSheet, "Pink_Monster_Idle_4_",
+            new Vector3(-2, -0.2f, 0), scale: 1f, sortingOrder: 3, idleFps: 6f);
+        var bobP = alienP.AddComponent<IdleBob>();
+        bobP.amplitude = 0.18f; bobP.speed = 2.3f; bobP.phase = 0f;
 
-        // Adulto à direita
-        CreateSprite("Woody", root, new Vector2(5, -1.2f), new Vector2(0.7f, 1.7f), new Color(0.45f, 0.32f, 0.22f), -2);
+        var alienO = CreateAnimatedSprite(
+            "Alien_Owlet", root, SceneArtCatalog.AlienOwletSheet, "Owlet_Monster_Idle_4_",
+            new Vector3(0, 0.2f, 0), scale: 1f, sortingOrder: 3, idleFps: 6f);
+        var bobO = alienO.AddComponent<IdleBob>();
+        bobO.amplitude = 0.18f; bobO.speed = 2.3f; bobO.phase = Mathf.PI * 0.66f;
+
+        var alienD = CreateAnimatedSprite(
+            "Alien_Dude", root, SceneArtCatalog.AlienDudeSheet, "Dude_Monster_Idle_4_",
+            new Vector3(2, -0.2f, 0), scale: 1f, sortingOrder: 3, idleFps: 6f);
+        var bobD = alienD.AddComponent<IdleBob>();
+        bobD.amplitude = 0.18f; bobD.speed = 2.3f; bobD.phase = Mathf.PI * 1.33f;
+
+        // Adulto à direita — sprite real animado.
+        var woodyAliens = CreateAnimatedSprite(
+            "Woody", root, SceneArtCatalog.WoodySittingSheet, "Idle_2_",
+            new Vector3(5, -2f, 0), scale: 3.0f, sortingOrder: -2, idleFps: 6f);
+        // Aparição 4: virado de lado (flipX) — encarando os aliens à esquerda.
+        woodyAliens.GetComponent<SpriteRenderer>().flipX = true;
 
         return root.gameObject;
     }
@@ -356,7 +405,10 @@ public static class PrologueBuilder
         CreateSprite("WatchFace", root, new Vector2(0, 0), new Vector2(2.6f, 2.6f), new Color(0.95f, 0.92f, 0.78f), -3);
         CreateSprite("WatchHand1", root, new Vector2(0, 0.4f), new Vector2(0.1f, 1.1f), new Color(0.10f, 0.10f, 0.12f), -2);
         CreateSprite("WatchHand2", root, new Vector2(0.5f, 0), new Vector2(0.9f, 0.1f), new Color(0.10f, 0.10f, 0.12f), -2);
-        CreateSprite("Hand_Adult", root, new Vector2(-2.5f, -2.2f), new Vector2(2f, 1.2f), new Color(0.45f, 0.32f, 0.22f), -1);
+        // Woody (corpo inteiro) ao lado do relógio — sprite real animado.
+        CreateAnimatedSprite(
+            "Hand_Adult", root, SceneArtCatalog.WoodySittingSheet, "Idle_2_",
+            new Vector3(-3f, -2.4f, 0), scale: 3.0f, sortingOrder: -1, idleFps: 6f);
 
         return root.gameObject;
     }
@@ -398,6 +450,76 @@ public static class PrologueBuilder
         return go;
     }
 
+    // Cria sprite com asset real do projeto (sem stretch — usa scale 1, PPU define escala).
+    static GameObject CreateRealSprite(string name, Transform parent, string spritePath, Vector2 pos, int sortingOrder)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = new Vector3(pos.x, pos.y, 0);
+        go.transform.localScale = Vector3.one;
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = SceneArtCatalog.LoadSprite(spritePath);
+        sr.color = Color.white;
+        sr.sortingOrder = sortingOrder;
+        return go;
+    }
+
+    // Cria GameObject decorativo com sprite real animado (SimpleSpriteAnimator só Idle).
+    // Sem collider/Rigidbody — animator não tenta AlignFeet (early return). Frames vêm
+    // do spritesheet via LoadSpriteFrames; se vazio, faz fallback magenta visível pra debug.
+    static GameObject CreateAnimatedSprite(string name, Transform parent, string sheetPath, string framePrefix,
+                                            Vector3 pos, float scale, int sortingOrder, float idleFps = 6f)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = pos;
+        go.transform.localScale = Vector3.one * scale;
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sortingOrder = sortingOrder;
+        var frames = SceneArtCatalog.LoadSpriteFrames(sheetPath, framePrefix);
+        if (frames != null && frames.Length > 0)
+        {
+            sr.sprite = frames[0];
+            sr.color = Color.white;
+            var anim = go.AddComponent<SimpleSpriteAnimator>();
+            anim.idleSprites = frames;
+            anim.idleFps = idleFps;
+        }
+        else
+        {
+            sr.sprite = UnitSprite();
+            sr.color = Color.magenta;
+            go.transform.localScale = Vector3.one;
+        }
+        return go;
+    }
+
+    // 5 layers do CityNight pack (PPU 50 → 11.52×6.48u por layer cobre ortho 10u
+    // alto). Sortings -100..-96. Layers 0..2 ganham sway leve via ParallaxLayer.
+    static void BuildCityNightBackdrop(Transform parent, float yOffset)
+    {
+        var bgRoot = new GameObject("BG_CityNight");
+        bgRoot.transform.SetParent(parent, false);
+        bgRoot.transform.localPosition = new Vector3(0, yOffset, 0);
+        for (int i = 0; i < SceneArtCatalog.CityNightLayers.Length; i++)
+        {
+            var go = new GameObject($"Layer_{i}");
+            go.transform.SetParent(bgRoot.transform, false);
+            go.transform.localPosition = new Vector3(0, 0, i * 0.01f);
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = SceneArtCatalog.LoadSprite(SceneArtCatalog.CityNightLayers[i]);
+            sr.color = Color.white;
+            sr.sortingOrder = -100 + i;
+            if (i <= 2)
+            {
+                var px = go.AddComponent<ParallaxLayer>();
+                px.swayAmplitude = 0.06f - i * 0.015f;
+                px.swaySpeed = 0.18f + i * 0.05f;
+                px.phase = i * 0.7f;
+            }
+        }
+    }
+
     static Sprite _unitSprite;
     static Sprite UnitSprite()
     {
@@ -410,6 +532,28 @@ public static class PrologueBuilder
         _unitSprite = Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
         _unitSprite.name = "UnitSquare";
         return _unitSprite;
+    }
+
+    static void AddLightning(GameObject parent)
+    {
+        // Overlay branco em screen-space pra dar a sensação de relâmpago.
+        var go = new GameObject("LightningOverlay");
+        go.transform.SetParent(parent.transform, false);
+        go.transform.localPosition = new Vector3(0, 0, -0.5f);
+        go.transform.localScale = new Vector3(40, 24, 1);
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = UnitSprite();
+        sr.color = new Color(1f, 1f, 1f, 0f);
+        sr.sortingOrder = 8;
+
+        var lf = go.AddComponent<LightningFlash>();
+        lf.targetSprite = sr;
+        lf.minInterval = 7f;
+        lf.maxInterval = 14f;
+        lf.flashDuration = 0.07f;
+        lf.fadeDuration = 0.45f;
+        lf.peakAlpha = 0.55f;
     }
 
     static void AddRain(GameObject parent, int intensity)
@@ -440,6 +584,8 @@ public static class PrologueBuilder
         var go = new GameObject(name, typeof(RectTransform));
         go.transform.SetParent(parent, false);
         var tmp = go.AddComponent<TextMeshProUGUI>();
+        var pixelFont = SceneArtCatalog.GetPixelFont();
+        if (pixelFont != null) tmp.font = pixelFont;
         tmp.text = text;
         tmp.fontSize = fontSize;
         tmp.fontStyle = style;

@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Events;
@@ -27,20 +28,57 @@ public static class MainMenuBuilder
         camGO.transform.position = new Vector3(0, 0, -10);
         camGO.AddComponent<AudioListener>();
 
-        // ---------- EventSystem ----------
+        // ---------- EventSystem (New Input System) ----------
         var esGO = new GameObject("EventSystem");
         esGO.AddComponent<EventSystem>();
-        esGO.AddComponent<StandaloneInputModule>();
+        esGO.AddComponent<InputSystemUIInputModule>();
 
-        // ---------- Background placeholders ----------
+        // ---------- Background ----------
         var bgRoot = new GameObject("Background");
-        CreatePlaceholderSprite("Sky", bgRoot.transform, new Vector2(0, 0), new Vector2(20, 12), new Color(0.05f, 0.06f, 0.12f), -10);
-        CreatePlaceholderSprite("BuildingsBack", bgRoot.transform, new Vector2(0, 1), new Vector2(20, 6), new Color(0.08f, 0.10f, 0.18f), -8);
-        CreatePlaceholderSprite("Tree", bgRoot.transform, new Vector2(-4, -1), new Vector2(2.5f, 5f), new Color(0.10f, 0.15f, 0.10f), -6);
+
+        // 5 layers do CityNight pack (PPU 50, 11.52×6.48u cada). Sortings -100..-96.
+        // Layers 0..2 (mais distantes) ganham sway leve; 3..4 ficam estáticos.
+        for (int i = 0; i < SceneArtCatalog.CityNightLayers.Length; i++)
+        {
+            var layerGO = new GameObject($"BG_Layer_{i}");
+            layerGO.transform.SetParent(bgRoot.transform, false);
+            layerGO.transform.localPosition = new Vector3(0, 0f, i * 0.01f);
+            var sr = layerGO.AddComponent<SpriteRenderer>();
+            sr.sprite = SceneArtCatalog.LoadSprite(SceneArtCatalog.CityNightLayers[i]);
+            sr.color = Color.white;
+            sr.sortingOrder = -100 + i;
+            if (i <= 2)
+            {
+                var px = layerGO.AddComponent<ParallaxLayer>();
+                px.swayAmplitude = 0.18f - i * 0.05f;
+                px.swaySpeed = 0.18f + i * 0.12f;
+                px.phase = i * 0.7f;
+            }
+        }
+
+        // Cabine roxa: metáfora narrativa, sem asset condizente — fica como placeholder.
         var cabin = CreatePlaceholderSprite("Cabin", bgRoot.transform, new Vector2(-3, -1.5f), new Vector2(1.5f, 2.5f), new Color(0.20f, 0.10f, 0.30f), -5);
         var glow = CreatePlaceholderSprite("CabinGlow", cabin.transform, Vector2.zero, new Vector2(2.2f, 3.2f), new Color(0.61f, 0.36f, 0.90f, 0.7f), -4);
-        CreatePlaceholderSprite("Bench", bgRoot.transform, new Vector2(2, -2.5f), new Vector2(2.5f, 0.7f), new Color(0.25f, 0.18f, 0.12f), -5);
-        CreatePlaceholderSprite("StreetLamp", bgRoot.transform, new Vector2(4, 0), new Vector2(0.3f, 4f), new Color(0.35f, 0.30f, 0.20f), -5);
+
+        // Banco e poste reais (PPU 32, pivot BottomCenter).
+        CreateRealSprite("Bench", bgRoot.transform, SceneArtCatalog.PropBench, new Vector2(2, -3f), -5);
+        CreateRealSprite("StreetLamp", bgRoot.transform, SceneArtCatalog.PropLamp, new Vector2(4, -3f), -5);
+
+        // Overlay de relâmpago (passa por cima do BG mas sob o canvas)
+        var lightningGO = new GameObject("LightningOverlay");
+        lightningGO.transform.position = new Vector3(0, 0, -1f);
+        lightningGO.transform.localScale = new Vector3(40, 24, 1);
+        var lsr = lightningGO.AddComponent<SpriteRenderer>();
+        lsr.sprite = CreateUnitSquareSprite();
+        lsr.color = new Color(1f, 1f, 1f, 0f);
+        lsr.sortingOrder = 9;
+        var lf = lightningGO.AddComponent<LightningFlash>();
+        lf.targetSprite = lsr;
+        lf.minInterval = 6f;
+        lf.maxInterval = 12f;
+        lf.flashDuration = 0.07f;
+        lf.fadeDuration = 0.4f;
+        lf.peakAlpha = 0.5f;
 
         // CabinPulse no Cabin
         var pulse = cabin.AddComponent<CabinPulse>();
@@ -93,22 +131,28 @@ public static class MainMenuBuilder
         canvasGO.AddComponent<GraphicRaycaster>();
 
         // ---------- Title ----------
-        var titleGO = CreateUIText(canvasGO.transform, "Title", "RETROSELF", 140, FontStyles.Bold);
+        var titleGO = CreateUIText(canvasGO.transform, "Title", "RETROSELF", 80, FontStyles.Bold);
         var titleRT = titleGO.GetComponent<RectTransform>();
         titleRT.anchoredPosition = new Vector2(0, 250);
-        titleRT.sizeDelta = new Vector2(1400, 200);
+        titleRT.sizeDelta = new Vector2(1600, 160);
         var titleTMP = titleGO.GetComponent<TextMeshProUGUI>();
         titleTMP.color = new Color(0.49f, 0.97f, 1f, 1f);
         titleTMP.alignment = TextAlignmentOptions.Center;
-        titleTMP.characterSpacing = 8f;
+        titleTMP.characterSpacing = 4f;
         var glitch = titleGO.AddComponent<TitleGlitch>();
         glitch.titleText = titleTMP;
         glitch.minInterval = 3f;
         glitch.maxInterval = 6f;
         glitch.glitchDuration = 0.12f;
 
+        // Pulse suave no título (1±2%) — sente que o título "respira"
+        var titleBreath = titleGO.AddComponent<BreathingScale>();
+        titleBreath.amplitude = 0.02f;
+        titleBreath.speed = 1.6f;
+        titleBreath.xWeight = 1f;
+
         // ---------- Subtitle ----------
-        var subGO = CreateUIText(canvasGO.transform, "Subtitle", "\"E se você pudesse voltar e ajudar a si mesmo a não desistir?\"", 32, FontStyles.Italic);
+        var subGO = CreateUIText(canvasGO.transform, "Subtitle", "\"E se voce pudesse voltar e ajudar a si mesmo a nao desistir?\"", 16, FontStyles.Italic);
         var subRT = subGO.GetComponent<RectTransform>();
         subRT.anchoredPosition = new Vector2(0, 130);
         subRT.sizeDelta = new Vector2(1500, 60);
@@ -138,8 +182,8 @@ public static class MainMenuBuilder
 
         // Credits text
         var creditsText = CreateUIText(creditsPanelGO.transform, "CreditsText",
-            "<b>RETROSELF</b>\n\n<size=32>Direção & Game Design</size>\nAlex Chequer\nCarlos Hernani\nLucas Ikawa\n\n<size=32>Música & Som</size>\n[a definir]\n\n<size=32>Pixel Art</size>\n[a definir]\n\n<size=32>Inspirado em</size>\nBraid · Celeste · Brothers · Inside\nUndertale · About Time\n\n<size=24>Insper · 2026</size>",
-            40, FontStyles.Normal);
+            "<b>RETROSELF</b>\n\n<size=16>Direcao & Game Design</size>\nAlex Chequer\nCarlos Hernani\nLucas Ikawa\n\n<size=16>Musica & Som</size>\n[a definir]\n\n<size=16>Pixel Art</size>\nCraftpix.net (licenciado)\n\n<size=16>Fonte</size>\nPress Start 2P (OFL)\n\n<size=16>Inspirado em</size>\nBraid - Celeste - Brothers - Inside\nUndertale - About Time\n\n<size=12>Insper - 2026</size>",
+            18, FontStyles.Normal);
         var crRT = creditsText.GetComponent<RectTransform>();
         crRT.anchoredPosition = new Vector2(0, 50);
         crRT.sizeDelta = new Vector2(1200, 800);
@@ -180,6 +224,19 @@ public static class MainMenuBuilder
         return go;
     }
 
+    static GameObject CreateRealSprite(string name, Transform parent, string spritePath, Vector2 pos, int sortingOrder)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.position = new Vector3(pos.x, pos.y, 0);
+        go.transform.localScale = Vector3.one;
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = SceneArtCatalog.LoadSprite(spritePath);
+        sr.color = Color.white;
+        sr.sortingOrder = sortingOrder;
+        return go;
+    }
+
     static Sprite _unitSprite;
     static Sprite CreateUnitSquareSprite()
     {
@@ -198,6 +255,8 @@ public static class MainMenuBuilder
         var go = new GameObject(name, typeof(RectTransform));
         go.transform.SetParent(parent, false);
         var tmp = go.AddComponent<TextMeshProUGUI>();
+        var pixelFont = SceneArtCatalog.GetPixelFont();
+        if (pixelFont != null) tmp.font = pixelFont;
         tmp.text = text;
         tmp.fontSize = fontSize;
         tmp.fontStyle = style;
@@ -232,8 +291,10 @@ public static class MainMenuBuilder
         textRT.offsetMin = Vector2.zero;
         textRT.offsetMax = Vector2.zero;
         var tmp = textGO.AddComponent<TextMeshProUGUI>();
+        var pixelFont = SceneArtCatalog.GetPixelFont();
+        if (pixelFont != null) tmp.font = pixelFont;
         tmp.text = label;
-        tmp.fontSize = 40;
+        tmp.fontSize = 22;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = Color.white;
 
