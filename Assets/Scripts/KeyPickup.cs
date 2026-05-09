@@ -11,6 +11,11 @@ public class KeyPickup : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     static void ResetState() { Collected = false; }
 
+    // Reset cross-cena: SubsystemRegistration roda só no boot do app, então sair
+    // de Memory_02 com chave coletada e voltar pra Memory_01 deixaria a porta da
+    // escola "pré-aberta". SceneStartReset chama isto no Awake da cena.
+    public static void Reset() { Collected = false; }
+
     void Awake()
     {
         var col = GetComponent<Collider2D>();

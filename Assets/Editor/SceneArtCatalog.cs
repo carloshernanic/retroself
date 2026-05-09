@@ -52,6 +52,34 @@ public static class SceneArtCatalog
     public const string TileAssetWall     = "Assets/Settings/Tiles/Residential_Wall.asset";
     public const string TileAssetPlatform = "Assets/Settings/Tiles/Residential_Platform.asset";
 
+    // ----- Tilemap (basement-tileset) — usado em Memory_02_Domingo (interior casa) -----
+    // Tile_*.png são 32×32 px, PPU 32 → 1 cell = 1u no Grid (mesma escala que residential).
+    // Indices escolhidos como ponto de partida (basement tem 70 tiles); ajustar visualmente.
+    public const string BasementTileGround   = "Assets/Sprites/basement-tileset-pixel-art/1 Tiles/Tile_01.png";
+    public const string BasementTileWall     = "Assets/Sprites/basement-tileset-pixel-art/1 Tiles/Tile_05.png";
+    public const string BasementTilePlatform = "Assets/Sprites/basement-tileset-pixel-art/1 Tiles/Tile_09.png";
+
+    // ----- Props basement (3 Objects/{1 Pipe, 2 Box, 3 Decoration}) -----
+    public const string BasementBox      = "Assets/Sprites/basement-tileset-pixel-art/3 Objects/2 Box/1.png";
+    public const string BasementPipe     = "Assets/Sprites/basement-tileset-pixel-art/3 Objects/1 Pipe/1.png";
+    public const string BasementDecor1   = "Assets/Sprites/basement-tileset-pixel-art/3 Objects/3 Decoration/1.png";
+    public const string BasementDecor4   = "Assets/Sprites/basement-tileset-pixel-art/3 Objects/3 Decoration/4.png";
+
+    // ----- BG basement (interior fechado, sem parallax) -----
+    public const string BasementBG       = "Assets/Sprites/basement-tileset-pixel-art/2 Background/Overlay_illumination.png";
+
+    // ----- Doors and portals (doors-and-portals-pixel-art-asset-pack) -----
+    // Sheet 1.png = porta de madeira, 6 frames horizontais 32×64 px (animação fechada→aberta).
+    // Sheet 2.png = portal de pedra/azul, 6 frames 64×64 (idle com brilho/estrelas).
+    // PPU 32 → door 1u×2u, portal 2u×2u. Pivot BottomCenter (sentam no chão).
+    public const string DoorWoodenSheet  = "Assets/Sprites/doors-and-portals-pixel-art-asset-pack/1 Doors/1.png";
+    public const string PortalStoneSheet = "Assets/Sprites/doors-and-portals-pixel-art-asset-pack/2 Portals/2.png";
+
+    // ----- Tile assets gerados pro basement -----
+    public const string TileAssetBasementGround   = "Assets/Settings/Tiles/Basement_Ground.asset";
+    public const string TileAssetBasementWall     = "Assets/Settings/Tiles/Basement_Wall.asset";
+    public const string TileAssetBasementPlatform = "Assets/Settings/Tiles/Basement_Platform.asset";
+
     // ----- Fonte pixel (TMP SDF gerado a partir de Press Start 2P) -----
     public const string PixelFontPath = "Assets/Fonts/PressStart2P-SDF.asset";
 

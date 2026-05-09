@@ -15,6 +15,7 @@ using UnityEngine;
 public static class SpriteImportConfigurator
 {
     const int PPU_Alien = 32;     // monstros decorativos do prologue
+    const int PPU_DoorPortal = 32; // doors-and-portals pack (32×64 / 64×64 frames)
 
     // Pra cada PNG: (frame count, PPU). Lista deve ficar **vazia** quando não há
     // pack novo pra slicar — assim o menu vira no-op seguro.
@@ -27,6 +28,11 @@ public static class SpriteImportConfigurator
         { "Assets/Sprites/free-pixel-art-tiny-hero-sprites/1 Pink_Monster/Pink_Monster_Idle_4.png",  (4, PPU_Alien) },
         { "Assets/Sprites/free-pixel-art-tiny-hero-sprites/2 Owlet_Monster/Owlet_Monster_Idle_4.png", (4, PPU_Alien) },
         { "Assets/Sprites/free-pixel-art-tiny-hero-sprites/3 Dude_Monster/Dude_Monster_Idle_4.png",  (4, PPU_Alien) },
+
+        // Doors and portals pack — porta de madeira 6 frames 32×64, portal de pedra 6 frames 64×64.
+        // Pivot BottomCenter (default do ConfigureSheet) → sentam no chão. Após 1ª rodada, remover.
+        { "Assets/Sprites/doors-and-portals-pixel-art-asset-pack/1 Doors/1.png",   (6, PPU_DoorPortal) },
+        { "Assets/Sprites/doors-and-portals-pixel-art-asset-pack/2 Portals/2.png", (6, PPU_DoorPortal) },
     };
 
     [MenuItem("Retroself/Slice New Sprite Sheets")]

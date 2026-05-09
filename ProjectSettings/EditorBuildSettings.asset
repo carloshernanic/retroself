@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Memory_01_School.unity
     guid: cd56550a9673f5241b0401b6c9cd9bb6
+  - enabled: 1
+    path: Assets/Scenes/Memory_02_Domingo.unity
+    guid: ecdcb0a6b85e4684fb7968af3f567f32
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

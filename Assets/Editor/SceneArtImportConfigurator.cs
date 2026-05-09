@@ -53,6 +53,15 @@ public static class SceneArtImportConfigurator
         // Restringido só à pasta Vending machines/ — outras subpastas de 3 Objects/ (ARMs,
         // Boxes, etc.) ficam de fora pra não tocarmos no que não estamos usando.
         new Rule { folder = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Vending machines", ppu = 32, alignment = (int)SpriteAlignment.BottomCenter, recursive = false },
+
+        // Basement tileset (Memory_02_Domingo, interior casa). Tiles 32×32 → PPU 32.
+        new Rule { folder = "Assets/Sprites/basement-tileset-pixel-art/1 Tiles", ppu = 32, alignment = (int)SpriteAlignment.Center, recursive = false },
+
+        // Basement props (1 Pipe, 2 Box, 3 Decoration, 4 Illumination). Pivot BottomCenter.
+        new Rule { folder = "Assets/Sprites/basement-tileset-pixel-art/3 Objects", ppu = 32, alignment = (int)SpriteAlignment.BottomCenter, recursive = true },
+
+        // Basement BG (interior). PPU 100 pra peças soltas — usado como overlay decorativo.
+        new Rule { folder = "Assets/Sprites/basement-tileset-pixel-art/2 Background", ppu = 100, alignment = (int)SpriteAlignment.Center, recursive = true },
     };
 
     [MenuItem("Retroself/Configure Scene Art Imports")]

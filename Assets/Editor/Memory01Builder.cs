@@ -22,7 +22,7 @@ public static class Memory01Builder
         "Bench", "Trashcan", "Lamp",
         "HeavyBox", "SchoolDoor", "Bully",
         "PlayerYoung", "PlayerAdult", "PlayerSwap",
-        "Global Volume", "Canvas",
+        "Global Volume", "Canvas", "SceneStartReset",
     };
 
     static readonly Color BgSky = new Color(0.32f, 0.36f, 0.18f, 1f);   // amarelo-esverdeado escolar
@@ -63,7 +63,12 @@ public static class Memory01Builder
         // Porta só abre quando bully cair (ref vira null) + chave coletada + ambos os Woody dentro.
         // A chave é dropada pelo bully quando ele morre — KeyDropper anexado em BuildBully.
         var doorComp = door.GetComponent<SchoolDoor>();
-        if (doorComp != null && bully != null) doorComp.bullyToDefeat = bully.GetComponent<EnemyHealth>();
+        if (doorComp != null)
+        {
+            if (bully != null) doorComp.bullyToDefeat = bully.GetComponent<EnemyHealth>();
+            // Tutorial 1 → Memory_02_Domingo (placeholder Memory_01_School fica como fallback do default).
+            doorComp.targetScene = SceneNames.Memory_02_Domingo;
+        }
 
         var young = BuildYoung(new Vector3(-7f, -2f, 0));
         var adult = BuildAdult(new Vector3(-5.5f, -2f, 0));
@@ -71,6 +76,12 @@ public static class Memory01Builder
 
         AttachCameraFollow(camera, young);
         BuildPostProcessing(camera);
+
+        // SceneStartReset: zera KeyPickup.Collected ao Awake da cena. Necessário
+        // pra evitar que coletar chave em Memory_02 deixe SchoolDoor pré-aberta aqui.
+        var resetGO = new GameObject("SceneStartReset");
+        resetGO.AddComponent<SceneStartReset>();
+
         BuildHUD(young, swap, young, adult, bully, door);
 
         EditorSceneManager.MarkSceneDirty(scene);
@@ -533,40 +544,30 @@ public static class Memory01Builder
         var root = new GameObject("SchoolDoor");
         root.transform.position = pos;
 
-        // Moldura externa (mais clara) — visual de parede ao redor da porta
-        var frame = new GameObject("Frame");
-        frame.transform.SetParent(root.transform, false);
-        frame.transform.localScale = new Vector3(1.1f, 2.2f, 1f);
-        var fsr = frame.AddComponent<SpriteRenderer>();
-        fsr.sprite = SolidSprite();
-        fsr.color = DoorFrameCol;
-        fsr.sortingOrder = 6;
-
-        // Folha da porta (mais escura)
-        var leaf = new GameObject("Leaf");
-        leaf.transform.SetParent(root.transform, false);
-        leaf.transform.localScale = new Vector3(0.85f, 1.95f, 1f);
-        var lsr = leaf.AddComponent<SpriteRenderer>();
-        lsr.sprite = SolidSprite();
-        lsr.color = DoorCol;
-        lsr.sortingOrder = 7;
-
-        // Maçaneta (creme)
-        var knob = new GameObject("Knob");
-        knob.transform.SetParent(root.transform, false);
-        knob.transform.localPosition = new Vector3(0.25f, 0f, 0f);
-        knob.transform.localScale = new Vector3(0.12f, 0.12f, 1f);
-        var ksr = knob.AddComponent<SpriteRenderer>();
-        ksr.sprite = SolidSprite();
-        ksr.color = CreamCol;
-        ksr.sortingOrder = 8;
+        // Visual: sprite real do doors-and-portals pack (6 frames de abertura).
+        // Pivot BottomCenter (PPU 32, 32×64 px → 1u×2u). Bottom alinha com chão (y=-3).
+        var visual = new GameObject("DoorVisual");
+        visual.transform.SetParent(root.transform, false);
+        // Door root está em y=-1.9; chão (top) em y=-3 → offset -1.1 alinha bottom no chão.
+        visual.transform.localPosition = new Vector3(0f, -1.1f, 0f);
+        var sr = visual.AddComponent<SpriteRenderer>();
+        sr.sortingOrder = 6;
+        var doorFrames = SceneArtCatalog.LoadSpriteFrames(SceneArtCatalog.DoorWoodenSheet, "1_");
+        var anim = visual.AddComponent<SpriteFrameAnimator>();
+        anim.frames = doorFrames;
+        anim.fps = 8f;
+        anim.loop = false;
+        anim.autoPlay = false;
+        if (doorFrames != null && doorFrames.Length > 0) sr.sprite = doorFrames[0];
+        else { sr.sprite = SolidSprite(); sr.color = DoorCol; }
 
         // Trigger que dispara o SchoolDoor
         var col = root.AddComponent<BoxCollider2D>();
         col.size = new Vector2(1.0f, 2.0f);
         col.isTrigger = true;
 
-        root.AddComponent<SchoolDoor>();
+        var doorComp = root.AddComponent<SchoolDoor>();
+        doorComp.openAnimator = anim;
 
         // Bobbing leve pra a porta "respirar" e chamar atenção
         var bob = root.AddComponent<IdleBob>();

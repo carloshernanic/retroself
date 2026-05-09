@@ -23,7 +23,14 @@ public class SchoolDoor : MonoBehaviour
     // Quando true, exige KeyPickup.Collected antes de abrir.
     public bool requireKey = true;
 
+    [Header("Visual")]
+    // Animator one-shot da folha da porta. Quando todas as condições de destrancar
+    // ficam true (bully morto + chave coletada), tocamos a animação de abertura
+    // antes de o jogador entrar — feedback visual de "porta destrancada".
+    public SpriteFrameAnimator openAnimator;
+
     private bool triggered;
+    private bool openAnimPlayed;
     private readonly HashSet<PlayerController> inside = new HashSet<PlayerController>();
 
     void Awake()
@@ -55,7 +62,19 @@ public class SchoolDoor : MonoBehaviour
     void Update()
     {
         if (triggered) return;
+        if (!openAnimPlayed && IsUnlocked())
+        {
+            openAnimPlayed = true;
+            if (openAnimator != null) openAnimator.Play();
+        }
         if (inside.Count > 0) TryFire();
+    }
+
+    bool IsUnlocked()
+    {
+        if (bullyToDefeat != null) return false;
+        if (requireKey && !KeyPickup.Collected) return false;
+        return true;
     }
 
     void TryFire()

@@ -23,6 +23,13 @@ public class HeavyBox : MonoBehaviour
         ApplyConstraints();
     }
 
+    // Antes Start() ignorava colisão Young×Box (Young atravessava a caixa). Mas isso
+    // quebra dois usos: (1) tutorial — Adult empurra caixa pra dentro do HazardPit pra
+    // fazer ponte; Young precisa pisar em cima pra atravessar a pit; (2) Memory_02 P2 —
+    // Young usa caixa como degrau pra atirar pedra alta. A constraint FreezePositionX
+    // (em ApplyConstraints) já impede Young de empurrar a caixa horizontalmente sem
+    // precisar de IgnoreCollision — Young bate na lateral, caixa fica parada.
+
     void OnCollisionEnter2D(Collision2D other)
     {
         if (IsAdult(other)) { adultContacts++; ApplyConstraints(); }
