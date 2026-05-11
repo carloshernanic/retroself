@@ -288,8 +288,8 @@ public static class Memory02Builder
 
         var plate = BuildPlate(parent, "P1_Plate_Box", new Vector3(6f, -2.8f, 0), PressurePlate.Requirement.HeavyBox);
         // Gate non-latched: caixa precisa ficar na placa enquanto ambos atravessam.
-        var gate = BuildGate(parent, "P1_Gate", new Vector3(8f, -1.5f, 0),
-            size: new Vector2(0.7f, 3f), openOffset: new Vector2(0f, 5.5f), latched: false);
+        var gate = BuildGate(parent, "P1_Gate", new Vector3(8f, 0.5f, 0),
+            size: new Vector2(0.7f, 7.0f), openOffset: new Vector2(0f, 8.0f), latched: false);
         gate.GetComponent<GatedDoor>().sources.Add(plate);
 
         // Pista 1 do cofre: "1: VERDE" — pintada na parede em verde, próxima da plank pra
@@ -317,8 +317,8 @@ public static class Memory02Builder
             new Vector2(1.0f, 1.0f), latched: true);
 
         // Gate único, source = stoneSwitch latched. Latched gate só abre uma vez.
-        var gate = BuildGate(parent, "P2_Gate", new Vector3(20f, -1.5f, 0),
-            size: new Vector2(0.7f, 3f), openOffset: new Vector2(0f, 5.5f), latched: true);
+        var gate = BuildGate(parent, "P2_Gate", new Vector3(20f, 0.5f, 0),
+            size: new Vector2(0.7f, 7.0f), openOffset: new Vector2(0f, 8.0f), latched: true);
         gate.GetComponent<GatedDoor>().sources.Add(stoneSwitch);
 
         // Pista 2: "2: VERMELHO" — perto da caixa, na parede.
@@ -345,8 +345,8 @@ public static class Memory02Builder
         var plateHold = BuildPlate(parent, "P3_Plate_Adult_Hold",
             new Vector3(24.5f, -2.8f, 0), PressurePlate.Requirement.Adult);
 
-        var gateC = BuildGate(parent, "P3_Gate_C", new Vector3(26f, -1.5f, 0),
-            size: new Vector2(0.7f, 3f), openOffset: new Vector2(0f, 5.5f), latched: true);
+        var gateC = BuildGate(parent, "P3_Gate_C", new Vector3(26f, 0.5f, 0),
+            size: new Vector2(0.7f, 7.0f), openOffset: new Vector2(0f, 8.0f), latched: true);
         gateC.GetComponent<GatedDoor>().sources.Add(plateHold);
 
         // Câmara do Young (x=27..32). Plank esconde o switch da visão da entrada.
@@ -358,8 +358,8 @@ public static class Memory02Builder
             new Vector2(1.2f, 1.2f), latched: true);
 
         // Gate final latched + non-Adult-Hold dependent — uma vez switch acertado, fica aberto pra sempre.
-        var gateFinal = BuildGate(parent, "P3_Gate_Final", new Vector3(32f, -1.5f, 0),
-            size: new Vector2(0.7f, 3f), openOffset: new Vector2(0f, 5.5f), latched: true);
+        var gateFinal = BuildGate(parent, "P3_Gate_Final", new Vector3(32f, 0.5f, 0),
+            size: new Vector2(0.7f, 7.0f), openOffset: new Vector2(0f, 8.0f), latched: true);
         gateFinal.GetComponent<GatedDoor>().sources.Add(stoneSwitch);
 
         // Pista 3: "3: AZUL" — dentro da câmara, atrás da plank, pra Young descobrir
@@ -408,10 +408,35 @@ public static class Memory02Builder
         seqLock.expectedOrder.Add(0); // 2º: RED
         seqLock.expectedOrder.Add(2); // 3º: BLUE
 
+        // Texto indicativo acima dos switches: "COLOCAR A SENHA".
+        BuildPasswordHint(lockRoot.transform);
+
         // Gate final do cofre — latched, source única é o SequenceLock (também GateSource).
-        var gate = BuildGate(lockRoot.transform, "P4_Gate_Lock", new Vector3(42f, -1.5f, 0),
-            size: new Vector2(0.7f, 3f), openOffset: new Vector2(0f, 5.5f), latched: true);
+        var gate = BuildGate(lockRoot.transform, "P4_Gate_Lock", new Vector3(42f, 0.5f, 0),
+            size: new Vector2(0.7f, 7.0f), openOffset: new Vector2(0f, 8.0f), latched: true);
         gate.GetComponent<GatedDoor>().sources.Add(seqLock);
+    }
+
+    static void BuildPasswordHint(Transform parent)
+    {
+        // Indicação maior acima da área dos switches (centro em x=37): "COLOCAR A SENHA".
+        var go = new GameObject("P4_PasswordHint");
+        go.transform.SetParent(parent, false);
+        go.transform.position = new Vector3(37f, 0.5f, 0);
+
+        var tmp = go.AddComponent<TextMeshPro>();
+        tmp.text = "COLOCAR A SENHA";
+        tmp.color = CreamCol;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.enableAutoSizing = false;
+        tmp.fontSize = 2.0f;
+        tmp.rectTransform.sizeDelta = new Vector2(6f, 1f);
+        var font = SceneArtCatalog.GetPixelFont();
+        if (font != null) tmp.font = font;
+
+        var mr = go.GetComponent<MeshRenderer>();
+        if (mr != null) mr.sortingOrder = 9;
     }
 
     // ===========================================================================
@@ -434,8 +459,8 @@ public static class Memory02Builder
         // LeftLockedDoor em x=-5 — começa fechada (latched=true, sources vazia).
         // ReturnPad chama ForceOpen() na primeira pisada → fica aberta pra sempre.
         // Mesma altura/scale que os outros gates da fase pra continuidade visual.
-        var doorGO = BuildGate(p5.transform, "P5_LeftLockedDoor", new Vector3(-5f, -1.5f, 0),
-            size: new Vector2(0.7f, 3f), openOffset: new Vector2(0f, 5.5f), latched: true);
+        var doorGO = BuildGate(p5.transform, "P5_LeftLockedDoor", new Vector3(-5f, 0.5f, 0),
+            size: new Vector2(0.7f, 7.0f), openOffset: new Vector2(0f, 8.0f), latched: true);
         var leftDoor = doorGO.GetComponent<GatedDoor>();
         // Sem sources — só ForceOpen() destranca.
 
@@ -665,17 +690,30 @@ public static class Memory02Builder
         var go = new GameObject(name);
         go.transform.SetParent(parent, false);
         go.transform.position = worldPos;
-        go.transform.localScale = new Vector3(size.x, size.y, 1f);
+        // Root sem scale; filho visual carrega o tamanho via stretch calculado.
+        go.transform.localScale = Vector3.one;
 
-        var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = SolidSprite();
-        sr.color = GateCol;
-        sr.sortingOrder = 7;
+        // Visual granular: empilha tiles do basement-tileset verticalmente pra dar
+        // aparência de parede texturizada (vs solid color). Fallback: quad sólido.
+        var wallSprite = SceneArtCatalog.LoadSprite(SceneArtCatalog.BasementTileWall);
+        if (wallSprite != null && wallSprite.bounds.size.x > 0 && wallSprite.bounds.size.y > 0)
+        {
+            BuildVerticalTiledVisual(go.transform, "GateVisual", wallSprite, size.x, size.y, 7);
+        }
+        else
+        {
+            var visual = new GameObject("GateVisual");
+            visual.transform.SetParent(go.transform, false);
+            visual.transform.localScale = new Vector3(size.x, size.y, 1f);
+            var sr = visual.AddComponent<SpriteRenderer>();
+            sr.sprite = SolidSprite();
+            sr.color = GateCol;
+            sr.sortingOrder = 7;
+        }
 
-        // Collider precisa estar no scale 1 do filho ou aceitar o scale do parent.
-        // Como BoxCollider2D.size é em local-space e o parent tem scale = size, usamos size = 1.
+        // Collider em world units no root (sem scale herdado).
         var col = go.AddComponent<BoxCollider2D>();
-        col.size = Vector2.one;
+        col.size = new Vector2(size.x, size.y);
 
         var rb = go.AddComponent<Rigidbody2D>();
         rb.bodyType = RigidbodyType2D.Kinematic;
@@ -691,6 +729,60 @@ public static class Memory02Builder
         return go;
     }
 
+    // Cria um filho visual com sprite stretched pra preencher (totalW, totalH) world units,
+    // centrado no parent. Usa sprite.bounds.size pra calcular scale (PPU-agnostic) e compensa
+    // pivot do sprite via localPosition. Necessário porque os sprites do basement-tileset têm
+    // PPU 100 + pivot bottom-left → stretch direto via transform.localScale fica minúsculo
+    // e desalinhado.
+    static GameObject CreateStretchedSpriteChild(Transform parent, string name, Sprite sprite,
+        float totalW, float totalH, int sortingOrder)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = sprite;
+        sr.sortingOrder = sortingOrder;
+
+        var native = sprite.bounds.size;
+        go.transform.localScale = new Vector3(totalW / native.x, totalH / native.y, 1f);
+
+        // pivotNorm = pivot/rect; localPosition = (pivotNorm - 0.5) * size compensa o pivot
+        // pra que o center do sprite caia em (0,0) do parent (validado por geometria).
+        var pivotNorm = new Vector2(
+            sprite.pivot.x / sprite.rect.width,
+            sprite.pivot.y / sprite.rect.height);
+        go.transform.localPosition = new Vector3(
+            (pivotNorm.x - 0.5f) * totalW,
+            (pivotNorm.y - 0.5f) * totalH, 0f);
+        return go;
+    }
+
+    // Empilha múltiplas instâncias do tileSprite verticalmente preenchendo (totalW, totalH),
+    // mantendo aspect ratio nativo do tile. Cada tile vira um filho com nome Tile_i. Granular
+    // look pra portas (vs single stretched sprite que ficaria com pixels esticados).
+    static void BuildVerticalTiledVisual(Transform parent, string namePrefix, Sprite tileSprite,
+        float totalW, float totalH, int sortingOrder)
+    {
+        var native = tileSprite.bounds.size;
+        // Cada tile tem largura totalW e altura proporcional ao aspect nativo do sprite.
+        float baseTileH = totalW * (native.y / native.x);
+        if (baseTileH < 0.3f) baseTileH = 0.5f;
+        int nTiles = Mathf.Max(1, Mathf.RoundToInt(totalH / baseTileH));
+        float tileH = totalH / nTiles;
+
+        for (int i = 0; i < nTiles; i++)
+        {
+            var tile = CreateStretchedSpriteChild(parent, $"{namePrefix}_{i}", tileSprite,
+                totalW, tileH, sortingOrder);
+            // Reposiciona pra empilhar do bottom ao top em y=[-totalH/2, +totalH/2].
+            float tileCenterY = -totalH * 0.5f + tileH * (i + 0.5f);
+            var pos = tile.transform.localPosition;
+            pos.y += tileCenterY;
+            tile.transform.localPosition = pos;
+        }
+    }
+
     static GameObject BuildHeavyBox(Vector3 pos)
     {
         // pos.y é o top do chão (-3). Caixa 1.6×1.4u sentada nesse top.
@@ -698,18 +790,31 @@ public static class Memory02Builder
         var go = new GameObject("HeavyBox");
         const float w = 1.6f, h = 1.4f;
         go.transform.position = new Vector3(pos.x, pos.y + h * 0.5f, 0);
-        go.transform.localScale = new Vector3(w, h, 1f);
+        // Root sem scale; filho visual carrega o stretch calculado via bounds.
+        go.transform.localScale = Vector3.one;
 
-        // SolidSprite (Center pivot, 4×4 quad) → visual = collider exatamente.
-        // Não usar BasementBox PNG: pivot BottomCenter + tamanho nativo pequeno
-        // criavam gap entre topo visível e topo do collider — player flutuava.
-        var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = SolidSprite();
-        sr.color = BoxCol;
-        sr.sortingOrder = 8;
+        // Visual: sprite real do BasementBox esticado pra preencher 1.6×1.4u via
+        // CreateStretchedSpriteChild (compensa PPU 100 + pivot bottom-left do asset).
+        // Fallback: quad sólido se o sprite não carregar.
+        var boxSprite = SceneArtCatalog.LoadSprite(SceneArtCatalog.BasementBox);
+        if (boxSprite != null && boxSprite.bounds.size.x > 0 && boxSprite.bounds.size.y > 0)
+        {
+            CreateStretchedSpriteChild(go.transform, "BoxVisual", boxSprite, w, h, 8);
+        }
+        else
+        {
+            var visual = new GameObject("BoxVisual");
+            visual.transform.SetParent(go.transform, false);
+            visual.transform.localScale = new Vector3(w, h, 1f);
+            var sr = visual.AddComponent<SpriteRenderer>();
+            sr.sprite = SolidSprite();
+            sr.color = BoxCol;
+            sr.sortingOrder = 8;
+        }
 
+        // Collider em world units no root (sem scale herdado).
         var col = go.AddComponent<BoxCollider2D>();
-        col.size = Vector2.one;        // local 1×1, scaled = w×h
+        col.size = new Vector2(w, h);
         col.offset = Vector2.zero;
         col.sharedMaterial = new PhysicsMaterial2D("HeavyBoxNoFriction") { friction = 0f, bounciness = 0f };
 
