@@ -412,8 +412,8 @@ MonoBehaviour:
   m_text: '[A]/[D] mover  [Espaco] pular  [K] arremessar (so o jovem)  [Tab] trocar 
     -  derrote o porteiro, pegue a chave e leve os dois ate a porta'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 92d4eae6f72ea6d458470ba52c88e3d4, type: 2}
-  m_sharedMaterial: {fileID: -7728181198600994170, guid: 92d4eae6f72ea6d458470ba52c88e3d4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 09706ca841181cd45b782088c6faac39, type: 2}
+  m_sharedMaterial: {fileID: -7277885932467677624, guid: 09706ca841181cd45b782088c6faac39, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -437,8 +437,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 35.84
+  m_fontSizeBase: 35.84
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -4210,8 +4210,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: '>> Espaco/Enter'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 92d4eae6f72ea6d458470ba52c88e3d4, type: 2}
-  m_sharedMaterial: {fileID: -7728181198600994170, guid: 92d4eae6f72ea6d458470ba52c88e3d4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 09706ca841181cd45b782088c6faac39, type: 2}
+  m_sharedMaterial: {fileID: -7277885932467677624, guid: 09706ca841181cd45b782088c6faac39, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4235,8 +4235,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 35.84
+  m_fontSizeBase: 35.84
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -4455,7 +4455,7 @@ MonoBehaviour:
   m_text: MEMORY 01 - O PATIO
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 92d4eae6f72ea6d458470ba52c88e3d4, type: 2}
-  m_sharedMaterial: {fileID: -7728181198600994170, guid: 92d4eae6f72ea6d458470ba52c88e3d4, type: 2}
+  m_sharedMaterial: {fileID: 97380202986278876, guid: 92d4eae6f72ea6d458470ba52c88e3d4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4981,8 +4981,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 92d4eae6f72ea6d458470ba52c88e3d4, type: 2}
-  m_sharedMaterial: {fileID: -7728181198600994170, guid: 92d4eae6f72ea6d458470ba52c88e3d4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 09706ca841181cd45b782088c6faac39, type: 2}
+  m_sharedMaterial: {fileID: -7277885932467677624, guid: 09706ca841181cd45b782088c6faac39, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -5006,8 +5006,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 46.08
+  m_fontSizeBase: 46.08
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -5175,8 +5175,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Woody (adulto)
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 92d4eae6f72ea6d458470ba52c88e3d4, type: 2}
-  m_sharedMaterial: {fileID: -7728181198600994170, guid: 92d4eae6f72ea6d458470ba52c88e3d4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 09706ca841181cd45b782088c6faac39, type: 2}
+  m_sharedMaterial: {fileID: -7277885932467677624, guid: 09706ca841181cd45b782088c6faac39, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -5200,8 +5200,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 46.08
+  m_fontSizeBase: 46.08
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -5324,8 +5324,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: VIDA
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 92d4eae6f72ea6d458470ba52c88e3d4, type: 2}
-  m_sharedMaterial: {fileID: -7728181198600994170, guid: 92d4eae6f72ea6d458470ba52c88e3d4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 09706ca841181cd45b782088c6faac39, type: 2}
+  m_sharedMaterial: {fileID: -7277885932467677624, guid: 09706ca841181cd45b782088c6faac39, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -5349,8 +5349,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14
-  m_fontSizeBase: 14
+  m_fontSize: 35.84
+  m_fontSizeBase: 35.84
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

@@ -4,16 +4,20 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.TextCore.LowLevel;
 
-// Gera um TMP_FontAsset SDF a partir de Press Start 2P TTF. Inclui o ASCII básico
-// + acentuações pt-BR (áéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ) — o suficiente pra todos os
-// diálogos das 3 cenas existentes.
+// Gera os TMP_FontAssets SDF do projeto:
+// - Press Start 2P → usado SÓ no logo "RETROSELF" (estética 8-bit forte).
+// - VT323         → fonte default de UI/diálogos (mais legível em corpo pequeno).
+// Ambos cobrem ASCII + acentuações pt-BR (áéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ etc).
 //
 // Uso: rodar 'Retroself → Build Pixel Font Asset' uma vez. Re-rodar reescreve
-// o asset existente.
+// os assets existentes.
 public static class PixelFontBuilder
 {
-    const string TtfPath = "Assets/Fonts/PressStart2P-Regular.ttf";
-    const string OutPath = "Assets/Fonts/PressStart2P-SDF.asset";
+    const string TitleTtfPath = "Assets/Fonts/PressStart2P-Regular.ttf";
+    const string TitleOutPath = "Assets/Fonts/PressStart2P-SDF.asset";
+
+    const string BodyTtfPath = "Assets/TextMesh Pro/Fonts/VT323/VT323-Regular.ttf";
+    const string BodyOutPath = "Assets/Fonts/VT323-SDF.asset";
 
     // Caracteres do glyph table. Press Start 2P tem suporte limitado a acentos —
     // se algum não renderizar, o TMP cai no missing-glyph (□). Aceitável.
@@ -30,17 +34,23 @@ public static class PixelFontBuilder
     [MenuItem("Retroself/Build Pixel Font Asset")]
     public static void Build()
     {
-        var ttf = AssetDatabase.LoadAssetAtPath<Font>(TtfPath);
+        BuildOne(TitleTtfPath, TitleOutPath, "PressStart2P-SDF");
+        BuildOne(BodyTtfPath, BodyOutPath, "VT323-SDF");
+    }
+
+    static void BuildOne(string ttfPath, string outPath, string assetName)
+    {
+        var ttf = AssetDatabase.LoadAssetAtPath<Font>(ttfPath);
         if (ttf == null)
         {
-            Debug.LogError($"[PixelFontBuilder] Não achei o TTF em {TtfPath}. Coloque PressStart2P-Regular.ttf lá e rode de novo.");
+            Debug.LogError($"[PixelFontBuilder] Não achei o TTF em {ttfPath}.");
             return;
         }
 
-        // Atlas 512×512 SDF padding 5 — suficiente pro charset acima em pixel font 8px.
+        // Atlas 512×512 SDF padding 5 — suficiente pros charsets pixel-font.
         const int atlasSize = 512;
         const int padding = 5;
-        const int samplingPointSize = 64; // SDF sample size; o tamanho real do texto é set por TMP fontSize.
+        const int samplingPointSize = 64;
 
         var fontAsset = TMP_FontAsset.CreateFontAsset(
             ttf,
@@ -52,27 +62,21 @@ public static class PixelFontBuilder
 
         if (fontAsset == null)
         {
-            Debug.LogError("[PixelFontBuilder] CreateFontAsset retornou null.");
+            Debug.LogError($"[PixelFontBuilder] CreateFontAsset retornou null pra {ttfPath}.");
             return;
         }
 
-        fontAsset.name = "PressStart2P-SDF";
+        fontAsset.name = assetName;
 
-        // Pré-popula o atlas com os caracteres do Charset (Dynamic mode aceita
-        // glifos novos em runtime, mas pré-popular evita pop-in no primeiro typewriter).
-        // Overload de TryAddCharacters que aceita string + out string missingChars.
         fontAsset.TryAddCharacters(Charset, out string missing);
         if (!string.IsNullOrEmpty(missing))
-            Debug.LogWarning($"[PixelFontBuilder] Press Start 2P não suporta: '{missing}' — vão renderizar como □.");
+            Debug.LogWarning($"[PixelFontBuilder] {assetName} não suporta: '{missing}' — vão renderizar como □.");
 
-        // Salva como asset no projeto.
-        var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(OutPath);
-        if (existing != null) AssetDatabase.DeleteAsset(OutPath);
+        var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(outPath);
+        if (existing != null) AssetDatabase.DeleteAsset(outPath);
 
-        AssetDatabase.CreateAsset(fontAsset, OutPath);
+        AssetDatabase.CreateAsset(fontAsset, outPath);
 
-        // Sub-assets do atlas (Texture2D + Material) precisam ser embutidos no .asset
-        // pra persistir. CreateFontAsset gera essas refs internas.
         if (fontAsset.atlasTextures != null)
         {
             foreach (var tex in fontAsset.atlasTextures)
@@ -83,8 +87,8 @@ public static class PixelFontBuilder
 
         EditorUtility.SetDirty(fontAsset);
         AssetDatabase.SaveAssets();
-        AssetDatabase.ImportAsset(OutPath);
-        Debug.Log($"[PixelFontBuilder] {OutPath} criado com {fontAsset.characterTable.Count} caracteres.");
+        AssetDatabase.ImportAsset(outPath);
+        Debug.Log($"[PixelFontBuilder] {outPath} criado com {fontAsset.characterTable.Count} caracteres.");
     }
 }
 #endif

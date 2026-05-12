@@ -80,8 +80,11 @@ public static class SceneArtCatalog
     public const string TileAssetBasementWall     = "Assets/Settings/Tiles/Basement_Wall.asset";
     public const string TileAssetBasementPlatform = "Assets/Settings/Tiles/Basement_Platform.asset";
 
-    // ----- Fonte pixel (TMP SDF gerado a partir de Press Start 2P) -----
-    public const string PixelFontPath = "Assets/Fonts/PressStart2P-SDF.asset";
+    // ----- Fontes pixel (TMP SDF) -----
+    // Body = VT323 (default UI/diálogos — mais legível em corpo pequeno).
+    // Title = Press Start 2P (usado SÓ no logo "RETROSELF" — estética 8-bit).
+    public const string PixelFontPath = "Assets/Fonts/VT323-SDF.asset";
+    public const string TitleFontPath = "Assets/Fonts/PressStart2P-SDF.asset";
 
     // Carrega só os sub-sprites (slices) de um spritesheet em Multiple mode,
     // ordenados pelo índice numérico no sufixo "_N". Filtra fora a Texture2D
@@ -116,18 +119,32 @@ public static class SceneArtCatalog
         return s;
     }
 
-    static TMP_FontAsset _cachedFont;
-    static bool _fontLookupAttempted;
+    static TMP_FontAsset _cachedBodyFont;
+    static bool _bodyFontLookupAttempted;
     public static TMP_FontAsset GetPixelFont()
     {
-        if (_cachedFont != null) return _cachedFont;
-        if (_fontLookupAttempted) return null;
-        _fontLookupAttempted = true;
+        if (_cachedBodyFont != null) return _cachedBodyFont;
+        if (_bodyFontLookupAttempted) return null;
+        _bodyFontLookupAttempted = true;
 
-        _cachedFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(PixelFontPath);
-        if (_cachedFont == null)
-            Debug.LogWarning($"[SceneArtCatalog] Pixel font não encontrada em {PixelFontPath} — rode Retroself → Build Pixel Font Asset (precisa Assets/Fonts/PressStart2P-Regular.ttf primeiro). Texto vai ficar com fonte default.");
-        return _cachedFont;
+        _cachedBodyFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(PixelFontPath);
+        if (_cachedBodyFont == null)
+            Debug.LogWarning($"[SceneArtCatalog] Pixel font não encontrada em {PixelFontPath} — rode Retroself → Build Pixel Font Asset. Texto vai ficar com fonte default.");
+        return _cachedBodyFont;
+    }
+
+    static TMP_FontAsset _cachedTitleFont;
+    static bool _titleFontLookupAttempted;
+    public static TMP_FontAsset GetTitleFont()
+    {
+        if (_cachedTitleFont != null) return _cachedTitleFont;
+        if (_titleFontLookupAttempted) return null;
+        _titleFontLookupAttempted = true;
+
+        _cachedTitleFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(TitleFontPath);
+        if (_cachedTitleFont == null)
+            Debug.LogWarning($"[SceneArtCatalog] Title font não encontrada em {TitleFontPath} — rode Retroself → Build Pixel Font Asset.");
+        return _cachedTitleFont;
     }
 }
 #endif
