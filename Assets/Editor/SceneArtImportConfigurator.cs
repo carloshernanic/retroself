@@ -62,6 +62,15 @@ public static class SceneArtImportConfigurator
 
         // Basement BG (interior). PPU 100 pra peças soltas — usado como overlay decorativo.
         new Rule { folder = "Assets/Sprites/basement-tileset-pixel-art/2 Background", ppu = 100, alignment = (int)SpriteAlignment.Center, recursive = true },
+
+        // Green-zone tileset (Memory_03_Floresta, cenário de floresta). Tiles 32×32 → PPU 32.
+        new Rule { folder = "Assets/Sprites/green-zone-tileset-pixel-art/1 Tiles", ppu = 32, alignment = (int)SpriteAlignment.Center, recursive = false },
+
+        // Green-zone props (árvores, bushes, fence, stones, fountain, etc.). Pivot BottomCenter pra sentarem no chão.
+        new Rule { folder = "Assets/Sprites/green-zone-tileset-pixel-art/3 Objects", ppu = 32, alignment = (int)SpriteAlignment.BottomCenter, recursive = true },
+
+        // Green-zone BG layers (Day/Night, 5 layers cada, 576×324). PPU 32 cobre exatamente ortho size 5 em 16:9.
+        new Rule { folder = "Assets/Sprites/green-zone-tileset-pixel-art/2 Background", ppu = 32, alignment = (int)SpriteAlignment.Center, recursive = true },
     };
 
     [MenuItem("Retroself/Configure Scene Art Imports")]
@@ -129,6 +138,10 @@ public static class SceneArtImportConfigurator
         importer.ReadTextureSettings(settings);
         settings.spriteAlignment = rule.alignment;
         settings.spritePivot = AlignmentToPivot(rule.alignment);
+        // FullRect é necessário pra SpriteRenderer.drawMode=Tiled funcionar (Tight
+        // recorta o mesh nos pixels opacos e Tiled cai em fallback). Memory_03 usa
+        // Tiled pra tilear as sprites do green-zone no chão (grama/terra).
+        settings.spriteMeshType = SpriteMeshType.FullRect;
         importer.SetTextureSettings(settings);
 
         importer.filterMode = FilterMode.Point;

@@ -80,6 +80,49 @@ public static class SceneArtCatalog
     public const string TileAssetBasementWall     = "Assets/Settings/Tiles/Basement_Wall.asset";
     public const string TileAssetBasementPlatform = "Assets/Settings/Tiles/Basement_Platform.asset";
 
+    // ----- Tilemap (green-zone) — usado em Memory_03_Floresta (cenário externo, floresta) -----
+    // Tile_*.png são 32×32 px, PPU 32 (igual residential/basement). Índices iniciais
+    // batem com os usados em Memory_01 — ajustar visualmente se o pack tiver layout
+    // diferente. Pack tem 96 tiles no total.
+    // Tile_03 = espigas de grama verdes limpas (sem flores vermelhas). Tile_30 = brick roxo
+    // estilizado (pedra/rocha). Tile_04 = sólido roxo-escuro (terra profunda). Inspeção
+    // visual confirmou que o pack tem paleta roxa-escura stylizada, não dirt marrom natural.
+    public const string GreenZoneTileGround   = "Assets/Sprites/green-zone-tileset-pixel-art/1 Tiles/Tile_04.png"; // dirt sólido profundo
+    public const string GreenZoneTileGrassTop = "Assets/Sprites/green-zone-tileset-pixel-art/1 Tiles/Tile_03.png"; // grama verde clean
+    public const string GreenZoneTileStone    = "Assets/Sprites/green-zone-tileset-pixel-art/1 Tiles/Tile_30.png"; // pedra brick roxa
+    public const string GreenZoneTileWall     = "Assets/Sprites/green-zone-tileset-pixel-art/1 Tiles/Tile_05.png";
+    public const string GreenZoneTilePlatform = "Assets/Sprites/green-zone-tileset-pixel-art/1 Tiles/Tile_15.png";
+
+    // ----- Props green-zone (3 Objects/{Bushes, Stones, Fence, Other (trees/etc.)}) -----
+    public const string GreenZoneTree1   = "Assets/Sprites/green-zone-tileset-pixel-art/3 Objects/Other/Tree1.png";
+    public const string GreenZoneTree2   = "Assets/Sprites/green-zone-tileset-pixel-art/3 Objects/Other/Tree2.png";
+    public const string GreenZoneTree3   = "Assets/Sprites/green-zone-tileset-pixel-art/3 Objects/Other/Tree3.png";
+    public const string GreenZoneTree4   = "Assets/Sprites/green-zone-tileset-pixel-art/3 Objects/Other/Tree4.png";
+    public const string GreenZoneBush1   = "Assets/Sprites/green-zone-tileset-pixel-art/3 Objects/Bushes/1.png";
+    public const string GreenZoneBush2   = "Assets/Sprites/green-zone-tileset-pixel-art/3 Objects/Bushes/2.png";
+    public const string GreenZoneBush3   = "Assets/Sprites/green-zone-tileset-pixel-art/3 Objects/Bushes/3.png";
+    public const string GreenZoneStone1  = "Assets/Sprites/green-zone-tileset-pixel-art/3 Objects/Stones/1.png";
+    public const string GreenZoneStone2  = "Assets/Sprites/green-zone-tileset-pixel-art/3 Objects/Stones/2.png";
+    public const string GreenZoneStone3  = "Assets/Sprites/green-zone-tileset-pixel-art/3 Objects/Stones/3.png";
+    public const string GreenZoneFence   = "Assets/Sprites/green-zone-tileset-pixel-art/3 Objects/Fence/1.png";
+
+    // ----- BG layers green-zone (2 Background/Day, 5 layers parallax) -----
+    // Index 0 = mais distante (céu), 4 = mais próximo (foreground/chão).
+    public static readonly string[] GreenZoneBgDayLayers = new[]
+    {
+        "Assets/Sprites/green-zone-tileset-pixel-art/2 Background/Day/1.png",
+        "Assets/Sprites/green-zone-tileset-pixel-art/2 Background/Day/2.png",
+        "Assets/Sprites/green-zone-tileset-pixel-art/2 Background/Day/3.png",
+        "Assets/Sprites/green-zone-tileset-pixel-art/2 Background/Day/4.png",
+        "Assets/Sprites/green-zone-tileset-pixel-art/2 Background/Day/5.png",
+    };
+
+    // ----- Tile assets gerados pro green-zone -----
+    public const string TileAssetGreenZoneGround   = "Assets/Settings/Tiles/GreenZone_Ground.asset";
+    public const string TileAssetGreenZoneGrassTop = "Assets/Settings/Tiles/GreenZone_GrassTop.asset";
+    public const string TileAssetGreenZoneWall     = "Assets/Settings/Tiles/GreenZone_Wall.asset";
+    public const string TileAssetGreenZonePlatform = "Assets/Settings/Tiles/GreenZone_Platform.asset";
+
     // ----- Fontes pixel (TMP SDF) -----
     // Body = VT323 (default UI/diálogos — mais legível em corpo pequeno).
     // Title = Press Start 2P (usado SÓ no logo "RETROSELF" — estética 8-bit).

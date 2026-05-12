@@ -21,6 +21,11 @@ public class ReturnPad : MonoBehaviour
     // Portas que ficam destrancadas na primeira pisada (ex: LeftLockedDoor do P5).
     public List<GatedDoor> doorsToOpenOnFirstUse = new List<GatedDoor>();
 
+    // Quando true, só o player ATIVO (PlayerSwap.Instance.ActivePlayer) é teleportado.
+    // O outro Woody fica parado. Usado em Memory_03_Floresta pra cada Woody atravessar
+    // o portal individualmente. Default false = teleporta os 2 (comportamento M_02).
+    public bool teleportOnlyActive = false;
+
     private float lastUse = -10f;
     private bool firstUseDone;
 
@@ -39,7 +44,18 @@ public class ReturnPad : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
         if (Time.time - lastUse < cooldown) return;
-        if (other.GetComponent<PlayerController>() == null) return;
+        var pc = other.GetComponent<PlayerController>();
+        if (pc == null) return;
+
+        // Modo "só ativo": ignora trigger se quem pisou não é o player ativo.
+        // Evita também que o inativo dispare o portal (PlayerSwap desabilita o
+        // controller do inativo, mas o collider continua lá).
+        if (teleportOnlyActive)
+        {
+            var activeGO = PlayerSwap.Instance != null ? PlayerSwap.Instance.ActivePlayer : null;
+            if (activeGO == null || other.gameObject != activeGO) return;
+        }
+
         lastUse = Time.time;
 
         if (!firstUseDone)
@@ -51,8 +67,17 @@ public class ReturnPad : MonoBehaviour
             }
         }
 
-        Recall(young, youngSpawn);
-        Recall(adult, adultSpawn);
+        if (teleportOnlyActive)
+        {
+            // Só o ativo se move (PlayerKind decide qual spawn usar).
+            if (pc.kind == PlayerKind.Young) Recall(young, youngSpawn);
+            else Recall(adult, adultSpawn);
+        }
+        else
+        {
+            Recall(young, youngSpawn);
+            Recall(adult, adultSpawn);
+        }
     }
 
     static void Recall(Transform t, Vector3 pos)
