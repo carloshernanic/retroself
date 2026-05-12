@@ -522,17 +522,39 @@ public static class Memory01Builder
         go.transform.position = pos;
         go.transform.localScale = Vector3.one;
 
-        var sr = go.AddComponent<SpriteRenderer>();
-        var boxSprite = SceneArtCatalog.LoadSprite(SceneArtCatalog.PropBox);
-        sr.sprite = boxSprite != null ? boxSprite : SolidSprite();
-        sr.color = boxSprite != null ? Color.white : BoxCol;
-        sr.sortingOrder = 8;
-
-        // Box é PPU 32 com pivot BottomCenter (config do Configurator). 1 cell = 1u,
-        // sprite ~1×1u → collider 0.95×0.95 com offset y=0.5 fica certinho na base.
+        // Collider mantido como antes: 0.95×0.95 com offset y=0.5 → centro visual em (0, 0.5).
         var col = go.AddComponent<BoxCollider2D>();
         col.size = new Vector2(0.95f, 0.95f);
         col.offset = new Vector2(0f, 0.5f);
+
+        // Sprite trocado pro BasementBox da fase 2 — stretched pra preencher o
+        // espaço do collider, compensando o pivot (0,0) bottom-left do PNG.
+        var boxSprite = SceneArtCatalog.LoadSprite(SceneArtCatalog.BasementBox);
+        var visual = new GameObject("BoxVisual");
+        visual.transform.SetParent(go.transform, false);
+        var sr = visual.AddComponent<SpriteRenderer>();
+        sr.sortingOrder = 8;
+        if (boxSprite != null)
+        {
+            sr.sprite = boxSprite;
+            var native = boxSprite.bounds.size;
+            Vector2 fit = col.size; // ocupa o espaço do collider
+            visual.transform.localScale = new Vector3(fit.x / native.x, fit.y / native.y, 1f);
+            var pivotNorm = new Vector2(
+                boxSprite.pivot.x / boxSprite.rect.width,
+                boxSprite.pivot.y / boxSprite.rect.height);
+            // Centra o sprite em (col.offset.x, col.offset.y), compensando o pivot.
+            visual.transform.localPosition = new Vector3(
+                col.offset.x + (pivotNorm.x - 0.5f) * fit.x,
+                col.offset.y + (pivotNorm.y - 0.5f) * fit.y, 0f);
+        }
+        else
+        {
+            sr.sprite = SolidSprite();
+            sr.color = BoxCol;
+            visual.transform.localScale = new Vector3(col.size.x, col.size.y, 1f);
+            visual.transform.localPosition = new Vector3(col.offset.x, col.offset.y, 0f);
+        }
 
         // O componente HeavyBox configura o RB no Awake.
         go.AddComponent<Rigidbody2D>();

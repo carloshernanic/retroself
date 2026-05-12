@@ -39,6 +39,7 @@ public class PlayerAttack : MonoBehaviour
     void ThrowStone()
     {
         lastAttackTime = Time.time;
+        AudioManager.PlayShoot();
         float dirX = (controller != null && controller.body != null && controller.body.flipX) ? -1f : 1f;
         Vector3 spawn = transform.position + new Vector3(dirX * spawnOffsetX, 0.1f, 0);
 
