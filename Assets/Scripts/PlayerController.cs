@@ -72,7 +72,12 @@ public class PlayerController : MonoBehaviour
         var hits = Physics2D.OverlapCircleAll(groundCheck.position, groundCheckRadius, groundMask);
         for (int i = 0; i < hits.Length; i++)
         {
-            if (hits[i] != null && hits[i].attachedRigidbody != rb) return true;
+            var h = hits[i];
+            if (h == null) continue;
+            if (h.attachedRigidbody == rb) continue;
+            // O outro Woody não conta como chão — evita double jump pulando em cima do parceiro.
+            if (h.attachedRigidbody != null && h.attachedRigidbody.GetComponent<PlayerController>() != null) continue;
+            return true;
         }
         return false;
     }

@@ -149,6 +149,9 @@ public static class MainMenuBuilder
         titleRT.anchoredPosition = new Vector2(0, 250);
         titleRT.sizeDelta = new Vector2(1600, 160);
         var titleTMP = titleGO.GetComponent<TextMeshProUGUI>();
+        // Override: logo usa Press Start 2P (estética 8-bit) enquanto o resto da UI usa VT323.
+        var titleFont = SceneArtCatalog.GetTitleFont();
+        if (titleFont != null) titleTMP.font = titleFont;
         titleTMP.color = new Color(0.49f, 0.97f, 1f, 1f);
         titleTMP.alignment = TextAlignmentOptions.Center;
         titleTMP.characterSpacing = 4f;
@@ -195,7 +198,7 @@ public static class MainMenuBuilder
 
         // Credits text
         var creditsText = CreateUIText(creditsPanelGO.transform, "CreditsText",
-            "<b>RETROSELF</b>\n\n<size=16>Direcao & Game Design</size>\nAlex Chequer\nCarlos Hernani\nLucas Ikawa\n\n<size=16>Musica & Som</size>\n[a definir]\n\n<size=16>Pixel Art</size>\nCraftpix.net (licenciado)\n\n<size=16>Fonte</size>\nPress Start 2P (OFL)\n\n<size=16>Inspirado em</size>\nBraid - Celeste - Brothers - Inside\nUndertale - About Time\n\n<size=12>Insper - 2026</size>",
+            "<b>RETROSELF</b>\n\n<size=16>Direcao & Game Design</size>\nAlex Chequer\nCarlos Hernani\nLucas Ikawa\n\n<size=16>Musica & Som</size>\n[a definir]\n\n<size=16>Pixel Art</size>\nCraftpix.net (licenciado)\n\n<size=16>Fontes</size>\nVT323 - Press Start 2P (OFL)\n\n<size=16>Inspirado em</size>\nBraid - Celeste - Brothers - Inside\nUndertale - About Time\n\n<size=12>Insper - 2026</size>",
             18, FontStyles.Normal);
         var crRT = creditsText.GetComponent<RectTransform>();
         crRT.anchoredPosition = new Vector2(0, 50);
