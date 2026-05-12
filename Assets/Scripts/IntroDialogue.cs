@@ -44,11 +44,13 @@ public class IntroDialogue : MonoBehaviour
         if (skip)
         {
             if (typewriter != null && typewriter.IsPlaying) typewriter.SkipToEnd();
+            AudioManager.PlayDialog();
             DismissAndUnfreeze();
             return;
         }
 
         if (!advance) return;
+        AudioManager.PlayDialog();
 
         if (typewriter != null && typewriter.IsPlaying)
         {

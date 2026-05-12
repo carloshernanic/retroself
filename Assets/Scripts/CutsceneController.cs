@@ -85,6 +85,7 @@ public class CutsceneController : MonoBehaviour
             (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame);
 
         if (!advance) return;
+        AudioManager.PlayDialog();
 
         if (typewriter != null && typewriter.IsPlaying)
         {

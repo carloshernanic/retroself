@@ -27,6 +27,8 @@ public class PlayerController : MonoBehaviour
     private bool wasGrounded;
     private float moveX;
     private bool facingRight = true;
+    private float stepCooldown;
+    const float StepInterval = 0.28f; // intervalo entre footsteps enquanto andando no chão
 
     public bool IsGrounded => isGrounded;
     public float MoveX => moveX;
@@ -64,6 +66,21 @@ public class PlayerController : MonoBehaviour
         wasGrounded = nowGrounded;
         isGrounded = nowGrounded;
         rb.linearVelocity = new Vector2(moveX * moveSpeed, rb.linearVelocity.y);
+
+        // Footstep SFX: enquanto andando no chão, toca em intervalos regulares.
+        if (isGrounded && Mathf.Abs(moveX) > 0.05f)
+        {
+            stepCooldown -= Time.fixedDeltaTime;
+            if (stepCooldown <= 0f)
+            {
+                AudioManager.PlayStep();
+                stepCooldown = StepInterval;
+            }
+        }
+        else
+        {
+            stepCooldown = 0f; // resetar pra próximo passo soar imediato
+        }
     }
 
     bool CheckGrounded()
@@ -113,6 +130,7 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             jumpBufferCounter = 0f;
             coyoteCounter = 0f;
+            AudioManager.PlayJump();
         }
     }
 

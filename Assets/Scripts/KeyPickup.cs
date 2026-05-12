@@ -27,6 +27,7 @@ public class KeyPickup : MonoBehaviour
         if (Collected) return;
         if (other.GetComponent<PlayerController>() == null) return;
         Collected = true;
+        AudioManager.PlayKeyCollect();
         Destroy(gameObject);
     }
 
@@ -41,10 +42,20 @@ public class KeyPickup : MonoBehaviour
         var visual = new GameObject("Visual");
         visual.transform.SetParent(root.transform, false);
         visual.transform.localPosition = Vector3.zero;
-        visual.transform.localScale = new Vector3(0.35f, 0.35f, 1f);
+        var sprite = LoadKeySprite();
         var sr = visual.AddComponent<SpriteRenderer>();
-        sr.sprite = GoldSquareSprite();
-        sr.color = new Color(1f, 0.85f, 0.25f, 1f);
+        if (sprite != null)
+        {
+            sr.sprite = sprite;
+            visual.transform.localScale = Vector3.one;
+            sr.color = Color.white;
+        }
+        else
+        {
+            sr.sprite = GoldSquareSprite();
+            sr.color = new Color(1f, 0.85f, 0.25f, 1f);
+            visual.transform.localScale = new Vector3(0.35f, 0.35f, 1f);
+        }
         sr.sortingOrder = 9;
 
         var col = root.AddComponent<BoxCollider2D>();
@@ -57,6 +68,17 @@ public class KeyPickup : MonoBehaviour
         bob.amplitude = 0.12f;
         bob.speed = 2.2f;
         return root;
+    }
+
+    static Sprite cachedKeySprite;
+    static bool keySpriteLoadAttempted;
+    static Sprite LoadKeySprite()
+    {
+        if (cachedKeySprite != null) return cachedKeySprite;
+        if (keySpriteLoadAttempted) return null;
+        keySpriteLoadAttempted = true;
+        cachedKeySprite = Resources.Load<Sprite>("Sprites/key");
+        return cachedKeySprite;
     }
 
     static Sprite cachedSprite;
