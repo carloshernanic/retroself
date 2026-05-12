@@ -83,7 +83,11 @@ public static class Memory02Builder
         // -1.9 = ground top -3 + half door height 1.1 → door base no chão.
         // Posição x=45 fica logo depois do ReturnPad (x=43.5) e antes da parede direita (x=46).
         var finishDoorComp = finishDoor.GetComponent<CoopFinishDoor>();
-        if (finishDoorComp != null) finishDoorComp.requireKey = true;
+        if (finishDoorComp != null)
+        {
+            finishDoorComp.requireKey = true;
+            finishDoorComp.targetScene = SceneNames.Memory_03_Floresta;
+        }
 
         // ReturnPad: pisar = teleporta os 2 Woody pra spawn. Permite revisitar
         // pistas. Posicionado entre Gate_Lock (x=42) e FinishDoor (x=45) — caminho
