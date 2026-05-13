@@ -12,14 +12,23 @@ public class CameraFollow2D : MonoBehaviour
     public float minY = 0f;
     public float maxY = 0f;
 
+    // Quando setado, prevalece sobre o player ativo do PlayerSwap. Usado
+    // por cutaways narrativos (ex: pan pra porta de fim após coletar a chave).
+    [HideInInspector] public Transform overrideTarget;
+
     private Vector3 velocity;
     private Transform lastTarget;
 
     void LateUpdate()
     {
+        // Override tem prioridade — cutaways setam isso temporariamente.
+        if (overrideTarget != null)
+        {
+            target = overrideTarget;
+        }
         // Fonte de verdade do alvo: o ativo do PlayerSwap. Polling aqui evita
         // qualquer race entre Awake/OnEnable e a inscrição do evento.
-        if (PlayerSwap.Instance != null && PlayerSwap.Instance.ActivePlayer != null)
+        else if (PlayerSwap.Instance != null && PlayerSwap.Instance.ActivePlayer != null)
         {
             target = PlayerSwap.Instance.ActivePlayer.transform;
         }

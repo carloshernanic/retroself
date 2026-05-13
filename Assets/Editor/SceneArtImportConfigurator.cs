@@ -81,6 +81,27 @@ public static class SceneArtImportConfigurator
         // BreakablePlank em Memory_02/03 empilhando bottom/middle/top. 32×32, PPU 32,
         // pivot Center pra empilhamento ficar alinhado pelo centro.
         new Rule { folder = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects", ppu = 32, alignment = (int)SpriteAlignment.Center, recursive = false },
+
+        // Cyberpunk-market tileset (Memory_04_Sala, mercado). 32×32 px → PPU 32.
+        new Rule { folder = "Assets/Sprites/cyberpunk-market-street-pixel-art/1 Tiles", ppu = 32, alignment = (int)SpriteAlignment.Center, recursive = false },
+
+        // Cyberpunk-market BG night (5 layers 576×324) — PPU 32 cobre ortho size 5 em 16:9.
+        new Rule { folder = "Assets/Sprites/cyberpunk-market-street-pixel-art/2 Background", ppu = 32, alignment = (int)SpriteAlignment.Center, recursive = true },
+
+        // Cyberpunk-market props (Lamps, Signboards, Terrace) — sentam no chão.
+        new Rule { folder = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Lamps", ppu = 32, alignment = (int)SpriteAlignment.BottomCenter, recursive = false },
+        new Rule { folder = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Signboards", ppu = 32, alignment = (int)SpriteAlignment.BottomCenter, recursive = false },
+        new Rule { folder = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Terrace", ppu = 32, alignment = (int)SpriteAlignment.BottomCenter, recursive = false },
+
+        // Food icon packs (street-food / street-snacks) — 32×32 cada icon. Single,
+        // PPU 32, pivot Center pra ficarem em escala 1u no mundo (combina com tilemap).
+        new Rule { folder = "Assets/Sprites/street-food-for-cyberpunk-pixel-art-32x32-icons/1 Icons", ppu = 32, alignment = (int)SpriteAlignment.Center, recursive = false },
+        new Rule { folder = "Assets/Sprites/street-snacks-pixel-art-32x32-icon-pack/1 Icons", ppu = 32, alignment = (int)SpriteAlignment.Center, recursive = false },
+
+        // NPC guitarrista (pasta 6/) é animado: PlayGuitar.png (384×64 = 6 frames) e
+        // Idle.png (256×64 = 4 frames) são sheets multi-frame. O slicing é feito pelo
+        // SpriteImportConfigurator (Multiple mode), NÃO aqui — esta rule sobrescreveria
+        // pro Single mode. 6.png e StopPlaying.png ficam Single (não usados como anim).
     };
 
     [MenuItem("Retroself/Configure Scene Art Imports")]

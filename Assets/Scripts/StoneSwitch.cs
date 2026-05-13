@@ -32,6 +32,7 @@ public class StoneSwitch : GateSource
         if (active) return;
         if (other.GetComponent<Stone>() == null) return;
         active = true;
+        SfxBeep.PlayTargetHit();
         OnHit?.Invoke();
     }
 

@@ -14,7 +14,10 @@ public class KeyPickup : MonoBehaviour
     // Reset cross-cena: SubsystemRegistration roda só no boot do app, então sair
     // de Memory_02 com chave coletada e voltar pra Memory_01 deixaria a porta da
     // escola "pré-aberta". SceneStartReset chama isto no Awake da cena.
-    public static void Reset() { Collected = false; }
+    // NOTA: NÃO renomear pra `Reset()` — colide com MonoBehaviour.Reset() (msg
+    // que o editor chama no AddComponent), o Unity tenta invocar como instance
+    // e dá "Failed to call static function Reset because an object was provided".
+    public static void ResetCollected() { Collected = false; }
 
     void Awake()
     {
