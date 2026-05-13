@@ -732,21 +732,25 @@ public static class Memory04Builder
         var hitYoung = BuildHitZone(laneYoung, new Color(1f, 0.85f, 0.25f, 0.4f));
         var hitAdult = BuildHitZone(laneAdult, new Color(0.7f, 0.45f, 0.25f, 0.4f));
 
+        // Marcadores de coluna (A/S/D) abaixo de cada hit zone.
+        BuildColumnLabels(laneYoung);
+        BuildColumnLabels(laneAdult);
+
         var overlayYoung = BuildLaneOverlay(laneYoung);
         var overlayAdult = BuildLaneOverlay(laneAdult);
 
         // Labels acima das lanes.
-        CreateUIText(panel.transform, "LabelY", "JOVEM [Z/A/<-]",
+        CreateUIText(panel.transform, "LabelY", "JOVEM",
             36f, FontStyles.Bold, new Vector2(-320, 320), new Vector2(360, 60),
             new Color(1f, 0.85f, 0.25f, 1f));
-        CreateUIText(panel.transform, "LabelA", "ADULTO [X/D/->]",
+        CreateUIText(panel.transform, "LabelA", "ADULTO",
             36f, FontStyles.Bold, new Vector2( 320, 320), new Vector2(360, 60),
             new Color(0.95f, 0.7f, 0.45f, 1f));
 
         var score = CreateUIText(panel.transform, "Score", "0 / 0",
             48f, FontStyles.Bold, new Vector2(-700, 400), new Vector2(400, 60),
             new Color(0.7f, 1f, 0.7f, 1f), TextAlignmentOptions.Left);
-        var status = CreateUIText(panel.transform, "Status", "Qualquer tecla de hit toca a nota mais perto. Esc desiste.",
+        var status = CreateUIText(panel.transform, "Status", "A/S/D ou setas pra acertar. Tab troca guitarra. Esc desiste.",
             32f, FontStyles.Italic, new Vector2(0, -440), new Vector2(1600, 60),
             new Color(1f, 0.94f, 0.78f, 0.9f));
 
@@ -764,7 +768,7 @@ public static class Memory04Builder
         gh.noteFallTime = 3.0f;
         gh.hitWindow = 0.35f;
         gh.passThreshold = 0.4f;
-        gh.inactiveOverlayColor = new Color(0f, 0f, 0f, 0.08f);
+        gh.inactiveOverlayColor = new Color(0f, 0f, 0f, 0.45f);
         if (young != null) gh.young = young.GetComponent<PlayerController>();
         if (adult != null) gh.adult = adult.GetComponent<PlayerController>();
         if (swap != null) gh.playerSwap = swap.GetComponent<PlayerSwap>();
@@ -781,11 +785,11 @@ public static class Memory04Builder
 
         var ghTutorial = BuildTutorialPanel(canvasGO.transform, "GUITAR HERO CO-OP", new[]
         {
-            "Acerte as notas na zona de hit quando cairem.",
-            "Qualquer tecla de hit acerta a nota mais proxima.",
-            "Espaco / S / Seta-baixo, Z / A / Seta-esquerda,",
-            "X / D / Seta-direita — todas tocam.",
-            "Tab so alterna o foco visual.",
+            "Cada guitarra tem 3 colunas de hit.",
+            "A / Seta-esquerda = coluna 1",
+            "S / Seta-baixo    = coluna 2",
+            "D / Seta-direita  = coluna 3",
+            "Tab troca de guitarra (so a ativa registra hit).",
             "Esc = desistir.",
         });
         gh.tutorialPanel = ghTutorial;
@@ -846,6 +850,53 @@ public static class Memory04Builder
         rt.sizeDelta = new Vector2(340, 60);
         go.GetComponent<Image>().color = color;
         return rt;
+    }
+
+    static void BuildColumnLabels(RectTransform lane)
+    {
+        // Divide a lane em 3 colunas visualmente: 2 separadores verticais finos
+        // e 3 labels de tecla logo abaixo da hit zone.
+        float w = lane.sizeDelta.x; // 360
+        float colW = w / 3f;        // 120
+
+        // Separadores (em x = -w/6 e +w/6, ou seja borda entre col 0-1 e 1-2).
+        for (int s = 0; s < 2; s++)
+        {
+            var div = new GameObject($"ColDiv{s}", typeof(RectTransform), typeof(Image));
+            div.transform.SetParent(lane, false);
+            var drt = div.GetComponent<RectTransform>();
+            drt.anchorMin = drt.anchorMax = new Vector2(0.5f, 0.5f);
+            drt.pivot = new Vector2(0.5f, 0.5f);
+            drt.anchoredPosition = new Vector2((s == 0 ? -1f : 1f) * colW * 0.5f, 0);
+            drt.sizeDelta = new Vector2(2f, 720f);
+            div.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.10f);
+            div.GetComponent<Image>().raycastTarget = false;
+        }
+
+        // Labels logo abaixo da hit zone (hit zone fica em y=20 com altura 60,
+        // então centro y≈50 dentro da lane; abaixo dela y≈-5).
+        string[] labels = { "A / <-", "S / v", "D / ->" };
+        for (int c = 0; c < 3; c++)
+        {
+            float cx = (c - 1) * colW;
+            var lbl = new GameObject($"ColLabel{c}", typeof(RectTransform));
+            lbl.transform.SetParent(lane, false);
+            var lrt = lbl.GetComponent<RectTransform>();
+            lrt.anchorMin = new Vector2(0.5f, 0f);
+            lrt.anchorMax = new Vector2(0.5f, 0f);
+            lrt.pivot = new Vector2(0.5f, 1f);
+            lrt.anchoredPosition = new Vector2(cx, -10f);
+            lrt.sizeDelta = new Vector2(colW, 36f);
+            var tmp = lbl.AddComponent<TextMeshProUGUI>();
+            tmp.text = labels[c];
+            tmp.fontSize = 24f;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = new Color(1f, 0.94f, 0.78f, 0.9f);
+            tmp.raycastTarget = false;
+            var pixelFont = SceneArtCatalog.GetPixelFont();
+            if (pixelFont != null) tmp.font = pixelFont;
+        }
     }
 
     static Image BuildLaneOverlay(RectTransform lane)
