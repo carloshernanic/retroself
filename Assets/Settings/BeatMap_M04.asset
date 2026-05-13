@@ -15,149 +15,206 @@ MonoBehaviour:
   notes:
   - time: 1.8461539
     lane: 0
+    column: 0
   - time: 2.7692308
     lane: 0
+    column: 1
   - time: 3.6923077
     lane: 0
+    column: 2
   - time: 4.6153846
     lane: 0
+    column: 1
   - time: 7.3846154
     lane: 1
+    column: 0
   - time: 8.307693
     lane: 1
+    column: 1
   - time: 9.230769
     lane: 1
+    column: 2
   - time: 10.153846
     lane: 1
+    column: 1
   - time: 12.923077
     lane: 0
+    column: 0
   - time: 13.846154
     lane: 0
+    column: 1
   - time: 14.769231
     lane: 0
+    column: 2
   - time: 15.692307
     lane: 0
+    column: 1
   - time: 16.615385
     lane: 1
+    column: 0
   - time: 17.538462
     lane: 1
+    column: 1
   - time: 18.461538
     lane: 0
+    column: 2
   - time: 19.384615
     lane: 0
+    column: 1
   - time: 20.307692
     lane: 0
+    column: 0
   - time: 21.23077
     lane: 0
+    column: 1
   - time: 24
     lane: 0
+    column: 2
   - time: 24.923077
     lane: 0
+    column: 1
   - time: 25.846153
     lane: 0
+    column: 0
   - time: 26.769232
     lane: 0
+    column: 1
   - time: 29.538462
     lane: 1
+    column: 2
   - time: 30.461538
     lane: 1
+    column: 1
   - time: 31.384615
     lane: 1
+    column: 0
   - time: 32.307693
     lane: 1
+    column: 1
   - time: 35.076923
     lane: 0
+    column: 2
   - time: 36
     lane: 0
+    column: 1
   - time: 36.923077
     lane: 0
+    column: 0
   - time: 37.846153
     lane: 0
+    column: 1
   - time: 38.76923
     lane: 1
+    column: 2
   - time: 39.692307
     lane: 1
+    column: 1
   - time: 40.615383
     lane: 0
+    column: 0
   - time: 41.538464
     lane: 0
+    column: 1
   - time: 42.46154
     lane: 0
+    column: 2
   - time: 43.384617
     lane: 0
+    column: 1
   - time: 46.153847
     lane: 0
+    column: 0
   - time: 47.076923
     lane: 0
+    column: 1
   - time: 48
     lane: 0
+    column: 2
   - time: 48.923077
     lane: 0
+    column: 1
   - time: 51.692307
     lane: 1
+    column: 0
   - time: 52.615383
     lane: 1
+    column: 1
   - time: 53.538464
     lane: 1
+    column: 2
   - time: 54.46154
     lane: 1
+    column: 1
   - time: 57.23077
     lane: 0
+    column: 0
   - time: 58.153847
     lane: 0
+    column: 1
   - time: 59.076923
     lane: 0
+    column: 2
   - time: 60
     lane: 0
+    column: 1
   - time: 60.923077
     lane: 1
+    column: 0
   - time: 61.846153
     lane: 1
+    column: 1
   - time: 62.76923
     lane: 0
+    column: 2
   - time: 63.692307
     lane: 0
+    column: 1
   - time: 64.61539
     lane: 0
+    column: 0
   - time: 65.53846
     lane: 0
+    column: 1
   - time: 68.30769
     lane: 0
+    column: 2
   - time: 69.23077
     lane: 0
+    column: 1
   - time: 70.15385
     lane: 0
+    column: 0
   - time: 71.07693
     lane: 0
+    column: 1
   - time: 73.84615
     lane: 1
+    column: 2
   - time: 74.76923
     lane: 1
+    column: 1
   - time: 75.69231
     lane: 1
+    column: 0
   - time: 76.61539
     lane: 1
+    column: 1
   - time: 79.38461
     lane: 0
+    column: 2
   - time: 80.30769
     lane: 0
+    column: 1
   - time: 81.23077
     lane: 0
+    column: 0
   - time: 82.15385
     lane: 0
+    column: 1
   - time: 83.07693
     lane: 1
+    column: 2
   - time: 84
     lane: 1
-  - time: 84.92308
-    lane: 0
-  - time: 85.84615
-    lane: 0
-  - time: 86.76923
-    lane: 0
-  - time: 87.69231
-    lane: 0
-  - time: 90.46154
-    lane: 0
-  - time: 91.38461
-    lane: 0
+    column: 1
+  songStartOffset: 7.3799996
