@@ -102,6 +102,16 @@ public static class Memory02Builder
         var resetGO = new GameObject("SceneStartReset");
         resetGO.AddComponent<SceneStartReset>();
 
+        // Cutaway: ao coletar a chave, câmera pan pra porta de fim por ~2.2s
+        // mostrando ela destravar (SpriteFrameAnimator dispara via CoopFinishDoor
+        // assim que IsUnlocked() = true). Componente vive no FinishDoor.
+        var pan = finishDoor.AddComponent<KeyCollectCameraPan>();
+        pan.cam = camera.GetComponent<CameraFollow2D>();
+        pan.focusTarget = finishDoor.transform;
+        pan.young = young.GetComponent<PlayerController>();
+        pan.adult = adult.GetComponent<PlayerController>();
+        pan.playerSwap = swap.GetComponent<PlayerSwap>();
+
         BuildHUD(young, swap, young, adult, finishDoor);
 
         // Post-processing + Light2D são tunados manualmente pelo usuário (Volume e
@@ -544,6 +554,9 @@ public static class Memory02Builder
 
         var hp = go.AddComponent<EnemyHealth>();
         hp.maxHealth = 1;
+
+        // FX: partículas de madeira + crash sound em OnDefeated (antes do Destroy).
+        go.AddComponent<PlankBreakFx>();
         return go;
     }
 
@@ -578,8 +591,8 @@ public static class Memory02Builder
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.fontStyle = FontStyles.Bold;
         tmp.enableAutoSizing = false;
-        tmp.fontSize = 1.2f;
-        tmp.rectTransform.sizeDelta = new Vector2(0.8f, 0.8f);
+        tmp.fontSize = 2.0f;
+        tmp.rectTransform.sizeDelta = new Vector2(1.4f, 1.4f);
         var font = SceneArtCatalog.GetPixelFont();
         if (font != null) tmp.font = font;
 
@@ -662,32 +675,55 @@ public static class Memory02Builder
 
     static PressurePlate BuildPlate(Transform parent, string name, Vector3 worldPos, PressurePlate.Requirement req)
     {
+        const float W = 1.5f;
+        const float H = 0.4f;
+
         var go = new GameObject(name);
         go.transform.SetParent(parent, false);
         go.transform.position = worldPos;
-        // Placa: 1.5×0.4 (60% maior que original) — clara visualmente.
-        // Centro y=-2.8 deixa bottom em -3 (no chão), top em -2.6.
-        go.transform.localScale = new Vector3(1.5f, 0.4f, 1f);
-        var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = SolidSprite();
-        sr.color = PlateOffCol;
-        sr.sortingOrder = 6;
+        go.transform.localScale = Vector3.one; // root sem scale; visuais são filhos.
 
+        // 3 camadas pra dar leitura de "botão":
+        //   (a) Shadow: base escura ligeiramente maior, atrás de tudo.
+        //   (b) Body: corpo principal (cor swappada por PressurePlateVisual).
+        //   (c) Rim: linha clara fina no topo (highlight).
+        BuildPlateLayer(go.transform, "Shadow", new Vector3(0f, -0.05f, 0f), new Vector3(W + 0.1f, H, 1f),
+            new Color(0.10f, 0.08f, 0.06f, 1f), sortingOrder: 5);
+        var bodySr = BuildPlateLayer(go.transform, "Body", Vector3.zero, new Vector3(W, H, 1f),
+            PlateOffCol, sortingOrder: 6);
+        BuildPlateLayer(go.transform, "Rim", new Vector3(0f, H * 0.4f, 0f), new Vector3(W - 0.15f, 0.06f, 1f),
+            new Color(1f, 0.96f, 0.78f, 0.55f), sortingOrder: 7);
+
+        // Collider no root (1u×1u escalado por scale do go = 1×1 aqui; setamos size direto).
         var col = go.AddComponent<BoxCollider2D>();
         col.isTrigger = true;
+        col.size = new Vector2(W, H);
 
         var plate = go.AddComponent<PressurePlate>();
         plate.requirement = req;
 
-        // Visual: poll IsActive em Update e troca cor. UnityEvents não persistem
+        // Visual: poll IsActive em Update e troca cor do Body. UnityEvents não persistem
         // bem em scene file via builder editor (AddListener é runtime-only); poll
         // simples evita o problema.
         var colorizer = go.AddComponent<PressurePlateVisual>();
         colorizer.target = plate;
-        colorizer.renderer = sr;
+        colorizer.renderer = bodySr;
         colorizer.offColor = PlateOffCol;
         colorizer.onColor = PlateOnCol;
         return plate;
+    }
+
+    static SpriteRenderer BuildPlateLayer(Transform parent, string name, Vector3 localPos, Vector3 localScale, Color color, int sortingOrder)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = localPos;
+        go.transform.localScale = localScale;
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = SolidSprite();
+        sr.color = color;
+        sr.sortingOrder = sortingOrder;
+        return sr;
     }
 
     static GameObject BuildGate(Transform parent, string name, Vector3 worldPos, Vector2 size, Vector2 openOffset, bool latched)

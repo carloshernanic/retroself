@@ -251,13 +251,15 @@ public static class Memory03Builder
         var grid = new GameObject("Grid");
 
         // Ground_Top = grama (sprite tile real, drawMode=Tiled).
-        // Span total x=-5..60. **Gaps reais** em x=3..7 (riacho P1) e x=54..56 (poço P5)
+        // Span total x=-13..60. **Gaps reais** em x=3..7 (riacho P1) e x=54..56 (poço P5)
         // — player cai pelo gap e bate no hazard. Segmentos:
-        //   A: x=-5..3   (cx=-1,   w=8)
+        //   A: x=-13..3  (cx=-5,   w=16) — estendido pra esquerda pra não deixar vazio
+        //     atrás da árvore canto-esquerdo. Wall_Left bloqueia em x=-5; tudo a oeste
+        //     disso é decorativo (player não alcança).
         //   B: x=7..54   (cx=30.5, w=47)
         //   C: x=56..60  (cx=58,   w=4)
         // Altura 0.5u (y=-3.5..-3.0). Top y=-3 = ponto onde players spawnam em pé.
-        BuildGrassFloor(grid.transform, "Ground_Top_A", -1f,   -3.25f, 8f,  0.5f);
+        BuildGrassFloor(grid.transform, "Ground_Top_A", -5f,   -3.25f, 16f, 0.5f);
         BuildGrassFloor(grid.transform, "Ground_Top_B", 30.5f, -3.25f, 47f, 0.5f);
         BuildGrassFloor(grid.transform, "Ground_Top_C", 58f,   -3.25f, 4f,  0.5f);
 
@@ -270,17 +272,21 @@ public static class Memory03Builder
         //   3. Camada de pedrinhas (marrom-cinza com pedras decorativas espalhadas)
         //   4. Solo médio (marrom escuro)
         //   5. Profundo (dark earth)
-        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Root",    27.5f, -3.6f,  65f, 0.2f, DirtRootCol,    sortingOrder: 4); // banda fina escura (raízes) — sort 4 pra não competir com hazard sort 7
-        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Surface", 27.5f, -4.0f,  65f, 0.6f, DirtSurfaceCol, sortingOrder: 4); // umber quente
-        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Pebble",  27.5f, -5.0f,  65f, 1.4f, DirtPebbleCol,  sortingOrder: 4); // marrom-cinza (pedras embedded)
-        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Mid",     27.5f, -6.7f,  65f, 2.0f, DirtMidCol,     sortingOrder: 4); // marrom escuro
-        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Deep",    27.5f, -9.0f,  65f, 3.0f, DirtDeepCol,    sortingOrder: 4); // dark earth
+        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Root",    23.5f, -3.6f,  73f, 0.2f, DirtRootCol,    sortingOrder: 4); // banda fina escura (raízes) — sort 4 pra não competir com hazard sort 7
+        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Surface", 23.5f, -4.0f,  73f, 0.6f, DirtSurfaceCol, sortingOrder: 4); // umber quente
+        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Pebble",  23.5f, -5.0f,  73f, 1.4f, DirtPebbleCol,  sortingOrder: 4); // marrom-cinza (pedras embedded)
+        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Mid",     23.5f, -6.7f,  73f, 2.0f, DirtMidCol,     sortingOrder: 4); // marrom escuro
+        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Deep",    23.5f, -9.0f,  73f, 3.0f, DirtDeepCol,    sortingOrder: 4); // dark earth
 
         // Pedras decorativas embedded na camada Pebble (sortingOrder 5 — em cima do solid).
         BuildEmbeddedRocks(grid.transform);
 
         // Paredes laterais — barram o player de sair do mapa.
-        BuildPlatform(grid.transform, "Wall_Left",   cx: -5f, cy: -1f, w: 0.4f, h: 4f, WallCol, sortingOrder: 5);
+        // Wall_Left fica INVISÍVEL: a árvore canto-esquerdo (Tree_A1 em x=-4.2) é o
+        // delimitador visual. Retângulo marrom poluía a leitura da entrada da fase.
+        var wallLeft = BuildPlatform(grid.transform, "Wall_Left",   cx: -5f, cy: -1f, w: 0.4f, h: 4f, WallCol, sortingOrder: 5);
+        var wallLeftSr = wallLeft.GetComponent<SpriteRenderer>();
+        if (wallLeftSr != null) wallLeftSr.enabled = false;
         BuildPlatform(grid.transform, "Wall_Right",  cx: 60f, cy: -1f, w: 0.4f, h: 4f, WallCol, sortingOrder: 5);
     }
 
@@ -745,33 +751,56 @@ public static class Memory03Builder
 
         var hp = go.AddComponent<EnemyHealth>();
         hp.maxHealth = 1;
+
+        // FX: partículas de madeira + crash sound em OnDefeated (antes do Destroy).
+        go.AddComponent<PlankBreakFx>();
         return go;
     }
 
     static PressurePlate BuildPlate(Transform parent, string name, Vector3 worldPos, PressurePlate.Requirement req)
     {
+        const float W = 1.5f;
+        const float H = 0.4f;
+
         var go = new GameObject(name);
         go.transform.SetParent(parent, false);
         go.transform.position = worldPos;
-        go.transform.localScale = new Vector3(1.5f, 0.4f, 1f);
+        go.transform.localScale = Vector3.one;
 
-        var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = SolidSprite();
-        sr.color = PlateOffCol;
-        sr.sortingOrder = 6;
+        // 3 camadas (Shadow base / Body / Rim highlight) pra dar leitura de "botão".
+        BuildPlateLayer(go.transform, "Shadow", new Vector3(0f, -0.05f, 0f), new Vector3(W + 0.1f, H, 1f),
+            new Color(0.10f, 0.08f, 0.06f, 1f), sortingOrder: 5);
+        var bodySr = BuildPlateLayer(go.transform, "Body", Vector3.zero, new Vector3(W, H, 1f),
+            PlateOffCol, sortingOrder: 6);
+        BuildPlateLayer(go.transform, "Rim", new Vector3(0f, H * 0.4f, 0f), new Vector3(W - 0.15f, 0.06f, 1f),
+            new Color(1f, 0.96f, 0.78f, 0.55f), sortingOrder: 7);
 
         var col = go.AddComponent<BoxCollider2D>();
         col.isTrigger = true;
+        col.size = new Vector2(W, H);
 
         var plate = go.AddComponent<PressurePlate>();
         plate.requirement = req;
 
         var colorizer = go.AddComponent<PressurePlateVisual>();
         colorizer.target = plate;
-        colorizer.renderer = sr;
+        colorizer.renderer = bodySr;
         colorizer.offColor = PlateOffCol;
         colorizer.onColor = PlateOnCol;
         return plate;
+    }
+
+    static SpriteRenderer BuildPlateLayer(Transform parent, string name, Vector3 localPos, Vector3 localScale, Color color, int sortingOrder)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = localPos;
+        go.transform.localScale = localScale;
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = SolidSprite();
+        sr.color = color;
+        sr.sortingOrder = sortingOrder;
+        return sr;
     }
 
     static GameObject BuildGate(Transform parent, string name, Vector3 worldPos, Vector2 size, Vector2 openOffset, bool latched)

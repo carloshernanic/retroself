@@ -8,6 +8,6 @@ public class SceneStartReset : MonoBehaviour
 {
     void Awake()
     {
-        KeyPickup.Reset();
+        KeyPickup.ResetCollected();
     }
 }

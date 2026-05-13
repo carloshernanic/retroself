@@ -70,7 +70,15 @@ public class PressurePlate : GateSource
         bool nowActive = occupants.Count > 0;
         if (nowActive == active) return;
         active = nowActive;
-        if (active) OnActivated?.Invoke();
-        else OnDeactivated?.Invoke();
+        if (active)
+        {
+            SfxBeep.PlayPlateOn();
+            OnActivated?.Invoke();
+        }
+        else
+        {
+            SfxBeep.PlayPlateOff();
+            OnDeactivated?.Invoke();
+        }
     }
 }
