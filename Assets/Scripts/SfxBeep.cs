@@ -12,6 +12,12 @@ public static class SfxBeep
     static AudioClip plateOffClip;
     static AudioClip targetHitClip;
     static AudioClip breakClip;
+    static AudioClip minigameStartClip;
+    static AudioClip beatHitClip;
+    static AudioClip beatMissClip;
+    static AudioClip snakeMoveClip;
+    static AudioClip foodPickupClip;
+    static AudioClip gameOverClip;
     static AudioSource source;
 
     // Criamos o source no boot (antes da 1ª cena) em vez de lazy. Se criássemos
@@ -62,6 +68,75 @@ public static class SfxBeep
     {
         if (breakClip == null) breakClip = BuildWoodCrack(0.32f);
         Source.PlayOneShot(breakClip, 0.7f);
+    }
+
+    // Minigame start: chord arpegiado ascendente curto (insere moeda).
+    public static void PlayMinigameStart()
+    {
+        if (minigameStartClip == null) minigameStartClip = BuildArpeggio();
+        Source.PlayOneShot(minigameStartClip, 0.5f);
+    }
+
+    // Guitar Hero hit: blip curto agudo, sweep pra cima.
+    public static void PlayBeatHit()
+    {
+        if (beatHitClip == null) beatHitClip = BuildBlip(880f, 0.08f, square: true, sweep: 220f);
+        Source.PlayOneShot(beatHitClip, 0.5f);
+    }
+
+    // Guitar Hero miss: blip grave dissonante.
+    public static void PlayBeatMiss()
+    {
+        if (beatMissClip == null) beatMissClip = BuildBlip(180f, 0.12f, square: true, sweep: -60f);
+        Source.PlayOneShot(beatMissClip, 0.4f);
+    }
+
+    // Snake tick: pulso muito curto a cada move.
+    public static void PlaySnakeMove()
+    {
+        if (snakeMoveClip == null) snakeMoveClip = BuildBlip(520f, 0.03f, square: true, sweep: 0f);
+        Source.PlayOneShot(snakeMoveClip, 0.15f);
+    }
+
+    // Pickup de comida: chime ascendente rápido.
+    public static void PlayFoodPickup()
+    {
+        if (foodPickupClip == null) foodPickupClip = BuildBlip(740f, 0.12f, square: false, sweep: 380f);
+        Source.PlayOneShot(foodPickupClip, 0.5f);
+    }
+
+    // Game over / fail: sweep descendente longo.
+    public static void PlayGameOver()
+    {
+        if (gameOverClip == null) gameOverClip = BuildBlip(500f, 0.5f, square: true, sweep: -380f);
+        Source.PlayOneShot(gameOverClip, 0.6f);
+    }
+
+    // Arpegio 4 notas pra abertura de minigame (C-E-G-C ascendente).
+    static AudioClip BuildArpeggio()
+    {
+        const int sampleRate = 44100;
+        float perNote = 0.06f;
+        int samples = Mathf.CeilToInt(sampleRate * perNote * 4);
+        var data = new float[samples];
+        float[] freqs = { 523f, 659f, 784f, 1047f }; // C5 E5 G5 C6
+        float phase = 0f;
+        for (int n = 0; n < 4; n++)
+        {
+            int start = Mathf.CeilToInt(sampleRate * perNote * n);
+            int end = Mathf.CeilToInt(sampleRate * perNote * (n + 1));
+            for (int i = start; i < end && i < samples; i++)
+            {
+                float t = (float)(i - start) / sampleRate;
+                phase += 2f * Mathf.PI * freqs[n] / sampleRate;
+                float w = Mathf.Sin(phase) >= 0f ? 1f : -1f;
+                float env = Mathf.Clamp01(t / 0.003f) * Mathf.Exp(-t / (perNote * 0.7f));
+                data[i] = w * env * 0.3f;
+            }
+        }
+        var clip = AudioClip.Create("Arpeggio", samples, 1, sampleRate, false);
+        clip.SetData(data, 0);
+        return clip;
     }
 
     // Madeira quebrando: 3 camadas somadas

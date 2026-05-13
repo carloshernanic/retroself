@@ -132,6 +132,94 @@ public static class SceneArtCatalog
     public const string TileAssetGreenZoneWall     = "Assets/Settings/Tiles/GreenZone_Wall.asset";
     public const string TileAssetGreenZonePlatform = "Assets/Settings/Tiles/GreenZone_Platform.asset";
 
+    // ----- Tilemap cyberpunk-market (Memory_04_Sala, mercado cyberpunk noturno) -----
+    // Tile_*.png são 32×32 px, PPU 32 → 1 cell = 1u no Grid. Pack tem 100 tiles;
+    // índices iniciais escolhidos por inspeção visual (asfalto/calçada). Ajustar
+    // visualmente abrindo o spritesheet se necessário.
+    public const string MarketTileGround   = "Assets/Sprites/cyberpunk-market-street-pixel-art/1 Tiles/Tile_01.png";
+    public const string MarketTileGrassTop = "Assets/Sprites/cyberpunk-market-street-pixel-art/1 Tiles/Tile_02.png";
+    public const string MarketTileWall     = "Assets/Sprites/cyberpunk-market-street-pixel-art/1 Tiles/Tile_05.png";
+    public const string MarketTilePlatform = "Assets/Sprites/cyberpunk-market-street-pixel-art/1 Tiles/Tile_15.png";
+
+    // ----- Props cyberpunk-market (3 Objects) -----
+    public const string MarketLamp1      = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Lamps/1.png";
+    public const string MarketLamp2      = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Lamps/2.png";
+    public const string MarketLamp3      = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Lamps/3.png";
+    public const string MarketSign1      = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Signboards/1.png";
+    public const string MarketSign4      = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Signboards/4.png";
+    public const string MarketSign7      = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Signboards/7.png";
+    public const string MarketTerrace1   = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Terrace/1.png";
+    public const string MarketTerrace3   = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Terrace/3.png";
+    public const string MarketVending1   = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Vending machines/1.png";
+    public const string MarketVending2   = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Vending machines/2.png";
+    public const string MarketVending3   = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Vending machines/3.png";
+    public const string MarketVending4   = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Vending machines/4.png";
+    public const string MarketVending6   = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Vending machines/6.png";
+    public const string MarketVending7   = "Assets/Sprites/cyberpunk-market-street-pixel-art/3 Objects/Vending machines/7.png";
+
+    // ----- Vending machines do business-center pack (3 Objects/Vending_machine1..7) -----
+    // Substituem MarketVending* nas cabines de fliperama de M04. Sprites são pixel art
+    // de máquinas mais "arcade-looking" (CRT, neons). Pivot Center (regra existente do
+    // pack pra fences) — BuildArcadeCabin/AddProp compensam via pivot-aware offset.
+    public const string BusinessVending1 = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects/Vending_machine1.png";
+    public const string BusinessVending2 = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects/Vending_machine2.png";
+    public const string BusinessVending3 = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects/Vending_machine3.png";
+    public const string BusinessVending4 = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects/Vending_machine4.png";
+    public const string BusinessVending5 = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects/Vending_machine5.png";
+    public const string BusinessVending6 = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects/Vending_machine6.png";
+    public const string BusinessVending7 = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects/Vending_machine7.png";
+
+    // ----- BG cyberpunk-market (2 Background/Night, 5 layers parallax) -----
+    public static readonly string[] MarketBgNightLayers = new[]
+    {
+        "Assets/Sprites/cyberpunk-market-street-pixel-art/2 Background/Night/1.png",
+        "Assets/Sprites/cyberpunk-market-street-pixel-art/2 Background/Night/2.png",
+        "Assets/Sprites/cyberpunk-market-street-pixel-art/2 Background/Night/3.png",
+        "Assets/Sprites/cyberpunk-market-street-pixel-art/2 Background/Night/4.png",
+        "Assets/Sprites/cyberpunk-market-street-pixel-art/2 Background/Night/5.png",
+    };
+
+    // ----- Tile assets gerados pro market -----
+    public const string TileAssetMarketGround   = "Assets/Settings/Tiles/Market_Ground.asset";
+    public const string TileAssetMarketGrassTop = "Assets/Settings/Tiles/Market_GrassTop.asset";
+    public const string TileAssetMarketWall     = "Assets/Settings/Tiles/Market_Wall.asset";
+    public const string TileAssetMarketPlatform = "Assets/Settings/Tiles/Market_Platform.asset";
+
+    // ----- Food / snack icons (32×32) — comidas pra FoodPickup e Snake -----
+    // Icon3_NN.png (street-food) e Icon5_NN.png (street-snacks). 15 icons cada pack.
+    // PPU 32 → 1u no mundo. Pivot Center.
+    public const string FoodIconBurger  = "Assets/Sprites/street-food-for-cyberpunk-pixel-art-32x32-icons/1 Icons/Icon3_01.png";
+    public const string FoodIconNoodle  = "Assets/Sprites/street-food-for-cyberpunk-pixel-art-32x32-icons/1 Icons/Icon3_02.png";
+    public const string FoodIconSushi   = "Assets/Sprites/street-food-for-cyberpunk-pixel-art-32x32-icons/1 Icons/Icon3_05.png";
+    public const string FoodIconDrink   = "Assets/Sprites/street-food-for-cyberpunk-pixel-art-32x32-icons/1 Icons/Icon3_07.png";
+    public const string FoodIconDessert = "Assets/Sprites/street-snacks-pixel-art-32x32-icon-pack/1 Icons/Icon5_03.png";
+
+    // Lista completa pra Snake escolher sprite random pra cada comida.
+    public static readonly string[] FoodSnakePool = new[]
+    {
+        "Assets/Sprites/street-food-for-cyberpunk-pixel-art-32x32-icons/1 Icons/Icon3_01.png",
+        "Assets/Sprites/street-food-for-cyberpunk-pixel-art-32x32-icons/1 Icons/Icon3_02.png",
+        "Assets/Sprites/street-food-for-cyberpunk-pixel-art-32x32-icons/1 Icons/Icon3_03.png",
+        "Assets/Sprites/street-food-for-cyberpunk-pixel-art-32x32-icons/1 Icons/Icon3_05.png",
+        "Assets/Sprites/street-food-for-cyberpunk-pixel-art-32x32-icons/1 Icons/Icon3_07.png",
+        "Assets/Sprites/street-food-for-cyberpunk-pixel-art-32x32-icons/1 Icons/Icon3_09.png",
+        "Assets/Sprites/street-snacks-pixel-art-32x32-icon-pack/1 Icons/Icon5_01.png",
+        "Assets/Sprites/street-snacks-pixel-art-32x32-icon-pack/1 Icons/Icon5_03.png",
+        "Assets/Sprites/street-snacks-pixel-art-32x32-icon-pack/1 Icons/Icon5_05.png",
+        "Assets/Sprites/street-snacks-pixel-art-32x32-icon-pack/1 Icons/Icon5_08.png",
+    };
+
+    // ----- NPC guitarrista (cyberpunk-pixel-bar-cafe-npc-asset-pack/6) -----
+    // Cada PNG é um sheet com múltiplos frames; tem Idle, PlayGuitar e StopPlaying.
+    // 6.png parece ser um composto de overview. Usar PlayGuitar como sprite estático
+    // decorativo na fachada da cabine GH (single, não animado neste momento).
+    public const string MarketGuitarNpcPlay = "Assets/Sprites/cyberpunk-pixel-bar-cafe-npc-asset-pack/6/PlayGuitar.png";
+    public const string MarketGuitarNpcIdle = "Assets/Sprites/cyberpunk-pixel-bar-cafe-npc-asset-pack/6/Idle.png";
+
+    // ----- Foodtruck (business-center) e Money (coin do P1 da M04) -----
+    public const string MarketFoodtruck = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects/Foodtruck1.png";
+    public const string MarketCoin      = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects/Money.png";
+
     // ----- Fontes pixel (TMP SDF) -----
     // Body = VT323 (default UI/diálogos — mais legível em corpo pequeno).
     // Title = Press Start 2P (usado SÓ no logo "RETROSELF" — estética 8-bit).

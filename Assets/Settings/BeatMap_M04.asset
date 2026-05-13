@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb25794c34eee24dad291214f58a336, type: 3}
+  m_Name: BeatMap_M04
+  m_EditorClassIdentifier: Assembly-CSharp::BeatMap
+  notes:
+  - time: 2.5
+    lane: 0
+  - time: 3.3
+    lane: 0
+  - time: 4.1
+    lane: 0
+  - time: 4.9
+    lane: 0
+  - time: 5.7
+    lane: 1
+  - time: 6.5
+    lane: 1
+  - time: 7.3
+    lane: 1
+  - time: 8.1
+    lane: 1
+  - time: 8.9
+    lane: 0
+  - time: 9.7
+    lane: 0
+  - time: 10.5
+    lane: 0
+  - time: 11.3
+    lane: 0
+  - time: 12.1
+    lane: 1
+  - time: 12.900001
+    lane: 1
+  - time: 13.7
+    lane: 1
+  - time: 14.5
+    lane: 1
+  - time: 15.3
+    lane: 0
+  - time: 16.1
+    lane: 0
+  - time: 16.9
+    lane: 0
+  - time: 17.7
+    lane: 0
+  - time: 18.5
+    lane: 1
+  - time: 19.300001
+    lane: 1
+  - time: 20.1
+    lane: 1
+  - time: 20.9
+    lane: 1
+  - time: 21.7
+    lane: 0
+  - time: 22.5
+    lane: 0
+  - time: 23.300001
+    lane: 0
+  - time: 24.1
+    lane: 0
+  - time: 24.9
+    lane: 1
+  - time: 25.7
+    lane: 1

@@ -26,6 +26,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Memory_03_Floresta.unity
     guid: 236df8506a8a743d9b06c1f2ad12ccdf
+  - enabled: 1
+    path: Assets/Scenes/Memory_04_Cutscene_Placeholder.unity
+    guid: 29beef16b47e488429b7b20488428035
+  - enabled: 1
+    path: Assets/Scenes/Memory_04_Sala.unity
+    guid: e1d27660597b2eb4a98d587fd377e6bb
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -8,5 +8,6 @@ public static class SceneNames
     public const string Memory_02_Domingo = "Memory_02_Domingo";
     public const string Memory_03_Floresta = "Memory_03_Floresta";
     public const string Memory_04_Sala = "Memory_04_Sala";
+    public const string Memory_04_Cutscene_Placeholder = "Memory_04_Cutscene_Placeholder";
     public const string Epilogue = "Epilogue";
 }

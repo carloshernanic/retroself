@@ -9,5 +9,6 @@ public class SceneStartReset : MonoBehaviour
     void Awake()
     {
         KeyPickup.ResetCollected();
+        FoodInventory.ResetInventory();
     }
 }

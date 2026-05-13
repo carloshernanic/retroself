@@ -194,6 +194,48 @@ Fase 2 jogável montada por `Memory02Builder.cs` (menu **Retroself → Build Mem
 
 Build order quando importar pack ou trocar tile: **(a) Configure Scene Art Imports → (b) Build Memory_02_Domingo**. Não rode Configure Character Sprites de novo — slicing manual sobreviveu da Memory_01.
 
+## Estado da fase final (`Memory_04_Sala`)
+
+Fase final do jogo, montada por `Memory04Builder.cs` (menu **Retroself → Build Memory_04_Mercado**). Maior fase: span x=-5..70 (~75u). Setting: mercado cyberpunk noturno (`cyberpunk-market-street-pixel-art` pack). Narrativa: Woody adolescente (15-16 anos) fugindo de casa pro mercado — "o mercado nunca pedia explicação". Tom melancólico-esperançoso, sem palavrões (linha do `IntroDialogue` aprovada pelo usuário).
+
+**6 puzzles** em sequência, todos reusando primitivas existentes (sem types novos de plate/gate):
+
+1. **"A catraca" (x=5..15)** — `HeavyBox` com sprite `business-center/Money.png` em x=8 (coin-as-box). Adult empurra até `Plate_Coin` (HeavyBox-only) em x=12 → `Gate_Entry` (latched) em x=14 abre. Pista do P5: número "1" em **vermelho** em x=4.
+2. **"Cabine Snake" (x=18..23)** — `ArcadeMachine` (subclasse de `GateSource`) com sprite `MarketVending1` em x=20. Trigger zone 1.8×2.6 mostra prompt "[ESPAÇO]" quando player encosta. Espaço → `SnakeMinigame.Open()` (overlay Canvas filho, sortingOrder 110). Win = 10 frutas → `cleared=true` → `Gate_Snake` em x=23 abre permanente.
+3. **"Errand das comidas" (x=25..35)** — 3 plataformas elevadas em x=26/29/32 (alturas variadas, `Adult` empurra `HeavyBox` em x=24.5 como degrau). 3 `FoodPickup` (`FoodKind.Burger`) nas plataformas, Young coleta via `OnTriggerEnter2D` → `FoodInventory.Add()` estático. `VendorStall` (Foodtruck1.png) em x=33 com `required = [{Burger, 3}]`; quando satisfeito, vira `IsActive=true` latched → `Gate_Vendor` em x=35 abre. Pista do P5: número "2" em **verde**.
+4. **"Cabine Guitar Hero" (x=42)** — `ArcadeMachine` com `MarketVending6` + NPC `cyberpunk-pixel-bar-cafe-npc/6/PlayGuitar.png` decorativo na frente. Overlay com 2 lanes verticais (Young amarela esquerda, Adult marrom direita), `BeatMap_M04.asset` carregado de `Assets/Settings/`. Tab alterna `activeLane`, Espaço dá hit na lane ativa, Z/X forçam lane 0/1. Hit window ±0.18s, passThreshold 70%. `AudioClip song` opcional (placeholder usa `SfxBeep.PlayBeatHit/Miss` como metrônomo). Win → `Gate_GH` em x=45. Pista P5: "3" em **azul** em x=44.
+5. **"Senha das vending machines" (x=48..58)** — 3 vending decor (`Vending2/3/4`) + 3 `StoneSwitch` coloridos non-latched em y=-1: vermelho x=50, verde x=53, azul x=56. `SequenceLock` com `expectedOrder = [0, 1, 2]` → ordem **VERMELHO → VERDE → AZUL** (combina com clue numbering dos puzzles anteriores: 1=red, 2=green, 3=blue). Errar reseta todos. Acertar → latcha `IsActive=true` → `Gate_Lock` em x=58 abre.
+6. **"Saída" (x=63..68)** — `ReturnPad` em x=63 (revisita pistas/respawn). `CoopFinishDoor` em x=68 com `requireKey=false` (sem KeyPickup nessa fase — gates já são o gate) → carrega `SceneNames.Memory_04_Cutscene_Placeholder`.
+
+**Câmera**: bounds minX=-3, maxX=66, minY=-1, maxY=4. Spawn Young x=-3, Adult x=-1.5, y=-2 (convenção das outras fases — ground top y=-3). BG paralax de 5 layers night parented na Main Camera (PPU 32 cobre ortho 5).
+
+**Saída para cutscene**: `Memory_04_Cutscene_Placeholder.unity` (montada por `Memory04CutscenePlaceholderBuilder`) é um placeholder minimalista — texto "FIM DA MEMORIA" + botão "Voltar ao Menu" via `MenuActions.VoltarMenu()`. Substituir pela cutscene real depois.
+
+### Framework de minigame embedded
+
+Primitivas novas pra suportar arcades dentro de fase, sem trocar de cena:
+
+- **`MinigameOverlay`** (`Assets/Scripts/MinigameOverlay.cs`) — base abstrata. `Open(System.Action onWin = null)` faz `Time.timeScale = 0`, congela players via `SetGameplayFrozen` (zera velocidades + disable `PlayerController`/`PlayerAttack`/`PlayerSwap`), ativa o `canvas` filho. Subclasses sobrescrevem `OnStart()` (init), `OnEnd(bool won)` (cleanup) e `TickGame()` (chamado por `Update()` quando aberto). `Win()`/`Lose()` chamam `Close(won)` que restaura `timeScale=1` + dispara `onWinCallback` se won.
+- **`ArcadeMachine : GateSource`** (`Assets/Scripts/ArcadeMachine.cs`) — trigger box + sprite renderer. Refs: `MinigameOverlay overlay`, `GameObject promptIndicator`. `OnTriggerEnter/Exit2D` controla `playerInside` (HashSet de PlayerController). `Update` lê `Keyboard.current.spaceKey.wasPressedThisFrame` quando alguém está dentro e o overlay não está aberto → `overlay.Open(() => cleared = true)`. `IsActive => cleared` (latched permanente — gate fica aberto pra sempre após win).
+- **`SnakeMinigame : MinigameOverlay`** — grid 16×12 (configurável), snake de 3 segmentos, move a cada 0.15s usando `Time.unscaledDeltaTime` (timeScale=0!). `Keyboard.current.{up,down,left,right}ArrowKey.wasPressedThisFrame` muda direção. Spawna sprite random de `foodSprites` em célula livre. Win = `targetScore` (default 10), Esc = lose, Space re-tenta no game over.
+- **`GuitarHeroMinigame : MinigameOverlay`** — 2 RectTransforms lane (`laneYoungArea`/`laneAdultArea`), Image quadrada por nota interpolada do topo até hit zone em `noteFallTime` (1.8s). `BeatMap` ScriptableObject (`{ List<Note { time, lane }> }`) define quando cada nota nasce. `songTime` acumula `unscaledDeltaTime`; spawna nota `noteFallTime` antes do `time`. Tab alterna `activeLane`, Espaço dá hit na ativa, Z/X forçam lane 0/1. `CheckFinish`: accuracy = hits/totalNotes; >=`passThreshold` (default 0.7) = win.
+- **`BeatMap`** (`Assets/Scripts/BeatMap.cs`) — `ScriptableObject` simples com `List<Note>`. Permite trocar música/timing sem rebuildar a cena. `BeatMapPlaceholderBuilder` (menu **Retroself → Build BeatMap Placeholder**) gera `Assets/Settings/BeatMap_M04.asset` com 30 notas distribuídas em ~25s (lead 2.5s, intervalo 0.8s, swap lane a cada 4 notas pra ensinar Tab). **Idempotente**: se o `.asset` existir com notas, pula (preserva ajustes manuais — pra regerar, deletar primeiro).
+- **`FoodPickup` + `FoodInventory`** (`Assets/Scripts/{FoodPickup,FoodInventory}.cs`) — inventário estático cross-cena. `FoodKind` enum (Burger/Sushi/Noodle/Drink/Dessert). `FoodInventory.Items` é `List<FoodKind>` estática, reseta via `SceneStartReset.Awake()` (junto com `KeyPickup.ResetCollected()`).
+- **`VendorStall : GateSource`** — poll em `Update` checa se `FoodInventory.Has(kind, count)` pra cada `Need` em `required`. Quando todos satisfeitos, latcha `IsActive=true` + dispara `OnSatisfied` UnityEvent.
+
+**Como adicionar um minigame novo**: (a) subclassar `MinigameOverlay`, implementar `OnStart`/`OnEnd`/`TickGame`; (b) no builder, construir Canvas filho do ArcadeCabin com `sortingOrder` 110+, panel desativado por default, populá-lo com UI necessária, anexar componente do minigame e wirá-lo; (c) configurar `ArcadeMachine.overlay = <componente>`. O cabin vira `GateSource` automaticamente; usar como source de um `GatedDoor` pra destravar caminho.
+
+### Cuidados (lições novas do M04)
+
+- **`Time.timeScale = 0` exige `unscaledDeltaTime` em tudo.** Qualquer movement, animation, ou interval lógico DENTRO de um `MinigameOverlay` precisa usar `Time.unscaledDeltaTime`/`unscaledTime`, senão congela junto com o resto do jogo. `Keyboard.current.<key>.wasPressedThisFrame` continua funcionando normalmente (Input System bypassa Time).
+- **`Keyboard.current.spaceKey.wasPressedThisFrame` na `ArcadeMachine` requer prompt visual claro.** Sem hint na tela, jogador não descobre que Espaço abre a cabine — o `ArcadeMachine.promptIndicator` (filho ativado quando `playerInside == true`) é mandatório, não opcional.
+- **Canvas do minigame overlay**: `RenderMode.ScreenSpaceOverlay` + `sortingOrder=110` (HUD principal fica em 100). `CanvasScaler` em `ScaleWithScreenSize` 1920×1080. Painel filho desativado por default — `MinigameOverlay.Open()` ativa.
+- **`BeatMap` placeholder vs música real**: o `time` no beatmap é segundos desde Play. Se trocar `AudioClip song` por música real com BPM diferente, regere ou re-mapeie o beatmap manualmente. `BeatMapPlaceholderBuilder` é idempotente pra preservar ajustes — pra regenerar do zero, deletar `BeatMap_M04.asset` primeiro.
+- **`FoodInventory` precisa entrar no `SceneStartReset`.** Mesma armadilha do `KeyPickup`: campos estáticos sobrevivem entre `SceneManager.LoadScene`. `SceneStartReset.Awake()` agora chama tanto `KeyPickup.ResetCollected()` quanto `FoodInventory.ResetInventory()` — qualquer flag/inventory estático novo precisa ser adicionado ali.
+- **`ArcadeMachine` pós-win**: `cleared=true` persiste no scene runtime mas não cross-cena (instância destruída). Jogador pode revisitar a cabine; prompt some (já cleared). Opcionalmente o `MinigameOverlay` pode permitir replay sem flipar `cleared` (não implementado — gates ficam abertos de qualquer jeito).
+- **`PressurePlate` aceita sprite de moeda** pra tematizar como "catraca": a sprite é puramente visual (`SpriteRenderer`); o filtro mecânico (`requirement = HeavyBoxOnly`) é independente. `HeavyBox` com sprite `Money.png` empurrado pra plate vira "coin-operated turnstile" sem código novo.
+- **Build order do M04**: (a) **Configure Scene Art Imports** (uma vez, pra cyberpunk-market + food packs); (b) **Build BeatMap Placeholder** (gera `BeatMap_M04.asset`); (c) **Build Memory_04_Cutscene Placeholder**; (d) **Build Memory_04_Mercado**. Sem o BeatMap, `GuitarHeroMinigame.beatMap` fica null e o builder loga warning.
+
 ## Lições aprendidas montando a fase
 
 Gotchas do Unity 2D + URP que custaram tempo — leia antes de editar `Memory01Builder.cs` ou criar outra fase:
