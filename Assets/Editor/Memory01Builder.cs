@@ -612,13 +612,13 @@ public static class Memory01Builder
 
         CreateUIText(canvasGO.transform, "TutorialHint",
             "[A]/[D] mover  [Espaco] pular  [K] arremessar (so o jovem)  [Tab] trocar  -  derrote o porteiro, pegue a chave e leve os dois ate a porta",
-            14, FontStyles.Bold,
+            35.84f, FontStyles.Bold,
             new Vector2(0, -440), new Vector2(1820, 60),
             new Color(1, 0.95f, 0.7f, 0.9f));
 
         CreateUIText(canvasGO.transform, "Title", "MEMORY 01 - O PATIO",
-            28, FontStyles.Bold,
-            new Vector2(0, 460), new Vector2(1200, 60),
+            71.68f, FontStyles.Bold,
+            new Vector2(0, 460), new Vector2(1400, 100),
             CreamCol,
             TextAlignmentOptions.Center);
 
@@ -676,7 +676,7 @@ public static class Memory01Builder
         pimg.raycastTarget = false;
 
         // Speaker label — ancorada ao top-left do box (não centralizada, pra não sobrepor texto).
-        var labelGO = CreateUIText(box.transform, "SpeakerLabel", "Woody (adulto)", 18, FontStyles.Bold,
+        var labelGO = CreateUIText(box.transform, "SpeakerLabel", "Woody (adulto)", 46.08f, FontStyles.Bold,
             Vector2.zero, Vector2.zero, CreamCol, TextAlignmentOptions.Left);
         var labelRt = labelGO.GetComponent<RectTransform>();
         labelRt.anchorMin = labelRt.anchorMax = new Vector2(0, 1);
@@ -685,7 +685,7 @@ public static class Memory01Builder
         labelRt.sizeDelta = new Vector2(1200, 36);
 
         // Texto principal — abaixo da label, ancorado ao top-left.
-        var textGO = CreateUIText(box.transform, "DialogText", "", 18, FontStyles.Normal,
+        var textGO = CreateUIText(box.transform, "DialogText", "", 46.08f, FontStyles.Normal,
             Vector2.zero, Vector2.zero,
             new Color(1f, 0.96f, 0.85f, 1f), TextAlignmentOptions.TopLeft);
         var textRt = textGO.GetComponent<RectTransform>();
@@ -703,7 +703,7 @@ public static class Memory01Builder
 
         // Continue indicator (seta piscando no canto inferior direito).
         // Usa ">>" em vez de "▶" porque a LiberationSans SDF default não tem esse glyph.
-        var contGO = CreateUIText(box.transform, "Continue", ">> Espaco/Enter", 14, FontStyles.Italic,
+        var contGO = CreateUIText(box.transform, "Continue", ">> Espaco/Enter", 35.84f, FontStyles.Italic,
             Vector2.zero, Vector2.zero, CreamCol, TextAlignmentOptions.Right);
         var contRt = contGO.GetComponent<RectTransform>();
         contRt.anchorMin = contRt.anchorMax = new Vector2(1, 0);
@@ -752,7 +752,7 @@ public static class Memory01Builder
         var fill = fillGO.AddComponent<Image>();
         fill.color = new Color(0.55f, 0.85f, 0.4f);
 
-        CreateUIText(root.transform, "Label", "VIDA", 14, FontStyles.Bold,
+        CreateUIText(root.transform, "Label", "VIDA", 35.84f, FontStyles.Bold,
             new Vector2(0, 32), new Vector2(120, 24),
             new Color(1, 0.95f, 0.7f, 0.85f), TextAlignmentOptions.Left);
 
@@ -778,7 +778,7 @@ public static class Memory01Builder
         return cachedSolid;
     }
 
-    static GameObject CreateUIText(Transform parent, string name, string text, int size, FontStyles style,
+    static GameObject CreateUIText(Transform parent, string name, string text, float size, FontStyles style,
         Vector2 anchored, Vector2 sizeDelta, Color color,
         TextAlignmentOptions align = TextAlignmentOptions.Center)
     {
