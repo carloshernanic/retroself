@@ -68,6 +68,15 @@ public static class SceneArtCatalog
     // ----- BG basement (interior fechado, sem parallax) -----
     public const string BasementBG       = "Assets/Sprites/basement-tileset-pixel-art/2 Background/Overlay_illumination.png";
 
+    // ----- Fence quebrável (business-center-tileset/3 Objects/Fence7..10) -----
+    // 4 peças 32×32 que empilham verticalmente pra formar a parede destrutível
+    // (BuildBreakablePlank). Convenção: Bottom = âncora c/ barra horizontal grossa;
+    // MiddleA/B = variantes do meio (decoração); Top = topo limpo.
+    public const string FenceBottom  = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects/Fence8.png";
+    public const string FenceMiddleA = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects/Fence9.png";
+    public const string FenceMiddleB = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects/Fence7.png";
+    public const string FenceTop     = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects/Fence10.png";
+
     // ----- Doors and portals (doors-and-portals-pixel-art-asset-pack) -----
     // Sheet 1.png = porta de madeira, 6 frames horizontais 32×64 px (animação fechada→aberta).
     // Sheet 2.png = portal de pedra/azul, 6 frames 64×64 (idle com brilho/estrelas).

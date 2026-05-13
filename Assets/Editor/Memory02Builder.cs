@@ -319,6 +319,7 @@ public static class Memory02Builder
         // alvo (1.0u alto: y=-0.8 a +0.2). Janela apertada mas alcançável.
         var stoneSwitch = BuildStoneSwitch(parent, "P2_Switch_High", new Vector3(17f, -0.3f, 0),
             new Vector2(1.0f, 1.0f), latched: true);
+        SwitchIconHelper.Attach(stoneSwitch, SwitchIconHelper.Color.Yellow);
 
         // Gate único, source = stoneSwitch latched. Latched gate só abre uma vez.
         var gate = BuildGate(parent, "P2_Gate", new Vector3(20f, 0.5f, 0),
@@ -360,6 +361,7 @@ public static class Memory02Builder
         // Em pulo (~+2u) fira em y=-0.4 — acerta. Janela é mais larga que P2 (alvo 1.2u).
         var stoneSwitch = BuildStoneSwitch(parent, "P3_Switch", new Vector3(30f, -1f, 0),
             new Vector2(1.2f, 1.2f), latched: true);
+        SwitchIconHelper.Attach(stoneSwitch, SwitchIconHelper.Color.Yellow);
 
         // Gate final latched + non-Adult-Hold dependent — uma vez switch acertado, fica aberto pra sempre.
         var gateFinal = BuildGate(parent, "P3_Gate_Final", new Vector3(32f, 0.5f, 0),
@@ -392,12 +394,15 @@ public static class Memory02Builder
         var swRed   = BuildStoneSwitchColored(lockRoot.transform, "P4_Switch_Red",
             new Vector3(35f, -2.5f, 0), new Vector2(1.0f, 1.0f),
             latched: false, offColor: LockRedOff,   onColor: LockRed);
+        SwitchIconHelper.Attach(swRed, SwitchIconHelper.Color.Red);
         var swGreen = BuildStoneSwitchColored(lockRoot.transform, "P4_Switch_Green",
             new Vector3(37f, -2.5f, 0), new Vector2(1.0f, 1.0f),
             latched: false, offColor: LockGreenOff, onColor: LockGreen);
+        SwitchIconHelper.Attach(swGreen, SwitchIconHelper.Color.Green);
         var swBlue  = BuildStoneSwitchColored(lockRoot.transform, "P4_Switch_Blue",
             new Vector3(39f, -2.5f, 0), new Vector2(1.0f, 1.0f),
             latched: false, offColor: LockBlueOff,  onColor: LockBlue);
+        SwitchIconHelper.Attach(swBlue, SwitchIconHelper.Color.Blue);
 
         // SequenceLock — ordem: VERDE(idx 1), VERMELHO(idx 0), AZUL(idx 2).
         // Os índices da lista switches precisam bater com os números das pistas:
@@ -523,22 +528,18 @@ public static class Memory02Builder
 
     static GameObject BuildBreakablePlank(Transform parent, string name, Vector3 worldPos, Vector2 size)
     {
-        // Parede destrutível: SpriteRenderer quad + BoxCollider2D NÃO-trigger (bloqueia
-        // colisão sólida do Adult) + EnemyHealth(1). Stone (trigger) atravessa o sólido
-        // mas dispara OnTriggerEnter2D → Stone.OnTriggerEnter pega EnemyHealth → TakeDamage(1)
-        // → HP=0 → OnDefeated → Destroy. Plank some, Adult passa.
+        // Parede destrutível: stack de fence sprites (FenceStackHelper) + BoxCollider2D
+        // NÃO-trigger (bloqueia Adult) + EnemyHealth(1). Stone (trigger) atravessa o
+        // sólido mas dispara OnTriggerEnter2D → TakeDamage(1) → OnDefeated → Destroy.
         var go = new GameObject(name);
         go.transform.SetParent(parent, false);
         go.transform.position = worldPos;
-        go.transform.localScale = new Vector3(size.x, size.y, 1f);
+        go.transform.localScale = Vector3.one; // root sem scale; visual carrega o tamanho.
 
-        var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = SolidSprite();
-        sr.color = new Color(0.40f, 0.27f, 0.16f, 1f); // marrom-tabua
-        sr.sortingOrder = 7;
+        FenceStackHelper.Build(go.transform, name + "_Visual", size.x, size.y, 7);
 
         var col = go.AddComponent<BoxCollider2D>();
-        col.size = Vector2.one;
+        col.size = size;
         // NÃO trigger — bloqueia Adult fisicamente.
 
         var hp = go.AddComponent<EnemyHealth>();
@@ -982,13 +983,13 @@ public static class Memory02Builder
 
         CreateUIText(canvasGO.transform, "TutorialHint",
             "[A]/[D] mover  [Espaco] pular  [K] atirar pedra (jovem)  [Tab] trocar Woody",
-            14, FontStyles.Bold,
+            35.84f, FontStyles.Bold,
             new Vector2(0, -440), new Vector2(1820, 60),
             new Color(1, 0.95f, 0.7f, 0.9f));
 
         CreateUIText(canvasGO.transform, "Title", "MEMORY 02 - DOMINGO",
-            28, FontStyles.Bold,
-            new Vector2(0, 460), new Vector2(1200, 60),
+            71.68f, FontStyles.Bold,
+            new Vector2(0, 460), new Vector2(1400, 100),
             CreamCol,
             TextAlignmentOptions.Center);
 
@@ -1038,7 +1039,7 @@ public static class Memory02Builder
         pimg.color = AdultCol;
         pimg.raycastTarget = false;
 
-        var labelGO = CreateUIText(box.transform, "SpeakerLabel", "Woody (adulto)", 18, FontStyles.Bold,
+        var labelGO = CreateUIText(box.transform, "SpeakerLabel", "Woody (adulto)", 46.08f, FontStyles.Bold,
             Vector2.zero, Vector2.zero, CreamCol, TextAlignmentOptions.Left);
         var labelRt = labelGO.GetComponent<RectTransform>();
         labelRt.anchorMin = labelRt.anchorMax = new Vector2(0, 1);
@@ -1046,7 +1047,7 @@ public static class Memory02Builder
         labelRt.anchoredPosition = new Vector2(250, -20);
         labelRt.sizeDelta = new Vector2(1200, 36);
 
-        var textGO = CreateUIText(box.transform, "DialogText", "", 18, FontStyles.Normal,
+        var textGO = CreateUIText(box.transform, "DialogText", "", 46.08f, FontStyles.Normal,
             Vector2.zero, Vector2.zero,
             new Color(1f, 0.96f, 0.85f, 1f), TextAlignmentOptions.TopLeft);
         var textRt = textGO.GetComponent<RectTransform>();
@@ -1062,7 +1063,7 @@ public static class Memory02Builder
         typewriter.target = tmp;
         typewriter.charsPerSecond = 38f;
 
-        var contGO = CreateUIText(box.transform, "Continue", ">> Espaco/Enter", 14, FontStyles.Italic,
+        var contGO = CreateUIText(box.transform, "Continue", ">> Espaco/Enter", 35.84f, FontStyles.Italic,
             Vector2.zero, Vector2.zero, CreamCol, TextAlignmentOptions.Right);
         var contRt = contGO.GetComponent<RectTransform>();
         contRt.anchorMin = contRt.anchorMax = new Vector2(1, 0);
@@ -1113,7 +1114,7 @@ public static class Memory02Builder
         var fill = fillGO.AddComponent<Image>();
         fill.color = new Color(0.55f, 0.85f, 0.4f);
 
-        CreateUIText(root.transform, "Label", "VIDA", 14, FontStyles.Bold,
+        CreateUIText(root.transform, "Label", "VIDA", 35.84f, FontStyles.Bold,
             new Vector2(0, 32), new Vector2(120, 24),
             new Color(1, 0.95f, 0.7f, 0.85f), TextAlignmentOptions.Left);
 
@@ -1139,7 +1140,7 @@ public static class Memory02Builder
         return cachedSolid;
     }
 
-    static GameObject CreateUIText(Transform parent, string name, string text, int size, FontStyles style,
+    static GameObject CreateUIText(Transform parent, string name, string text, float size, FontStyles style,
         Vector2 anchored, Vector2 sizeDelta, Color color,
         TextAlignmentOptions align = TextAlignmentOptions.Center)
     {

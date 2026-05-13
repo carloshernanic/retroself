@@ -71,6 +71,16 @@ public static class SceneArtImportConfigurator
 
         // Green-zone BG layers (Day/Night, 5 layers cada, 576×324). PPU 32 cobre exatamente ortho size 5 em 16:9.
         new Rule { folder = "Assets/Sprites/green-zone-tileset-pixel-art/2 Background", ppu = 32, alignment = (int)SpriteAlignment.Center, recursive = true },
+
+        // Cyberpunk skills icons (1..13 cores, 14 glitch). PNG 32×32 com 5px de borda
+        // transparente → conteúdo 22×22. Single mode + PPU 32 → 1u no mundo, mesma
+        // métrica do quadrado do StoneSwitch (scale 1×1). Filtra Point pra pixel art.
+        new Rule { folder = "Assets/Sprites/cyberpunk-skills-pixelated-icon-pack/1 Icons", ppu = 32, alignment = (int)SpriteAlignment.Center, recursive = true },
+
+        // Business-center fences (3 Objects/Fence1..10) — usados como visual da
+        // BreakablePlank em Memory_02/03 empilhando bottom/middle/top. 32×32, PPU 32,
+        // pivot Center pra empilhamento ficar alinhado pelo centro.
+        new Rule { folder = "Assets/Sprites/business-center-tileset-pixel-art/3 Objects", ppu = 32, alignment = (int)SpriteAlignment.Center, recursive = false },
     };
 
     [MenuItem("Retroself/Configure Scene Art Imports")]

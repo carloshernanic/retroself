@@ -506,6 +506,7 @@ public static class Memory03Builder
         // Em cima da plataforma (top y=1) fira em y≈1.4 — entra no rect 1..2 → acerta.
         var stoneSwitch = BuildStoneSwitch(parent, "P2_Switch_High",
             new Vector3(20f, 1.5f, 0), new Vector2(1.0f, 1.0f), latched: true);
+        SwitchIconHelper.Attach(stoneSwitch, SwitchIconHelper.Color.Yellow);
 
         var gate = BuildGate(parent, "P2_Gate", new Vector3(22f, 0.5f, 0),
             size: new Vector2(0.7f, 7f), openOffset: new Vector2(0f, 8f), latched: true);
@@ -548,6 +549,7 @@ public static class Memory03Builder
         // Switch a y=-1 (Young pula do chão pra fira em y~+1 — alcança).
         var stoneSwitch = BuildStoneSwitch(parent, "P3_Switch",
             new Vector3(32f, -1f, 0), new Vector2(1.2f, 1.2f), latched: true);
+        SwitchIconHelper.Attach(stoneSwitch, SwitchIconHelper.Color.Yellow);
 
         var gateFinal = BuildGate(parent, "P3_Gate_Final", new Vector3(34f, 0.5f, 0),
             size: new Vector2(0.7f, 7f), openOffset: new Vector2(0f, 8f), latched: true);
@@ -579,12 +581,15 @@ public static class Memory03Builder
         var swGreen = BuildStoneSwitchColored(lockRoot.transform, "P4_Switch_Green",
             new Vector3(38f, 4.5f, 0), new Vector2(1f, 1f),
             latched: false, offColor: LockGreenOff, onColor: LockGreen);
+        SwitchIconHelper.Attach(swGreen, SwitchIconHelper.Color.Green);
         var swRed   = BuildStoneSwitchColored(lockRoot.transform, "P4_Switch_Red",
             new Vector3(42f, 4.5f, 0), new Vector2(1f, 1f),
             latched: false, offColor: LockRedOff,   onColor: LockRed);
+        SwitchIconHelper.Attach(swRed, SwitchIconHelper.Color.Red);
         var swBlue  = BuildStoneSwitchColored(lockRoot.transform, "P4_Switch_Blue",
             new Vector3(46f, 4.5f, 0), new Vector2(1f, 1f),
             latched: false, offColor: LockBlueOff,  onColor: LockBlue);
+        SwitchIconHelper.Attach(swBlue, SwitchIconHelper.Color.Blue);
 
         // SequenceLock — switches[0]=green, [1]=red, [2]=blue.
         // ExpectedOrder: 0,1,2 = green, red, blue (ordem das pistas: 1=verde, 2=vermelho, 3=azul).
@@ -725,20 +730,18 @@ public static class Memory03Builder
 
     static GameObject BuildBreakablePlank(Transform parent, string name, Vector3 worldPos, Vector2 size)
     {
-        // SpriteRenderer + BoxCollider2D NON-trigger (sólido pro Adult) + EnemyHealth(1).
+        // BoxCollider2D NON-trigger (sólido pro Adult) + EnemyHealth(1) no root.
+        // Visual = FenceStackHelper (bottom/middle/top empilhados, sprites do business-center pack).
         // Stone trigger atravessa o sólido mas dispara OnTriggerEnter → TakeDamage → Destroy.
         var go = new GameObject(name);
         go.transform.SetParent(parent, false);
         go.transform.position = worldPos;
-        go.transform.localScale = new Vector3(size.x, size.y, 1f);
+        go.transform.localScale = Vector3.one; // root sem scale; visual carrega o tamanho.
 
-        var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = SolidSprite();
-        sr.color = PlankCol;
-        sr.sortingOrder = 7;
+        FenceStackHelper.Build(go.transform, name + "_Visual", size.x, size.y, 7);
 
         var col = go.AddComponent<BoxCollider2D>();
-        col.size = Vector2.one;
+        col.size = size;
 
         var hp = go.AddComponent<EnemyHealth>();
         hp.maxHealth = 1;
@@ -1073,13 +1076,13 @@ public static class Memory03Builder
 
         CreateUIText(canvasGO.transform, "TutorialHint",
             "[A]/[D] mover  [Espaco] pular  [K] atirar pedra (jovem)  [Tab] trocar Woody",
-            24, FontStyles.Bold,
-            new Vector2(0, -440), new Vector2(1820, 80),
+            35.84f, FontStyles.Bold,
+            new Vector2(0, -440), new Vector2(1820, 60),
             new Color(1, 0.95f, 0.7f, 0.9f));
 
         CreateUIText(canvasGO.transform, "Title", "MEMORY 03 - FLORESTA",
-            48, FontStyles.Bold,
-            new Vector2(0, 460), new Vector2(1400, 80),
+            71.68f, FontStyles.Bold,
+            new Vector2(0, 460), new Vector2(1400, 100),
             CreamCol,
             TextAlignmentOptions.Center);
 
@@ -1129,7 +1132,7 @@ public static class Memory03Builder
         pimg.color = AdultCol;
         pimg.raycastTarget = false;
 
-        var labelGO = CreateUIText(box.transform, "SpeakerLabel", "Woody (adulto)", 30, FontStyles.Bold,
+        var labelGO = CreateUIText(box.transform, "SpeakerLabel", "Woody (adulto)", 46.08f, FontStyles.Bold,
             Vector2.zero, Vector2.zero, CreamCol, TextAlignmentOptions.Left);
         var labelRt = labelGO.GetComponent<RectTransform>();
         labelRt.anchorMin = labelRt.anchorMax = new Vector2(0, 1);
@@ -1137,7 +1140,7 @@ public static class Memory03Builder
         labelRt.anchoredPosition = new Vector2(250, -20);
         labelRt.sizeDelta = new Vector2(1200, 36);
 
-        var textGO = CreateUIText(box.transform, "DialogText", "", 26, FontStyles.Normal,
+        var textGO = CreateUIText(box.transform, "DialogText", "", 46.08f, FontStyles.Normal,
             Vector2.zero, Vector2.zero,
             new Color(1f, 0.96f, 0.85f, 1f), TextAlignmentOptions.TopLeft);
         var textRt = textGO.GetComponent<RectTransform>();
@@ -1153,7 +1156,7 @@ public static class Memory03Builder
         typewriter.target = tmp;
         typewriter.charsPerSecond = 38f;
 
-        var contGO = CreateUIText(box.transform, "Continue", ">> Espaco/Enter", 22, FontStyles.Italic,
+        var contGO = CreateUIText(box.transform, "Continue", ">> Espaco/Enter", 35.84f, FontStyles.Italic,
             Vector2.zero, Vector2.zero, CreamCol, TextAlignmentOptions.Right);
         var contRt = contGO.GetComponent<RectTransform>();
         contRt.anchorMin = contRt.anchorMax = new Vector2(1, 0);
@@ -1203,7 +1206,7 @@ public static class Memory03Builder
         var fill = fillGO.AddComponent<Image>();
         fill.color = new Color(0.55f, 0.85f, 0.4f);
 
-        CreateUIText(root.transform, "Label", "VIDA", 24, FontStyles.Bold,
+        CreateUIText(root.transform, "Label", "VIDA", 35.84f, FontStyles.Bold,
             new Vector2(0, 40), new Vector2(160, 32),
             new Color(1, 0.95f, 0.7f, 0.85f), TextAlignmentOptions.Left);
 
@@ -1229,7 +1232,7 @@ public static class Memory03Builder
         return cachedSolid;
     }
 
-    static GameObject CreateUIText(Transform parent, string name, string text, int size, FontStyles style,
+    static GameObject CreateUIText(Transform parent, string name, string text, float size, FontStyles style,
         Vector2 anchored, Vector2 sizeDelta, Color color,
         TextAlignmentOptions align = TextAlignmentOptions.Center)
     {
