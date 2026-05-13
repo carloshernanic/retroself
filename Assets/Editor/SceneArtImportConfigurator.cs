@@ -98,10 +98,10 @@ public static class SceneArtImportConfigurator
         new Rule { folder = "Assets/Sprites/street-food-for-cyberpunk-pixel-art-32x32-icons/1 Icons", ppu = 32, alignment = (int)SpriteAlignment.Center, recursive = false },
         new Rule { folder = "Assets/Sprites/street-snacks-pixel-art-32x32-icon-pack/1 Icons", ppu = 32, alignment = (int)SpriteAlignment.Center, recursive = false },
 
-        // NPC guitarrista (pasta 6/) — sprite estático decorativo na fachada da cabine GH.
-        // PPU 32, BottomCenter pra ele "sentar" no chão da cabine. Single mode (não
-        // estamos animando — Idle/PlayGuitar/StopPlaying tratados como sprites separados).
-        new Rule { folder = "Assets/Sprites/cyberpunk-pixel-bar-cafe-npc-asset-pack/6", ppu = 32, alignment = (int)SpriteAlignment.BottomCenter, recursive = false },
+        // NPC guitarrista (pasta 6/) é animado: PlayGuitar.png (384×64 = 6 frames) e
+        // Idle.png (256×64 = 4 frames) são sheets multi-frame. O slicing é feito pelo
+        // SpriteImportConfigurator (Multiple mode), NÃO aqui — esta rule sobrescreveria
+        // pro Single mode. 6.png e StopPlaying.png ficam Single (não usados como anim).
     };
 
     [MenuItem("Retroself/Configure Scene Art Imports")]

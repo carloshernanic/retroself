@@ -210,9 +210,10 @@ public static class SceneArtCatalog
     };
 
     // ----- NPC guitarrista (cyberpunk-pixel-bar-cafe-npc-asset-pack/6) -----
-    // Cada PNG é um sheet com múltiplos frames; tem Idle, PlayGuitar e StopPlaying.
-    // 6.png parece ser um composto de overview. Usar PlayGuitar como sprite estático
-    // decorativo na fachada da cabine GH (single, não animado neste momento).
+    // PlayGuitar.png é sheet 384×64 (6 frames horizontais) — sliciado pelo
+    // SpriteImportConfigurator e carregado via LoadSpriteFrames pra animar o NPC
+    // da fachada da cabine GH como SimpleSpriteAnimator. Idle.png (256×64, 4 frames)
+    // pode ser usado quando o NPC parar de tocar; atualmente usamos só PlayGuitar.
     public const string MarketGuitarNpcPlay = "Assets/Sprites/cyberpunk-pixel-bar-cafe-npc-asset-pack/6/PlayGuitar.png";
     public const string MarketGuitarNpcIdle = "Assets/Sprites/cyberpunk-pixel-bar-cafe-npc-asset-pack/6/Idle.png";
 

@@ -24,6 +24,7 @@ public static class Memory04Builder
 {
     const string ScenePath = "Assets/Scenes/Memory_04_Sala.unity";
     const string BeatMapPath = "Assets/Settings/BeatMap_M04.asset";
+    const string GuitarHeroSongPath = "Assets/Audio/retroself-gh.wav";
 
     static readonly string[] OwnedRoots = {
         "Main Camera", "EventSystem", "Grid", "BG_Market",
@@ -577,14 +578,25 @@ public static class Memory04Builder
             var npc = new GameObject("NPC");
             npc.transform.SetParent(root.transform, false);
             var nsr = npc.AddComponent<SpriteRenderer>();
-            var nps = SceneArtCatalog.LoadSprite(npcSprite);
-            if (nps != null)
+            // Tenta carregar frames sliciados (Multiple mode); se houver, anima.
+            var frames = SceneArtCatalog.LoadSpriteFrames(npcSprite);
+            Sprite first = (frames != null && frames.Length > 0) ? frames[0] : SceneArtCatalog.LoadSprite(npcSprite);
+            if (first != null)
             {
-                nsr.sprite = nps;
-                npc.transform.localPosition = new Vector3(1.4f, GroundSitOffsetY(nps), 0f);
+                nsr.sprite = first;
+                npc.transform.localPosition = new Vector3(1.4f, GroundSitOffsetY(first), 0f);
             }
             else { nsr.sprite = SolidSprite(); nsr.color = new Color(0.85f, 0.6f, 0.4f, 1f); npc.transform.localScale = new Vector3(0.6f, 1.2f, 1f); npc.transform.localPosition = new Vector3(1.4f, 0.6f, 0f); }
             nsr.sortingOrder = 6;
+
+            if (frames != null && frames.Length > 1)
+            {
+                var anim = npc.AddComponent<SimpleSpriteAnimator>();
+                anim.idleSprites = frames;
+                anim.walkSprites = frames;
+                anim.jumpSprites = frames;
+                anim.idleFps = 8f;
+            }
         }
 
         return root;
@@ -650,11 +662,19 @@ public static class Memory04Builder
         var score = CreateUIText(panel.transform, "Score", "0 / 10",
             48f, FontStyles.Bold, new Vector2(-700, 380), new Vector2(400, 60),
             new Color(0.7f, 1f, 0.7f, 1f), TextAlignmentOptions.Left);
-        var status = CreateUIText(panel.transform, "Status", "Setas pra mover. Esc pra desistir.",
+        var status = CreateUIText(panel.transform, "Status", "Setas ou WASD pra mover. Esc pra desistir.",
             36f, FontStyles.Italic, new Vector2(0, -420), new Vector2(1600, 60),
             new Color(1f, 0.94f, 0.78f, 0.9f));
 
+        var snakeTutorial = BuildTutorialPanel(canvasGO.transform, "COBRINHA", new[]
+        {
+            "Coma 10 frutas pra ganhar.",
+            "Setas ou WASD = mover a cobra.",
+            "Esc = desistir.",
+        });
+
         var snake = canvasGO.AddComponent<SnakeMinigame>();
+        snake.tutorialPanel = snakeTutorial;
         snake.canvas = canvas;
         snake.panel = panel;
         snake.gridArea = grt;
@@ -715,18 +735,18 @@ public static class Memory04Builder
         var overlayAdult = BuildLaneOverlay(laneAdult);
 
         // Labels acima das lanes.
-        CreateUIText(panel.transform, "LabelY", "JOVEM [Z]",
-            42f, FontStyles.Bold, new Vector2(-320, 320), new Vector2(360, 60),
+        CreateUIText(panel.transform, "LabelY", "JOVEM [Z/A/<-]",
+            36f, FontStyles.Bold, new Vector2(-320, 320), new Vector2(360, 60),
             new Color(1f, 0.85f, 0.25f, 1f));
-        CreateUIText(panel.transform, "LabelA", "ADULTO [X]",
-            42f, FontStyles.Bold, new Vector2( 320, 320), new Vector2(360, 60),
+        CreateUIText(panel.transform, "LabelA", "ADULTO [X/D/->]",
+            36f, FontStyles.Bold, new Vector2( 320, 320), new Vector2(360, 60),
             new Color(0.95f, 0.7f, 0.45f, 1f));
 
         var score = CreateUIText(panel.transform, "Score", "0 / 0",
             48f, FontStyles.Bold, new Vector2(-700, 400), new Vector2(400, 60),
             new Color(0.7f, 1f, 0.7f, 1f), TextAlignmentOptions.Left);
-        var status = CreateUIText(panel.transform, "Status", "Tab alterna. Espaco/Z/X tocam. Esc desiste.",
-            36f, FontStyles.Italic, new Vector2(0, -440), new Vector2(1600, 60),
+        var status = CreateUIText(panel.transform, "Status", "Qualquer tecla de hit toca a nota mais perto. Esc desiste.",
+            32f, FontStyles.Italic, new Vector2(0, -440), new Vector2(1600, 60),
             new Color(1f, 0.94f, 0.78f, 0.9f));
 
         var gh = canvasGO.AddComponent<GuitarHeroMinigame>();
@@ -740,9 +760,10 @@ public static class Memory04Builder
         gh.laneAdultOverlay = overlayAdult;
         gh.scoreText = score.GetComponent<TMP_Text>();
         gh.statusText = status.GetComponent<TMP_Text>();
-        gh.noteFallTime = 1.8f;
-        gh.hitWindow = 0.18f;
-        gh.passThreshold = 0.7f;
+        gh.noteFallTime = 3.0f;
+        gh.hitWindow = 0.35f;
+        gh.passThreshold = 0.4f;
+        gh.inactiveOverlayColor = new Color(0f, 0f, 0f, 0.08f);
         if (young != null) gh.young = young.GetComponent<PlayerController>();
         if (adult != null) gh.adult = adult.GetComponent<PlayerController>();
         if (swap != null) gh.playerSwap = swap.GetComponent<PlayerSwap>();
@@ -752,8 +773,51 @@ public static class Memory04Builder
             Debug.LogWarning($"[Memory04Builder] BeatMap não encontrado em {BeatMapPath} — rode 'Retroself → Build BeatMap Placeholder' antes.");
         gh.beatMap = beatMap;
 
+        var song = AssetDatabase.LoadAssetAtPath<AudioClip>(GuitarHeroSongPath);
+        if (song == null)
+            Debug.LogWarning($"[Memory04Builder] AudioClip não encontrado em {GuitarHeroSongPath} — placeholder metronômico será usado.");
+        gh.song = song;
+
+        var ghTutorial = BuildTutorialPanel(canvasGO.transform, "GUITAR HERO CO-OP", new[]
+        {
+            "Acerte as notas na zona de hit quando cairem.",
+            "Qualquer tecla de hit acerta a nota mais proxima.",
+            "Espaco / S / Seta-baixo, Z / A / Seta-esquerda,",
+            "X / D / Seta-direita — todas tocam.",
+            "Tab so alterna o foco visual.",
+            "Esc = desistir.",
+        });
+        gh.tutorialPanel = ghTutorial;
+
         canvasGO.SetActive(false);
         return gh;
+    }
+
+    // ---------- Tutorial panel comum ----------
+
+    static GameObject BuildTutorialPanel(Transform canvasParent, string title, string[] lines)
+    {
+        var tut = new GameObject("Tutorial", typeof(RectTransform), typeof(Image));
+        tut.transform.SetParent(canvasParent, false);
+        var rt = tut.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
+        tut.GetComponent<Image>().color = new Color(0.02f, 0.02f, 0.06f, 0.98f);
+
+        CreateUIText(tut.transform, "TutTitle", title,
+            72f, FontStyles.Bold, new Vector2(0, 350), new Vector2(1600, 100), CreamCol);
+
+        var body = string.Join("\n\n", lines);
+        CreateUIText(tut.transform, "TutBody", body,
+            36f, FontStyles.Normal, new Vector2(0, 0), new Vector2(1400, 600),
+            new Color(1f, 0.94f, 0.78f, 1f));
+
+        CreateUIText(tut.transform, "TutHint", "Pressione [Enter] pra comecar",
+            42f, FontStyles.Italic, new Vector2(0, -400), new Vector2(1600, 80),
+            new Color(0.8f, 1f, 0.8f, 1f));
+
+        tut.SetActive(false);
+        return tut;
     }
 
     static RectTransform BuildLane(Transform parent, string name, Vector2 anchored, Color bgColor)

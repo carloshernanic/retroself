@@ -1,21 +1,40 @@
 #if UNITY_EDITOR
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-// Gera Assets/Settings/BeatMap_M04.asset com ~30 notas distribuídas em ~25s.
-// Padrão alternante (4 notas Young, 4 Adult, ...) pra ensinar Tab swap.
-// Densidade ~1.2 notas/s — controlável pelo `passThreshold` do GH.
+// Gera Assets/Settings/BeatMap_M04.asset alinhado com retroself-gh.wav (130 BPM).
+// Estrutura musical aprovada pelo usuário (1 ciclo):
+//   [4 tempos vazio][8 Jovem][4 vazio][8 Adulto][4 vazio]
+//   [4 Jovem][4 Jovem][4 Adulto][8 Jovem]
 //
-// Idempotente: se asset existir e tiver notas, NÃO sobrescreve (preserva ajustes
-// manuais). Se vazio ou inexistente, gera placeholder. Pra regerar, deletar o
-// asset antes.
+// Densidade: 1 nota a cada 2 tempos (130 BPM → ~1.08 notas/s) — confortável pra
+// jogar com música. Total por ciclo: 18 notas em 48 tempos (~22.15s).
+//
+// Estende o ciclo repetidamente até cobrir toda a duração de retroself-gh.wav.
+// Se o AudioClip não existir, gera só 1 ciclo como fallback.
+//
+// Sempre regera. Pra preservar ajustes manuais, mover o asset pra outro path antes.
 public static class BeatMapPlaceholderBuilder
 {
     const string AssetPath = "Assets/Settings/BeatMap_M04.asset";
-    const float Lead = 2.5f;           // tempo inicial antes da 1ª nota
-    const int   NoteCount = 30;
-    const float NoteInterval = 0.8f;   // ~1.25 notas/s
-    const int   SwapEvery = 4;         // alterna lane a cada N notas
+    const string SongPath = "Assets/Audio/retroself-gh.wav";
+    const float Bpm = 130f;
+    // 1 nota a cada N tempos. 2 = cada meio-compasso (mais confortável que 1 por tempo).
+    const int BeatsPerNote = 2;
+
+    static readonly (int? lane, int beats)[] Sections = new (int?, int)[]
+    {
+        (null, 4),
+        (0,    8),
+        (null, 4),
+        (1,    8),
+        (null, 4),
+        (0,    4),
+        (0,    4),
+        (1,    4),
+        (0,    8),
+    };
 
     [MenuItem("Retroself/Build BeatMap Placeholder")]
     public static void BuildPlaceholder()
@@ -23,20 +42,35 @@ public static class BeatMapPlaceholderBuilder
         EnsureFolder("Assets/Settings");
 
         var existing = AssetDatabase.LoadAssetAtPath<BeatMap>(AssetPath);
-        if (existing != null && existing.notes != null && existing.notes.Count > 0)
-        {
-            Debug.Log($"[BeatMapPlaceholderBuilder] {AssetPath} já existe com {existing.notes.Count} notas — pulei (delete o asset pra regerar).");
-            EditorGUIUtility.PingObject(existing);
-            return;
-        }
-
         var bm = existing != null ? existing : ScriptableObject.CreateInstance<BeatMap>();
         bm.notes.Clear();
-        int currentLane = 0;
-        for (int i = 0; i < NoteCount; i++)
+
+        float beatDur = 60f / Bpm;
+
+        int cycleBeats = 0;
+        foreach (var s in Sections) cycleBeats += s.beats;
+        float cycleSec = cycleBeats * beatDur;
+
+        var song = AssetDatabase.LoadAssetAtPath<AudioClip>(SongPath);
+        float targetSec = song != null ? song.length : cycleSec;
+        int cycles = song != null ? Mathf.Max(1, Mathf.CeilToInt(targetSec / cycleSec)) : 1;
+
+        int beat = 0;
+        for (int c = 0; c < cycles; c++)
         {
-            if (i > 0 && i % SwapEvery == 0) currentLane = 1 - currentLane;
-            bm.notes.Add(new BeatMap.Note { time = Lead + i * NoteInterval, lane = currentLane });
+            foreach (var sec in Sections)
+            {
+                if (sec.lane.HasValue)
+                {
+                    for (int i = 0; i < sec.beats; i += BeatsPerNote)
+                    {
+                        float t = (beat + i) * beatDur;
+                        if (song != null && t > targetSec - 0.4f) break;
+                        bm.notes.Add(new BeatMap.Note { time = t, lane = sec.lane.Value });
+                    }
+                }
+                beat += sec.beats;
+            }
         }
 
         if (existing == null)
@@ -47,7 +81,9 @@ public static class BeatMapPlaceholderBuilder
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[BeatMapPlaceholderBuilder] Gerado {AssetPath} com {bm.notes.Count} notas (lead {Lead}s, intervalo {NoteInterval}s, swap a cada {SwapEvery}).");
+        float totalSec = beat * beatDur;
+        string songInfo = song != null ? $", song {targetSec:F1}s" : ", sem audio clip (fallback 1 ciclo)";
+        Debug.Log($"[BeatMapPlaceholderBuilder] Gerado {AssetPath}: {bm.notes.Count} notas em {totalSec:F1}s ({cycles} ciclos, {Bpm} BPM, 1/{BeatsPerNote} densidade{songInfo}).");
         EditorGUIUtility.PingObject(bm);
     }
 

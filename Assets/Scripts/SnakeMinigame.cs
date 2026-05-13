@@ -68,7 +68,7 @@ public class SnakeMinigame : MinigameOverlay
         gameOver = false;
         PlaceFood();
         UpdateScoreText();
-        if (statusText != null) statusText.text = "Setas pra mover. Esc pra desistir.";
+        if (statusText != null) statusText.text = "Setas ou WASD pra mover. Esc pra desistir.";
         RebuildTiles();
     }
 
@@ -89,11 +89,11 @@ public class SnakeMinigame : MinigameOverlay
             return;
         }
 
-        // Input: setas (não permite reversão direta).
-        if (kb.leftArrowKey.wasPressedThisFrame  && dir.x ==  0) nextDir = new Vector2Int(-1, 0);
-        if (kb.rightArrowKey.wasPressedThisFrame && dir.x ==  0) nextDir = new Vector2Int( 1, 0);
-        if (kb.upArrowKey.wasPressedThisFrame    && dir.y ==  0) nextDir = new Vector2Int( 0, 1);
-        if (kb.downArrowKey.wasPressedThisFrame  && dir.y ==  0) nextDir = new Vector2Int( 0,-1);
+        // Input: setas + WASD (não permite reversão direta).
+        if ((kb.leftArrowKey.wasPressedThisFrame  || kb.aKey.wasPressedThisFrame) && dir.x ==  0) nextDir = new Vector2Int(-1, 0);
+        if ((kb.rightArrowKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame) && dir.x ==  0) nextDir = new Vector2Int( 1, 0);
+        if ((kb.upArrowKey.wasPressedThisFrame    || kb.wKey.wasPressedThisFrame) && dir.y ==  0) nextDir = new Vector2Int( 0, 1);
+        if ((kb.downArrowKey.wasPressedThisFrame  || kb.sKey.wasPressedThisFrame) && dir.y ==  0) nextDir = new Vector2Int( 0,-1);
 
         moveTimer += Time.unscaledDeltaTime;
         if (moveTimer < moveInterval) return;

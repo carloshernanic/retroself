@@ -19,10 +19,12 @@ public class GuitarHeroMinigame : MinigameOverlay
     public BeatMap beatMap;
     public AudioClip song;
     [Tooltip("Tempo (s) que a nota leva do topo até a hit zone.")]
-    public float noteFallTime = 1.8f;
+    public float noteFallTime = 2.0f;
     [Tooltip("Margem (s) pra hit ser válido — ±janela.")]
-    public float hitWindow = 0.18f;
-    [Range(0f, 1f)] public float passThreshold = 0.7f;
+    public float hitWindow = 0.25f;
+    [Range(0f, 1f)] public float passThreshold = 0.5f;
+    [Tooltip("Offset (s) entre songTime=0 e a primeira nota. Compensa pre-roll do beatmap.")]
+    public float songStartOffset = 0f;
 
     [Header("UI Refs")]
     public RectTransform laneYoungArea;
@@ -37,7 +39,10 @@ public class GuitarHeroMinigame : MinigameOverlay
     [Header("Cores")]
     public Color youngColor = new Color(1f, 0.85f, 0.25f, 1f);
     public Color adultColor = new Color(0.7f, 0.45f, 0.25f, 1f);
-    public Color inactiveOverlayColor = new Color(0f, 0f, 0f, 0.55f);
+    // Inativa fica só levemente esmaecida pras notas continuarem visíveis (bug
+    // anterior: alpha 0.55 escondia as notas, jogador achava que só Espaço/lane
+    // ativa registrava). Ambas as lanes recebem hits independentes via Z/X/setas.
+    public Color inactiveOverlayColor = new Color(0f, 0f, 0f, 0.08f);
     public Color activeOverlayColor = new Color(0f, 0f, 0f, 0f);
 
     int activeLane;
@@ -86,7 +91,9 @@ public class GuitarHeroMinigame : MinigameOverlay
         totalNotes = beatMap != null ? beatMap.notes.Count : 0;
         UpdateOverlay();
         UpdateScoreText();
-        if (statusText != null) statusText.text = "Tab alterna guitarra. Espaço/Z/X pra tocar. Esc desiste.";
+        if (statusText != null) statusText.text = "Qualquer tecla de hit toca a nota mais perto. Esc desiste.";
+
+        AudioManager.PauseMusic();
 
         if (song != null)
         {
@@ -99,6 +106,7 @@ public class GuitarHeroMinigame : MinigameOverlay
     protected override void OnEnd(bool won)
     {
         if (songSource != null && songSource.isPlaying) songSource.Stop();
+        AudioManager.ResumeMusic();
         foreach (var n in live) if (n != null && n.img != null) Destroy(n.img.gameObject);
         live.Clear();
     }
@@ -112,16 +120,32 @@ public class GuitarHeroMinigame : MinigameOverlay
 
         if (finished) return;
 
-        songTime += Time.unscaledDeltaTime;
+        // Sincroniza songTime ao playback do AudioSource quando há música — evita
+        // drift entre relógio do jogo (unscaledDeltaTime) e thread de áudio.
+        // Sem música, acumula manualmente (fallback metronômico).
+        if (song != null && songSource != null && songSource.isPlaying)
+            songTime = songSource.time - songStartOffset;
+        else
+            songTime += Time.unscaledDeltaTime;
 
         if (kb.tabKey.wasPressedThisFrame)
         {
             activeLane = 1 - activeLane;
             UpdateOverlay();
         }
-        if (kb.spaceKey.wasPressedThisFrame) TryHit(activeLane);
-        if (kb.zKey.wasPressedThisFrame) TryHit(0);
-        if (kb.xKey.wasPressedThisFrame) TryHit(1);
+        // Auto-sense total: QUALQUER tecla de hit busca a nota mais próxima em
+        // qualquer lane. Antes Z/A/← e X/D/→ travavam na lane fixa (0 ou 1),
+        // então o jogador apertava perto de uma nota Adulta com Z e nada
+        // acontecia — sensação de "só a tecla do meio funciona". Agora todas as
+        // 9 teclas têm comportamento idêntico: pega a nota mais próxima dentro
+        // da hit window, lane que for.
+        bool anyHit = kb.spaceKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame
+                   || kb.downArrowKey.wasPressedThisFrame
+                   || kb.zKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame
+                   || kb.leftArrowKey.wasPressedThisFrame
+                   || kb.xKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame
+                   || kb.rightArrowKey.wasPressedThisFrame;
+        if (anyHit) TryHitAny();
 
         // Spawn das próximas notas (start mostra antes do hitTime por noteFallTime).
         if (beatMap != null)
@@ -136,14 +160,15 @@ public class GuitarHeroMinigame : MinigameOverlay
         }
 
         // Atualiza posição das notas + resolve passou da hit zone.
+        // t é função de songTime vs hitTime — independente de quando spawnou,
+        // pra primeira nota não chegar atrasada quando songTime começa em 0.
         for (int i = live.Count - 1; i >= 0; i--)
         {
             var fn = live[i];
-            float age = songTime - fn.spawnTime;
-            float t = Mathf.Clamp01(age / noteFallTime);
-            UpdateNotePosition(fn, t);
+            float tRaw = 1f - (fn.hitTime - songTime) / noteFallTime;
+            UpdateNotePosition(fn, Mathf.Clamp01(tRaw));
 
-            if (fn.resolved) { if (t >= 1.05f) { Destroy(fn.img.gameObject); live.RemoveAt(i); } continue; }
+            if (fn.resolved) { if (tRaw >= 1.05f) { Destroy(fn.img.gameObject); live.RemoveAt(i); } continue; }
 
             // Miss automático se passou da hit zone sem hit.
             if (songTime > fn.hitTime + hitWindow)
@@ -201,7 +226,6 @@ public class GuitarHeroMinigame : MinigameOverlay
 
     void TryHit(int lane)
     {
-        // Procura nota ainda não resolvida da lane mais próxima do hit time.
         FlyingNote best = null;
         float bestDelta = float.MaxValue;
         foreach (var fn in live)
@@ -211,6 +235,24 @@ public class GuitarHeroMinigame : MinigameOverlay
             float delta = Mathf.Abs(songTime - fn.hitTime);
             if (delta < bestDelta) { best = fn; bestDelta = delta; }
         }
+        ResolveBest(best, bestDelta);
+    }
+
+    void TryHitAny()
+    {
+        FlyingNote best = null;
+        float bestDelta = float.MaxValue;
+        foreach (var fn in live)
+        {
+            if (fn.resolved) continue;
+            float delta = Mathf.Abs(songTime - fn.hitTime);
+            if (delta < bestDelta) { best = fn; bestDelta = delta; }
+        }
+        ResolveBest(best, bestDelta);
+    }
+
+    void ResolveBest(FlyingNote best, float bestDelta)
+    {
         if (best == null) return;
         if (bestDelta > hitWindow) return;
         best.resolved = true;

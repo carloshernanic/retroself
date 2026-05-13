@@ -33,6 +33,12 @@ public static class SpriteImportConfigurator
         // Pivot BottomCenter (default do ConfigureSheet) → sentam no chão. Após 1ª rodada, remover.
         { "Assets/Sprites/doors-and-portals-pixel-art-asset-pack/1 Doors/1.png",   (6, PPU_DoorPortal) },
         { "Assets/Sprites/doors-and-portals-pixel-art-asset-pack/2 Portals/2.png", (6, PPU_DoorPortal) },
+
+        // NPC guitarrista da cabine GH (Memory_04). PlayGuitar.png = 384×64 → 6 frames 64×64;
+        // Idle.png = 256×64 → 4 frames 64×64. PPU 32 (consistente com props do pack). Após 1ª rodada,
+        // remover pra preservar slices manuais.
+        { "Assets/Sprites/cyberpunk-pixel-bar-cafe-npc-asset-pack/6/PlayGuitar.png", (6, 32) },
+        { "Assets/Sprites/cyberpunk-pixel-bar-cafe-npc-asset-pack/6/Idle.png",       (4, 32) },
     };
 
     [MenuItem("Retroself/Slice New Sprite Sheets")]

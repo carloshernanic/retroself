@@ -1,27 +1,25 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 // Base abstrata pra minigames de fliperama. Subclasses (Snake, GuitarHero)
 // montam o conteúdo do painel e implementam TickGame.
 //
 // Comportamento comum:
 //   Open(onWin)    — congela gameplay, ativa o canvas próprio, Time.timeScale=0,
-//                     chama OnStart na subclasse, e guarda callback pra disparar
-//                     em vitória.
+//                     mostra tutorialPanel se setado (espera Enter pra começar),
+//                     senão chama OnStart imediato.
 //   Close(won)     — descongela, desativa o canvas, restaura Time.timeScale,
 //                     dispara onWin se won==true.
-//   TickGame()     — chamada em Update se isOpen; subclasse lê input (Keyboard.current)
-//                     e atualiza estado usando Time.unscaledDeltaTime.
+//   TickGame()     — chamada em Update se isOpen e tutorial já dispensado.
 //   Win()/Lose()   — helpers pra subclasse fechar com resultado.
-//
-// Quem congela: PlayerController + PlayerAttack + PlayerSwap (mesmo padrão do
-// IntroDialogue). Não congelamos Rigidbody2D — só desabilitamos controles,
-// mas o Time.timeScale=0 zera Physics passo, então corpos param naturalmente.
 public abstract class MinigameOverlay : MonoBehaviour
 {
     [Header("Overlay")]
     public Canvas canvas;
     public GameObject panel;
+    [Tooltip("Se setado, mostra esse painel no Open() e só inicia o jogo quando o jogador pressionar Enter/Espaço.")]
+    public GameObject tutorialPanel;
 
     [Header("Players (pra congelar)")]
     public PlayerController young;
@@ -29,6 +27,7 @@ public abstract class MinigameOverlay : MonoBehaviour
     public PlayerSwap playerSwap;
 
     protected bool isOpen;
+    bool tutorialShowing;
     Action onWinCallback;
 
     protected virtual void Awake()
@@ -55,7 +54,17 @@ public abstract class MinigameOverlay : MonoBehaviour
         // tiles de tamanho 0 — visualmente parece "jogo travado".
         Canvas.ForceUpdateCanvases();
         SfxBeep.PlayMinigameStart();
-        OnStart();
+
+        if (tutorialPanel != null)
+        {
+            tutorialShowing = true;
+            tutorialPanel.SetActive(true);
+            if (panel != null) panel.SetActive(false);
+        }
+        else
+        {
+            OnStart();
+        }
     }
 
     protected void Win()
@@ -73,6 +82,8 @@ public abstract class MinigameOverlay : MonoBehaviour
     {
         if (!isOpen) return;
         isOpen = false;
+        tutorialShowing = false;
+        if (tutorialPanel != null) tutorialPanel.SetActive(false);
         OnEnd(won);
         if (canvas != null) canvas.gameObject.SetActive(false);
         Time.timeScale = 1f;
@@ -84,6 +95,19 @@ public abstract class MinigameOverlay : MonoBehaviour
     protected virtual void Update()
     {
         if (!isOpen) return;
+        if (tutorialShowing)
+        {
+            var kb = Keyboard.current;
+            if (kb != null && (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame))
+            {
+                tutorialShowing = false;
+                if (tutorialPanel != null) tutorialPanel.SetActive(false);
+                if (panel != null) panel.SetActive(true);
+                Canvas.ForceUpdateCanvases();
+                OnStart();
+            }
+            return;
+        }
         TickGame();
     }
 

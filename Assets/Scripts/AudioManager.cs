@@ -100,6 +100,21 @@ public class AudioManager : MonoBehaviour
     public static void PlayDialog() { Instance?.PlayClipPitched(Instance.clipDialog, Random.Range(0.95f, 1.05f), volScale: 0.7f); }
     public static void PlayKeyCollect() { Instance?.PlayClipPitched(Instance.clipKey, 1f, volScale: 1.1f); }
 
+    // ----- Music control -----
+    // Usado pelo GuitarHeroMinigame: pausa a trilha de fundo enquanto o minigame
+    // toca, e retoma quando o jogador fecha o overlay.
+    public static void PauseMusic()
+    {
+        if (Instance == null || Instance.musicSource == null) return;
+        if (Instance.musicSource.isPlaying) Instance.musicSource.Pause();
+    }
+
+    public static void ResumeMusic()
+    {
+        if (Instance == null || Instance.musicSource == null) return;
+        if (Instance.musicSource.clip != null && !Instance.musicSource.isPlaying) Instance.musicSource.UnPause();
+    }
+
     void PlayClipPitched(AudioClip clip, float pitch, float volScale = 1f)
     {
         if (clip == null || sfxSource == null) return;
