@@ -525,7 +525,8 @@ public static class Memory03Builder
             young, adult,
             youngSpawn: new Vector3(15.5f, 2.0f, 0),
             adultSpawn: new Vector3(15.8f, 2.0f, 0));
-        BuildPortal(parent, "P2_Portal_D", new Vector3(18f, 1.4f, 0), PortalRoxo,
+        // Portal_D y=1.2 = plataforma top (cy=0.8 + h/2=0.2 = 1.0) + offset do pivot (0.2).
+        BuildPortal(parent, "P2_Portal_D", new Vector3(18f, 1.2f, 0), PortalRoxo,
             young, adult,
             youngSpawn: new Vector3(11.5f, -2.0f, 0),
             adultSpawn: new Vector3(11.2f, -2.0f, 0));
@@ -705,7 +706,8 @@ public static class Memory03Builder
             young, adult,
             youngSpawn: new Vector3(58.3f, 3.5f, 0),
             adultSpawn: new Vector3(58.6f, 3.5f, 0));
-        BuildPortal(p5.transform, "P5_Portal_K", new Vector3(56.5f, 2.7f, 0), PortalDourado,
+        // Portal_K y=2.9 = alcove top (cy=2.5 + h/2=0.2 = 2.7) + offset do pivot (0.2).
+        BuildPortal(p5.transform, "P5_Portal_K", new Vector3(56.5f, 2.9f, 0), PortalDourado,
             young, adult,
             youngSpawn: new Vector3(51.0f, -2.0f, 0),
             adultSpawn: new Vector3(51.3f, -2.0f, 0));

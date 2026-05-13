@@ -92,6 +92,9 @@ public class PlayerController : MonoBehaviour
             var h = hits[i];
             if (h == null) continue;
             if (h.attachedRigidbody == rb) continue;
+            // Triggers (StoneSwitch, hazards, pickups, return pads) não são chão —
+            // sem isso o Young pula contra um StoneSwitch e ganha double jump.
+            if (h.isTrigger) continue;
             // O outro Woody não conta como chão — evita double jump pulando em cima do parceiro.
             if (h.attachedRigidbody != null && h.attachedRigidbody.GetComponent<PlayerController>() != null) continue;
             return true;

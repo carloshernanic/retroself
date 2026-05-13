@@ -136,7 +136,10 @@ public static class SceneArtCatalog
     // Tile_*.png são 32×32 px, PPU 32 → 1 cell = 1u no Grid. Pack tem 100 tiles;
     // índices iniciais escolhidos por inspeção visual (asfalto/calçada). Ajustar
     // visualmente abrindo o spritesheet se necessário.
-    public const string MarketTileGround   = "Assets/Sprites/cyberpunk-market-street-pixel-art/1 Tiles/Tile_01.png";
+    // Tile_01 tem coluna esquerda quase toda transparente (tile de canto) — quando
+    // Tiled repete horizontalmente, a faixa transparente vira gap entre cópias. Use
+    // Tile_02 (sólido edge-to-edge, com lip de topo) pro chão.
+    public const string MarketTileGround   = "Assets/Sprites/cyberpunk-market-street-pixel-art/1 Tiles/Tile_02.png";
     public const string MarketTileGrassTop = "Assets/Sprites/cyberpunk-market-street-pixel-art/1 Tiles/Tile_02.png";
     public const string MarketTileWall     = "Assets/Sprites/cyberpunk-market-street-pixel-art/1 Tiles/Tile_05.png";
     public const string MarketTilePlatform = "Assets/Sprites/cyberpunk-market-street-pixel-art/1 Tiles/Tile_15.png";

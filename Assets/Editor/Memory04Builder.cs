@@ -411,8 +411,9 @@ public static class Memory04Builder
         BuildFoodPickup(p3.transform, "P3_Food_B", new Vector3(29f,  1.7f, 0), FoodKind.Burger);
         BuildFoodPickup(p3.transform, "P3_Food_C", new Vector3(32f,  1.2f, 0), FoodKind.Burger);
 
-        // VendorStall em x=33 — foodtruck do business-center pack.
-        var stall = BuildVendorStall(p3.transform, "P3_Vendor", new Vector3(33f, -2f, 0));
+        // VendorStall em x=33 — foodtruck do business-center pack. y=-3 = topo do chão;
+        // BuildVendorStall aplica GroundSitOffsetY pra base do sprite sentar no chão.
+        var stall = BuildVendorStall(p3.transform, "P3_Vendor", new Vector3(33f, -3f, 0));
         // Precisa de 3 burgers.
         stall.required.Clear();
         stall.required.Add(new VendorStall.Need { kind = FoodKind.Burger, count = 3 });
@@ -923,7 +924,12 @@ public static class Memory04Builder
         visual.transform.SetParent(go.transform, false);
         var sr = visual.AddComponent<SpriteRenderer>();
         var truck = SceneArtCatalog.LoadSprite(SceneArtCatalog.MarketFoodtruck);
-        if (truck != null) sr.sprite = truck;
+        if (truck != null)
+        {
+            sr.sprite = truck;
+            // Pivot Center → sobe a meia-altura pra base do sprite sentar em go.transform.y.
+            visual.transform.localPosition = new Vector3(0f, GroundSitOffsetY(truck), 0f);
+        }
         else { sr.sprite = SolidSprite(); sr.color = new Color(0.85f, 0.55f, 0.30f, 1f); visual.transform.localScale = new Vector3(2.2f, 1.4f, 1f); visual.transform.localPosition = new Vector3(0f, 0.7f, 0f); }
         sr.sortingOrder = 5;
 
