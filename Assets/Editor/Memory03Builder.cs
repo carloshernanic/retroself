@@ -261,7 +261,9 @@ public static class Memory03Builder
         // Altura 0.5u (y=-3.5..-3.0). Top y=-3 = ponto onde players spawnam em pé.
         BuildGrassFloor(grid.transform, "Ground_Top_A", -5f,   -3.25f, 16f, 0.5f);
         BuildGrassFloor(grid.transform, "Ground_Top_B", 30.5f, -3.25f, 47f, 0.5f);
-        BuildGrassFloor(grid.transform, "Ground_Top_C", 58f,   -3.25f, 4f,  0.5f);
+        // Segmento C estendido até x=65 pra preencher o vazio visível depois da porta
+        // (câmera maxX=56 + half-width ~8.9 → borda visível ~x=64.9).
+        BuildGrassFloor(grid.transform, "Ground_Top_C", 60.5f, -3.25f, 9f,  0.5f);
 
         // Ground_Base = 5 camadas earth-tone (solid color) com pedras decorativas.
         // Tile brick do green-zone era estranho (parecia parede); agora paleta marrom real.
@@ -272,11 +274,11 @@ public static class Memory03Builder
         //   3. Camada de pedrinhas (marrom-cinza com pedras decorativas espalhadas)
         //   4. Solo médio (marrom escuro)
         //   5. Profundo (dark earth)
-        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Root",    23.5f, -3.6f,  73f, 0.2f, DirtRootCol,    sortingOrder: 4); // banda fina escura (raízes) — sort 4 pra não competir com hazard sort 7
-        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Surface", 23.5f, -4.0f,  73f, 0.6f, DirtSurfaceCol, sortingOrder: 4); // umber quente
-        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Pebble",  23.5f, -5.0f,  73f, 1.4f, DirtPebbleCol,  sortingOrder: 4); // marrom-cinza (pedras embedded)
-        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Mid",     23.5f, -6.7f,  73f, 2.0f, DirtMidCol,     sortingOrder: 4); // marrom escuro
-        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Deep",    23.5f, -9.0f,  73f, 3.0f, DirtDeepCol,    sortingOrder: 4); // dark earth
+        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Root",    26f, -3.6f,  78f, 0.2f, DirtRootCol,    sortingOrder: 4); // banda fina escura (raízes) — sort 4 pra não competir com hazard sort 7
+        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Surface", 26f, -4.0f,  78f, 0.6f, DirtSurfaceCol, sortingOrder: 4); // umber quente
+        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Pebble",  26f, -5.0f,  78f, 1.4f, DirtPebbleCol,  sortingOrder: 4); // marrom-cinza (pedras embedded)
+        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Mid",     26f, -6.7f,  78f, 2.0f, DirtMidCol,     sortingOrder: 4); // marrom escuro
+        BuildSolidEarthLayer(grid.transform, "Ground_Dirt_Deep",    26f, -9.0f,  78f, 3.0f, DirtDeepCol,    sortingOrder: 4); // dark earth
 
         // Pedras decorativas embedded na camada Pebble (sortingOrder 5 — em cima do solid).
         BuildEmbeddedRocks(grid.transform);
@@ -287,7 +289,24 @@ public static class Memory03Builder
         var wallLeft = BuildPlatform(grid.transform, "Wall_Left",   cx: -5f, cy: -1f, w: 0.4f, h: 4f, WallCol, sortingOrder: 5);
         var wallLeftSr = wallLeft.GetComponent<SpriteRenderer>();
         if (wallLeftSr != null) wallLeftSr.enabled = false;
-        BuildPlatform(grid.transform, "Wall_Right",  cx: 60f, cy: -1f, w: 0.4f, h: 4f, WallCol, sortingOrder: 5);
+        // Wall_Right expandido pra cima e pra fora — face interna em x=65 (fim do chão
+        // estendido); cobre todo o vazio vertical até o topo do frame visível.
+        BuildPlatform(grid.transform, "Wall_Right",  cx: 68f, cy: 3f, w: 6f, h: 12f, WallCol, sortingOrder: 5);
+
+        // Barreira invisível logo depois da CoopFinishDoor (x=58) — impede o player
+        // de caminhar pra área decorativa estendida (x=58..65) e perder a porta de saída.
+        BuildInvisibleBarrier(grid.transform, "Barrier_PostFinish", x: 59f, height: 20f);
+    }
+
+    // Coluna invisível alta — barra movimento sem ocupar visual.
+    static void BuildInvisibleBarrier(Transform parent, string name, float x, float height)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = new Vector3(x, 0f, 0f);
+        var col = go.AddComponent<BoxCollider2D>();
+        col.size = new Vector2(0.2f, height);
+        col.offset = Vector2.zero;
     }
 
     // Cria segmento de grama: sprite real do green-zone (Tile_02 = grass top) com
@@ -584,17 +603,19 @@ public static class Memory03Builder
         BuildPlatform(lockRoot.transform, "P4_Island_Red",    cx: 42f, cy: 3.8f, w: 3f, h: 0.4f, PlatformCol, 5);
         BuildPlatform(lockRoot.transform, "P4_Island_Blue",   cx: 46f, cy: 3.8f, w: 3f, h: 0.4f, PlatformCol, 5);
 
-        // Switches no centro de cada ilha. Non-latched (SequenceLock reseta em erro).
+        // Switches ACIMA do portal de retorno (y=6.5): da plataforma top y=4, o jovem
+        // precisa pular pra acertar com pedra (PlayerAttack arremessa horizontal — pula
+        // e atira no ápice, igual ao M_02 P2). Non-latched (SequenceLock reseta em erro).
         var swGreen = BuildStoneSwitchColored(lockRoot.transform, "P4_Switch_Green",
-            new Vector3(38f, 4.5f, 0), new Vector2(1f, 1f),
+            new Vector3(38f, 6.5f, 0), new Vector2(1f, 1f),
             latched: false, offColor: LockGreenOff, onColor: LockGreen);
         SwitchIconHelper.Attach(swGreen, SwitchIconHelper.Color.Green);
         var swRed   = BuildStoneSwitchColored(lockRoot.transform, "P4_Switch_Red",
-            new Vector3(42f, 4.5f, 0), new Vector2(1f, 1f),
+            new Vector3(42f, 6.5f, 0), new Vector2(1f, 1f),
             latched: false, offColor: LockRedOff,   onColor: LockRed);
         SwitchIconHelper.Attach(swRed, SwitchIconHelper.Color.Red);
         var swBlue  = BuildStoneSwitchColored(lockRoot.transform, "P4_Switch_Blue",
-            new Vector3(46f, 4.5f, 0), new Vector2(1f, 1f),
+            new Vector3(46f, 6.5f, 0), new Vector2(1f, 1f),
             latched: false, offColor: LockBlueOff,  onColor: LockBlue);
         SwitchIconHelper.Attach(swBlue, SwitchIconHelper.Color.Blue);
 
@@ -610,35 +631,36 @@ public static class Memory03Builder
         seqLock.expectedOrder.Add(1); // 2º: RED
         seqLock.expectedOrder.Add(2); // 3º: BLUE
 
-        // Texto indicativo grande acima das ilhas (centro x=42, alto y=6).
-        BuildPasswordHint(lockRoot.transform, new Vector3(42f, 6f, 0), "COLOCAR A SENHA NA ORDEM");
+        // Texto indicativo acima dos switches (que agora ficam em y=6.5).
+        BuildPasswordHint(lockRoot.transform, new Vector3(42f, 8f, 0), "COLOCAR A SENHA NA ORDEM");
 
-        // 3 pares de portais. IDA no chão (centro da ilha). VOLTA no lado DIREITO da ilha.
-        // Spawns: ida → lado ESQUERDO da ilha (longe do trigger de volta); volta → chão à direita
-        // do portal de ida (longe do trigger de ida). Todos os spawns y=-2.0 (chão) ou y=5.0 (alto).
+        // 3 pares de portais. IDA no chão (centro da ilha). VOLTA centralizado na ilha
+        // (mesmo X, alto y=4.2 sobre o piso da ilha em y=4). Agora requireKeyPress=true,
+        // então sobreposição do trigger do retorno com o pé do jogador não dispara —
+        // só ao apertar [E]. Spawns landam ao lado do par pra não cair direto no trigger.
         BuildPortal(lockRoot.transform, "P4_Portal_G", new Vector3(38f, -2.8f, 0), PortalVerde,
             young, adult,
-            youngSpawn: new Vector3(37f, 5.0f, 0),    // esquerda da ilha verde, longe de G_Return em x=39
-            adultSpawn: new Vector3(37.3f, 5.0f, 0));
-        BuildPortal(lockRoot.transform, "P4_Portal_GReturn", new Vector3(39f, 4.2f, 0), PortalVerde,
+            youngSpawn: new Vector3(38f, 5.0f, 0),     // centro da ilha verde
+            adultSpawn: new Vector3(38.3f, 5.0f, 0));
+        BuildPortal(lockRoot.transform, "P4_Portal_GReturn", new Vector3(38f, 4.2f, 0), PortalVerde,
             young, adult,
-            youngSpawn: new Vector3(36.7f, -2.0f, 0), // chão à esquerda de G (x=38, trigger 37.4..38.6)
+            youngSpawn: new Vector3(36.7f, -2.0f, 0),  // chão à esquerda do portal de ida (x=38, trigger 37.4..38.6)
             adultSpawn: new Vector3(37.0f, -2.0f, 0));
 
         BuildPortal(lockRoot.transform, "P4_Portal_H", new Vector3(42f, -2.8f, 0), PortalVermelho,
             young, adult,
-            youngSpawn: new Vector3(41f, 5.0f, 0),
-            adultSpawn: new Vector3(41.3f, 5.0f, 0));
-        BuildPortal(lockRoot.transform, "P4_Portal_HReturn", new Vector3(43f, 4.2f, 0), PortalVermelho,
+            youngSpawn: new Vector3(42f, 5.0f, 0),
+            adultSpawn: new Vector3(42.3f, 5.0f, 0));
+        BuildPortal(lockRoot.transform, "P4_Portal_HReturn", new Vector3(42f, 4.2f, 0), PortalVermelho,
             young, adult,
             youngSpawn: new Vector3(40.7f, -2.0f, 0),
             adultSpawn: new Vector3(41.0f, -2.0f, 0));
 
         BuildPortal(lockRoot.transform, "P4_Portal_I", new Vector3(46f, -2.8f, 0), PortalCiano,
             young, adult,
-            youngSpawn: new Vector3(45f, 5.0f, 0),
-            adultSpawn: new Vector3(45.3f, 5.0f, 0));
-        BuildPortal(lockRoot.transform, "P4_Portal_IReturn", new Vector3(47f, 4.2f, 0), PortalCiano,
+            youngSpawn: new Vector3(46f, 5.0f, 0),
+            adultSpawn: new Vector3(46.3f, 5.0f, 0));
+        BuildPortal(lockRoot.transform, "P4_Portal_IReturn", new Vector3(46f, 4.2f, 0), PortalCiano,
             young, adult,
             youngSpawn: new Vector3(44.7f, -2.0f, 0),
             adultSpawn: new Vector3(45.0f, -2.0f, 0));
@@ -942,6 +964,7 @@ public static class Memory03Builder
 
         var pad = go.AddComponent<ReturnPad>();
         pad.teleportOnlyActive = true; // Memory_03: cada Woody atravessa o portal individualmente.
+        pad.requireKeyPress = true;    // E pra entrar — evita teleporte acidental ao caminhar/cair.
         if (young != null)
         {
             pad.young = young.transform;
@@ -952,7 +975,31 @@ public static class Memory03Builder
             pad.adult = adult.transform;
             pad.adultSpawn = adultSpawn;
         }
+
+        AttachPortalPrompt(go, pad);
         return go;
+    }
+
+    // Prompt "[E]" world-space acima do portal — visível só quando há player dentro
+    // do trigger (ReturnPad.Update ativa/desativa o GO).
+    static void AttachPortalPrompt(GameObject portal, ReturnPad pad)
+    {
+        var prompt = new GameObject("PortalPrompt");
+        prompt.transform.SetParent(portal.transform, false);
+        prompt.transform.localPosition = new Vector3(0f, 2.2f, 0f);
+        var tmp = prompt.AddComponent<TextMeshPro>();
+        tmp.text = "[E]";
+        tmp.color = Color.white;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.enableAutoSizing = false;
+        tmp.fontSize = 4f;
+        tmp.rectTransform.sizeDelta = new Vector2(4f, 2f);
+        var pfont = SceneArtCatalog.GetPixelFont();
+        if (pfont != null) tmp.font = pfont;
+        var pmr = prompt.GetComponent<MeshRenderer>();
+        if (pmr != null) pmr.sortingOrder = 10;
+        pad.promptIndicator = prompt;
     }
 
     // ---------- Players ----------

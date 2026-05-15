@@ -215,20 +215,39 @@ public static class Memory04Builder
     {
         var grid = new GameObject("Grid");
 
-        // Span total x=-15..70 (85u), 1 segmento contínuo. Top y=-3 (convenção M02/M03).
-        // Estendido 10u à esquerda do spawn pra cobrir todo o frustum quando a câmera
-        // bate em minX=-3 (ortho 5 em 16:9 → meio-frustum ~8.88u, vê até x≈-11.88).
-        // Top y=-3 ↔ collider top: cy=-3.25 com h=0.5 → top y=-3.0.
-        BuildFloorSegment(grid.transform, "Floor_Top", 27.5f, -3.25f, 85f, 0.5f, FloorTopCol, sortingOrder: 5);
+        // Span total x=-15..78 (93u), 1 segmento contínuo. Top y=-3 (convenção M02/M03).
+        // Estendido pros 2 lados pra cobrir todo o frustum (câmera minX=-3/maxX=66,
+        // ortho 5 em 16:9 → meio-frustum ~8.88u → visível ~x[-11.88..74.88]).
+        BuildFloorSegment(grid.transform, "Floor_Top", 31.5f, -3.25f, 93f, 0.5f, FloorTopCol, sortingOrder: 5);
 
         // Base profunda (visual, sem collider).
-        BuildSolidQuad(grid.transform, "Floor_Base", 27.5f, -5.5f, 85f, 4f, FloorBaseCol, sortingOrder: 4);
+        BuildSolidQuad(grid.transform, "Floor_Base", 31.5f, -5.5f, 93f, 4f, FloorBaseCol, sortingOrder: 4);
 
         // Paredes laterais invisíveis — bloqueiam o player.
-        var wallLeft = BuildPlatform(grid.transform, "Wall_Left", -15f, -1f, 0.4f, 4f, WallCol, 5);
+        // Wall_Left em x=-11 fica DENTRO do frame visível (câmera clampa em minX=-3 →
+        // borda esquerda visível ~x=-11.88). Antes em x=-15 o player saía da tela
+        // antes de bater na parede.
+        var wallLeft = BuildPlatform(grid.transform, "Wall_Left", -11f, -1f, 0.4f, 20f, WallCol, 5);
         var wallLeftSr = wallLeft.GetComponent<SpriteRenderer>(); if (wallLeftSr != null) wallLeftSr.enabled = false;
-        var wallRight = BuildPlatform(grid.transform, "Wall_Right", 70.5f, -1f, 0.4f, 4f, WallCol, 5);
+        // Wall_Right na borda direita do chão estendido (mantém o player no mapa
+        // se passar do delimitador post-finish).
+        var wallRight = BuildPlatform(grid.transform, "Wall_Right", 78.5f, -1f, 0.4f, 20f, WallCol, 5);
         var wallRightSr = wallRight.GetComponent<SpriteRenderer>(); if (wallRightSr != null) wallRightSr.enabled = false;
+
+        // Delimitador invisível logo depois da CoopFinishDoor (x=68) — impede o player
+        // de andar pra área decorativa estendida e perder a porta de saída de vista.
+        BuildInvisibleBarrier(grid.transform, "Barrier_PostFinish", x: 69f, height: 20f);
+    }
+
+    // Coluna invisível alta — barra movimento sem ocupar visual.
+    static void BuildInvisibleBarrier(Transform parent, string name, float x, float height)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = new Vector3(x, 0f, 0f);
+        var col = go.AddComponent<BoxCollider2D>();
+        col.size = new Vector2(0.2f, height);
+        col.offset = Vector2.zero;
     }
 
     static GameObject BuildFloorSegment(Transform parent, string name, float cx, float cy, float w, float h, Color color, int sortingOrder)

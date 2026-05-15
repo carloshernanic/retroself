@@ -636,6 +636,7 @@ public static class Memory02Builder
         else { sr.sprite = SolidSprite(); sr.color = new Color(0.4f, 0.85f, 0.95f, 1f); }
 
         var pad = go.AddComponent<ReturnPad>();
+        pad.requireKeyPress = true; // E pra entrar — evita teleporte acidental.
         if (young != null)
         {
             pad.young = young.transform;
@@ -646,6 +647,25 @@ public static class Memory02Builder
             pad.adult = adult.transform;
             pad.adultSpawn = adult.transform.position;
         }
+
+        // Prompt "[E]" world-space acima do portal — visível só quando player dentro.
+        var prompt = new GameObject("PortalPrompt");
+        prompt.transform.SetParent(go.transform, false);
+        prompt.transform.localPosition = new Vector3(0f, 2.2f, 0f);
+        var tmp = prompt.AddComponent<TextMeshPro>();
+        tmp.text = "[E]";
+        tmp.color = Color.white;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.enableAutoSizing = false;
+        tmp.fontSize = 4f;
+        tmp.rectTransform.sizeDelta = new Vector2(4f, 2f);
+        var pfont = SceneArtCatalog.GetPixelFont();
+        if (pfont != null) tmp.font = pfont;
+        var pmr = prompt.GetComponent<MeshRenderer>();
+        if (pmr != null) pmr.sortingOrder = 10;
+        pad.promptIndicator = prompt;
+
         return go;
     }
 
