@@ -216,8 +216,10 @@ public static class Memory01Builder
         var cc = tmGO.AddComponent<CompositeCollider2D>();
         cc.geometryType = CompositeCollider2D.GeometryType.Polygons;
 
-        // Chão contínuo: x ∈ [-16, 20) — superfície (grass) em y=-4, subterrâneo (dirt) em y=-5
-        for (int x = -16; x < 20; x++)
+        // Chão contínuo: x ∈ [-16, 26] — superfície (grass) em y=-4, subterrâneo (dirt) em y=-5.
+        // Estende até x=26 (além do maxX=16 + half-width ~8.9 da câmera) pra cobrir
+        // o vazio visível à direita da porta da escola.
+        for (int x = -16; x <= 26; x++)
         {
             tm.SetTile(new Vector3Int(x, -4, 0), grassTile);
             tm.SetTile(new Vector3Int(x, -5, 0), dirtTile);
@@ -234,8 +236,13 @@ public static class Memory01Builder
         // Fresta baixa em x=16..17 (teto a y=-2): jovem cabe (1u alto), adulto (~2u) bate a cabeça.
         tm.SetTile(new Vector3Int(16, -2, 0), platformTile);
         tm.SetTile(new Vector3Int(17, -2, 0), platformTile);
-        // Parede de fundo em x=20 (bloqueia também por cima)
-        for (int y = -3; y <= 0; y++) tm.SetTile(new Vector3Int(20, y, 0), wallTile);
+        // Parede de fundo: bloco sólido de x=20 até x=26 (borda da câmera), do chão (y=-3)
+        // até o topo do frame (y=8). Fecha visualmente toda a área "depois da porta".
+        for (int x = 20; x <= 26; x++)
+            for (int y = -3; y <= 8; y++)
+                tm.SetTile(new Vector3Int(x, y, 0), wallTile);
+        // Coluna esquerda só na borda (x=-16) — não bloquear área jogável.
+        for (int y = -3; y <= 8; y++) tm.SetTile(new Vector3Int(-16, y, 0), wallTile);
 
         // Força a geração da geometria do CompositeCollider2D no momento do build
         // pra que ela já fique cacheada no .unity. Sem isso, a 1ª FixedUpdate após
@@ -245,6 +252,26 @@ public static class Memory01Builder
         tc.ProcessTilemapChanges();
         cc.GenerateGeometry();
         EditorUtility.SetDirty(tmGO);
+
+        // Barrier dentro do frame visível: câmera clampa em minX=-7 (CameraFollow2D),
+        // half-width ~8.9u em 16:9 ortho 5 → borda esquerda visível ~-15.9. Barreira
+        // em -15.4 mantém o player dentro da tela.
+        BuildInvisibleBarrier(gridGO, "LeftBarrier", x: -15.4f, height: 20f);
+        // Barrier direita: a parede de fim em x=20 só vai até y=1 — sem isso o
+        // player pode pular por cima e cair na faixa de chão estendida pós-porta.
+        BuildInvisibleBarrier(gridGO, "RightBarrier", x: 20.6f, height: 20f);
+    }
+
+    // Parede invisível alta — impede que o jogador pule a parede de fim de mapa.
+    // Parented no Grid pra herdar o cleanup do OwnedRoots no rebuild.
+    static void BuildInvisibleBarrier(GameObject parent, string name, float x, float height)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent.transform, false);
+        go.transform.localPosition = new Vector3(x, 0f, 0f);
+        var col = go.AddComponent<BoxCollider2D>();
+        col.size = new Vector2(0.2f, height);
+        col.offset = Vector2.zero;
     }
 
     // Cria/atualiza um Tile.asset apontando pro sprite real do residential pack.

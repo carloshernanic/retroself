@@ -12,11 +12,16 @@ public class PressurePlate : GateSource
 
     public Requirement requirement = Requirement.Any;
 
+    [Tooltip("Quando true, a 1ª ativação trava a plate ON pra sempre. Se o ocupante for " +
+             "HeavyBox, a caixa também é snapada no centro X da plate e congelada.")]
+    public bool latch = false;
+
     public UnityEvent OnActivated;
     public UnityEvent OnDeactivated;
 
     public override bool IsActive => active;
     private bool active;
+    private bool latched;
 
     private readonly HashSet<Collider2D> occupants = new HashSet<Collider2D>();
 
@@ -28,6 +33,7 @@ public class PressurePlate : GateSource
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        if (latched) return;
         if (!Matches(other)) return;
         occupants.Add(other);
         Recheck();
@@ -35,6 +41,7 @@ public class PressurePlate : GateSource
 
     void OnTriggerExit2D(Collider2D other)
     {
+        if (latched) return;
         if (!occupants.Remove(other)) return;
         Recheck();
     }
@@ -74,11 +81,32 @@ public class PressurePlate : GateSource
         {
             SfxBeep.PlayPlateOn();
             OnActivated?.Invoke();
+            if (latch) LatchNow();
         }
         else
         {
             SfxBeep.PlayPlateOff();
             OnDeactivated?.Invoke();
+        }
+    }
+
+    // Trava a plate ON permanente. Se algum ocupante é HeavyBox, snapa no centro X
+    // da plate e congela o RB (Static) — visual de "caixa encaixada".
+    void LatchNow()
+    {
+        latched = true;
+        foreach (var occ in occupants)
+        {
+            if (occ == null) continue;
+            var box = occ.GetComponent<HeavyBox>();
+            if (box == null) continue;
+            var rb = box.GetComponent<Rigidbody2D>();
+            if (rb == null) continue;
+            var pos = box.transform.position;
+            box.transform.position = new Vector3(transform.position.x, pos.y, pos.z);
+            rb.linearVelocity = Vector2.zero;
+            rb.bodyType = RigidbodyType2D.Static;
+            box.enabled = false; // não tenta mais aplicar empurrão / constraints
         }
     }
 }

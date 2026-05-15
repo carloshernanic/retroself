@@ -226,14 +226,18 @@ public static class Memory02Builder
         // e não friction de plataforma. Variedade visual vem dos props (Decor) e dos gates.
         var grid = new GameObject("Grid");
 
-        // Linha de superfície (h=0.4u no topo) + base larga abaixo. Continuum de x=-15 a x=46
-        // (a área x=-15..-5 é a câmara da chave do P5 — começa fechada via LeftLockedDoor).
-        BuildPlatform(grid.transform, "Ground_Top",  cx: 15.5f, cy: -3.2f, w: 61f, h: 0.4f, FloorTopCol, sortingOrder: 5);
-        BuildPlatform(grid.transform, "Ground_Base", cx: 15.5f, cy: -4.5f, w: 61f, h: 2f,   FloorCol,    sortingOrder: 4);
+        // Linha de superfície (h=0.4u no topo) + base larga abaixo. Estendido até as bordas
+        // do frame da câmera (x[-22..51]) — a área jogável segue x=-15..46 (blocked pelos
+        // Wall_Left/Wall_Right); o excedente é só visual pra preencher o frame.
+        BuildPlatform(grid.transform, "Ground_Top",  cx: 14.5f, cy: -3.2f, w: 75f, h: 0.4f, FloorTopCol, sortingOrder: 5);
+        BuildPlatform(grid.transform, "Ground_Base", cx: 14.5f, cy: -5.5f, w: 75f, h: 5f,   FloorCol,    sortingOrder: 4);
 
-        // Paredes laterais pra player não sair do mapa.
-        BuildPlatform(grid.transform, "Wall_Left",   cx: -15f,  cy: -1f,   w: 0.4f, h: 4f,  WallCol,    sortingOrder: 5);
-        BuildPlatform(grid.transform, "Wall_Right",  cx: 46f,   cy: -1f,   w: 0.4f, h: 4f,  WallCol,    sortingOrder: 5);
+        // Paredes laterais expandidas pra cima e pra fora — cobrem todo o vazio até a borda
+        // visível da câmera (minX=-13/maxX=42 + half-width ~8.9 → frame ~[-22..51]; topo ~y=8).
+        // Continua bloqueando o player na borda do chão (x=-15 e x=46) porque os blocos
+        // se estendem PRA FORA dali, mantendo a face interna na mesma posição.
+        BuildPlatform(grid.transform, "Wall_Left",   cx: -18.5f, cy: 3f, w: 7f, h: 12f, WallCol, sortingOrder: 5);
+        BuildPlatform(grid.transform, "Wall_Right",  cx: 49f,    cy: 3f, w: 6f, h: 12f, WallCol, sortingOrder: 5);
     }
 
     static GameObject BuildPlatform(Transform parent, string name, float cx, float cy, float w, float h, Color color, int sortingOrder)
@@ -301,9 +305,11 @@ public static class Memory02Builder
         box.transform.SetParent(parent, false);
 
         var plate = BuildPlate(parent, "P1_Plate_Box", new Vector3(6f, -2.8f, 0), PressurePlate.Requirement.HeavyBox);
-        // Gate non-latched: caixa precisa ficar na placa enquanto ambos atravessam.
+        // Plate latch: 1ª caixa que pisar trava (snap + freeze) e a plate fica ON pra sempre.
+        plate.latch = true;
+        // Gate latched: uma vez aberto pela caixa travada, fica aberto pra sempre (igual aos outros).
         var gate = BuildGate(parent, "P1_Gate", new Vector3(8f, 0.5f, 0),
-            size: new Vector2(0.7f, 7.0f), openOffset: new Vector2(0f, 8.0f), latched: false);
+            size: new Vector2(0.7f, 7.0f), openOffset: new Vector2(0f, 8.0f), latched: true);
         gate.GetComponent<GatedDoor>().sources.Add(plate);
 
         // Pista 1 do cofre: "1: VERDE" — pintada na parede em verde, próxima da plank pra
