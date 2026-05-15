@@ -29,6 +29,10 @@ public class CutsceneController : MonoBehaviour
     public Panel[] panels;
     public string nextSceneName = SceneNames.Memory_01_Patio;
 
+    // Disparado quando termina o fluxo de painéis E nextSceneName está vazio.
+    // Permite encadear (ex: ativar canvas de créditos) sem trocar de cena.
+    public UnityEngine.Events.UnityEvent OnFinished;
+
     [Header("UI refs")]
     public TypewriterText typewriter;
     public TMP_Text speakerLabel;
@@ -73,7 +77,7 @@ public class CutsceneController : MonoBehaviour
         var kb = Keyboard.current;
         if (kb != null && kb.escapeKey.wasPressedThisFrame)
         {
-            SceneManager.LoadScene(nextSceneName);
+            FinishOrLoad();
             return;
         }
         if (busy) return;
@@ -168,7 +172,7 @@ public class CutsceneController : MonoBehaviour
 
         if (panelIdx + 1 >= panels.Length)
         {
-            SceneManager.LoadScene(nextSceneName);
+            FinishOrLoad();
             yield break;
         }
 
@@ -181,5 +185,13 @@ public class CutsceneController : MonoBehaviour
     void ShowContinueIndicator(bool show)
     {
         if (continueIndicator != null) continueIndicator.SetActive(show);
+    }
+
+    // Se nextSceneName vazio, dispara OnFinished (caller decide o que fazer);
+    // senão, carrega a cena. Mantém retro-compat com Prologue (nextScene preenchido).
+    void FinishOrLoad()
+    {
+        if (string.IsNullOrEmpty(nextSceneName)) OnFinished?.Invoke();
+        else SceneManager.LoadScene(nextSceneName);
     }
 }

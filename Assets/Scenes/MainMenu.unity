@@ -553,7 +553,7 @@ MonoBehaviour:
   m_text: '<b>RETROSELF</b>
 
 
-    <size=16>Direcao & Game Design</size>
+    <size=56><b>Direcao & Game Design</b></size>
 
     Alex
     Chequer
@@ -563,24 +563,23 @@ MonoBehaviour:
     Lucas Ikawa
 
 
-    <size=16>Musica & Som</size>
+    <size=56><b>Musica & Som</b></size>
 
-    [a
-    definir]
+    Carlos Hernani
 
 
-    <size=16>Pixel Art</size>
+    <size=56><b>Pixel Art</b></size>
 
     Craftpix.net (licenciado)
 
 
-    <size=16>Fonte</size>
+    <size=56><b>Fonte</b></size>
 
     Press
     Start 2P (OFL)
 
 
-    <size=16>Inspirado em</size>
+    <size=56><b>Inspirado em</b></size>
 
     Braid - Celeste - Brothers
     - Inside

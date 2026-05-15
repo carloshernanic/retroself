@@ -196,10 +196,17 @@ public static class MainMenuBuilder
         creditsPanelGO.GetComponent<Image>().color = new Color(0, 0, 0, 0.9f);
         creditsPanelGO.SetActive(false);
 
-        // Credits text
+        // Credits text — base fontSize 46 (igual ajuste manual feito na cena);
+        // labels de seção em <size=56><b> pra peso visual.
         var creditsText = CreateUIText(creditsPanelGO.transform, "CreditsText",
-            "<b>RETROSELF</b>\n\n<size=16>Direcao & Game Design</size>\nAlex Chequer\nCarlos Hernani\nLucas Ikawa\n\n<size=16>Musica & Som</size>\n[a definir]\n\n<size=16>Pixel Art</size>\nCraftpix.net (licenciado)\n\n<size=16>Fontes</size>\nVT323 - Press Start 2P (OFL)\n\n<size=16>Inspirado em</size>\nBraid - Celeste - Brothers - Inside\nUndertale - About Time\n\n<size=12>Insper - 2026</size>",
-            18, FontStyles.Normal);
+            "<b>RETROSELF</b>\n\n" +
+            "<size=56><b>Direcao & Game Design</b></size>\nAlex Chequer\nCarlos Hernani\nLucas Ikawa\n\n" +
+            "<size=56><b>Musica & Som</b></size>\nCarlos Hernani\n\n" +
+            "<size=56><b>Pixel Art</b></size>\nCraftpix.net (licenciado)\n\n" +
+            "<size=56><b>Fonte</b></size>\nPress Start 2P (OFL)\n\n" +
+            "<size=56><b>Inspirado em</b></size>\nBraid - Celeste - Brothers - Inside\nUndertale - About Time\n\n" +
+            "<size=24>Insper - 2026</size>",
+            46, FontStyles.Normal);
         var crRT = creditsText.GetComponent<RectTransform>();
         crRT.anchoredPosition = new Vector2(0, 50);
         crRT.sizeDelta = new Vector2(1200, 800);
