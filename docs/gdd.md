@@ -2,258 +2,243 @@
 
 > *"E se você pudesse voltar e ajudar a si mesmo a não desistir?"*
 
-**Versão:** 0.2 (Draft)
-**Autor:** Carlos
-**Data:** abril de 2026
+**Versão:** 0.4 — sprint final
+**Equipe:** Alex Chequer, Carlos Hernani, Lucas Ikawa
+**Curso:** Insper — Jogos Digitais 2026
+**Data:** maio de 2026
 
 ---
 
 ## 1. Game Concept
 
-> **[IMAGEM REPRESENTANDO O JOGO]**
-> *Prompt para gerar:* "Pixel art game cover for an indie puzzle-platformer. A tired 30-year-old man in a worn-out coat stands in a rainy city square at night, looking down at a small 7-year-old boy — both are clearly the same person at different ages. Between them, a glowing alien pocket watch floats, freezing a single raindrop mid-air. A retro arcade cabinet glows behind a tree in the background. Cold blue-gray palette with one warm amber glow. 8-bit pixel art, CRT scanlines, melancholic but hopeful mood. --ar 16:9"
-
 ### História + Visão Geral
 
-**Retroself** é um puzzle-platformer narrativo de pixel art 8-bits, single-player, com mecânica de manipulação do tempo. Jogado em 2D side-scroller, tem entre **45 e 60 minutos** de campanha (4 fases + hub + epílogo) e é desenvolvido em **Unity 2D** para **Web (itch.io)**.
+**Retroself** é um puzzle-platformer narrativo de pixel art 8-bit, **co-op assimétrico local** (mesmo teclado, dois Woodys controláveis por Tab), com tema de **auto-compaixão**. Side-scroller 2D em Unity, target **Web (itch.io WebGL)**. Campanha de ~45–60 min cobrindo quatro memórias da vida de Woody.
 
-Woody tem 30 anos, foi despejado e dorme num banco de praça. Numa noite chuvosa, encontra uma cabine alienígena escondida atrás de uma árvore. Ao entrar, descobre que alienígenas vinham observando ele há anos: não como cobaia, mas como candidato. Eles concluíram que Woody não é um homem mau, apenas alguém que tropeçou nas piores horas. E oferecem um acordo: ele pode voltar para **quatro momentos da própria vida**, entre os 7 e os 18 anos, e ajudar seu eu mais jovem a atravessá-los.
+Woody adulto (homeless, ~30 anos) é encontrado por alienígenas numa cabine cyberpunk escondida atrás de uma árvore. Eles oferecem um acordo: voltar a quatro momentos da própria vida e ajudar seu eu mais jovem a atravessá-los. **Os dois Woodys coexistem na mesma cena** — o jovem é menor e ágil, o adulto é maior, mais pesado e empurra blocos. O jogador alterna entre os dois com `Tab`. Não há mecânica de congelamento de tempo no estado atual; a cooperação é puramente **espacial-assimétrica** (Pico Park-style).
 
-A mágica do jogo está no encontro entre os dois Woodys. O Woody-criança é pequeno, ágil, frágil. O Woody-adulto é o dobro do tamanho, alcança o que a criança não alcança, e recebe dos alienígenas um relógio que **congela o tempo**. Cada fase é um quebra-cabeça em movimento: o adulto prepara o cenário, congela o tempo, e o jovem segue adiante.
+A cada fase resolvida o presente de Woody muda sutilmente. O jogo termina numa **cutscene de auto-perdão** seguida dos créditos rolando.
 
-A cada fase concluída, o presente de Woody se altera sutilmente: a praça começa a clarear, o banco onde ele dormia ganha um cobertor, depois um casaco, depois desaparece. O jogo termina quando Woody acorda — talvez na praça, talvez não.
+**Tema central:** Auto-compaixão. Não é apagar o passado — é voltar a ele com o cuidado que você não recebeu na época.
 
-**Tema central:** Auto-compaixão. O jogo não é sobre apagar o passado, é sobre voltar a ele com o cuidado que você não recebeu na época.
+**Classificação:** 12+ (sem violência gráfica, sem palavrões — diálogos vetam linguagem pesada por regra do projeto).
 
-**Classificação indicativa:** 12+ (temas de fracasso, despejo, melancolia — sem violência gráfica)
-
-**Público-alvo:** Jogadores indie de 18–35 anos que gostam de puzzle-platformers narrativos (público de Celeste, Braid, GRIS) e público brasileiro adulto que se identifica com a temática de "segunda chance".
+**Público-alvo:** indie 18–35, fãs de Celeste/Braid/GRIS/Inside, jogador brasileiro adulto que se identifica com "segunda chance".
 
 ---
 
 ## 2. Design
 
-> **[IMAGEM ILUSTRANDO O DESIGN DO JOGO]**
-> *Prompt para gerar:* "Pixel art level design mockup, side-scroller perspective. A cross-section of four different scenes stacked: a school courtyard, a family home interior, a teen party at night, and a bright exam room. Two characters visible — a small kid and a tall adult silhouette. Glowing pocket watch icon on a HUD bar. 8-bit pixel art, restricted palette, design document style. --ar 16:9"
-
 ### 2.1. Blueprint
 
 #### Art Style
 
-> **[IMAGEM]**
-> *Prompt:* "Pixel art style reference sheet. NES + Game Boy Color inspired palette. Tile examples (16x16) of grass, brick, wood, metal. Side-scroller environment chunk with 4 distinct color zones: warm school yellow, melancholic home brown, neon party magenta, cold exam white. CRT scanline effect overlay. --ar 16:9"
-
-- **Pixel art 8-bits** com paleta restrita (estilo NES + Game Boy Color)
-- Sprites: 16×32 (Woody adulto), 16×16 (Woody jovem), tiles de 16×16
-- Resolução interna: 320×180, escalonada
-- Cada fase tem **identidade cromática própria** para localizar o jogador emocionalmente
-- HUD minimalista: apenas barra de energia do congelamento (canto superior esquerdo)
-- Diálogos: caixa pixelada com retrato 24×24 (estilo Pokémon clássico), fonte custom de 8 pixels
+- **Pixel art 8-bit** com paleta restrita; cada fase tem identidade cromática (escolar quente, domingo basement marrom, floresta verde noturna, mercado cyberpunk neon).
+- Sprites de personagem: **PlayerYoung** ~16×16 (jaqueta amarela), **PlayerAdult** ~16×32 (sobretudo marrom). Tiles 32×32 PPU 32.
+- BG paralax 5 layers (CityNight, basement, floresta, mercado) parented na Main Camera.
+- Pós-processamento URP por cena (Bloom + Vignette + ColorAdjustments + Light2D), tunado manualmente — builders criam só o pré-requisito.
+- HUD minimalista: título da fase + barra de vida do ativo + hint de controles + slot do inventário de chaves/comidas quando aplicável.
 
 #### Narrative Style
 
-> **[IMAGEM]**
-> *Prompt:* "Pixel art dialogue box mockup, retro RPG style. Two character portraits side by side — a tired 30-year-old man with stubble and a curious 7-year-old boy. Typewriter text effect mid-sentence. Bottom of screen, classic Pokemon-inspired UI frame. 8-bit pixel art, low resolution. --ar 16:9"
+- Tom melancólico-esperançoso; humor seco do adulto contra a sinceridade do jovem.
 
-- **Tom:** melancólico mas esperançoso. Humor seco do adulto contra a sinceridade do jovem.
-- **Diálogos curtos**, em texto 8-bits com efeito de máquina de escrever.
-- **Sem cinemáticas longas** — narrativa cabe em pequenos diálogos antes/depois das fases.
-- **Detalhes ambientais**: pôsteres, bilhetes, fotos durante as fases.
-- **Sem voice acting** — apenas blips de texto (grave para o adulto, agudo para o jovem, sintético para os alienígenas).
 
 #### Sound Style
 
-> **[IMAGEM]**
-> *Prompt:* "Pixel art retro audio waveform visualization. Stylized 8-bit chiptune sheet music floating over a moody pixel art landscape. Old NES-style sound chip in foreground. Cold purple and amber accent colors. 8-bit aesthetic, atmospheric. --ar 16:9"
-
-- **Direção:** Chiptune com camadas modernas, lo-fi melancólico.
-- **Referências:** Celeste OST (Lena Raine), Undertale (Toby Fox), Hyper Light Drifter, Shovel Knight.
-- **Faixas previstas:** tema da praça, da sala alienígena, dos 4 cenários, e remix final no epílogo.
-- **SFX:** pulo, passos diferentes por personagem, zumbido elétrico do congelamento, ondas sonoras dos pais (fase 2), tique-taque do relógio gigante (fase 4).
+- Chiptune lo-fi melancólico (Lena Raine, Toby Fox como referência).
+- **Música**: Carlos Hernani.
+- **SFX procedural** (`SfxBeep.BuildBlip`): pulo, pedra, plate on/off, beat hit/miss, snake move/food, game over, dialog blip, plank break.
+- AudioManager pausa/retoma trilha de fundo durante minigames (Snake / Guitar Hero).
 
 #### Characters
 
-> **[IMAGEM — Woody Adulto]**
-> *Prompt:* "Pixel art character sprite sheet, 16x32 pixels. A tired 30-year-old man with stubble, dark circles under eyes, worn brown coat, slumped posture. Walk cycle, idle pose, jump frame. Muted gray-brown palette. White background, sprite reference. 8-bit pixel art. --ar 1:1"
-
-> **[IMAGEM — Woody Jovem (4 versões)]**
-> *Prompt:* "Pixel art character sprite sheet showing the same boy at 4 ages, all 16x16. At 7 (school uniform, backpack, curious), at 12 (headphones, closed-off), at 15 (skateboard under arm, smug grin), at 18 (school uniform, anxious posture). Bright contrasting palette. 8-bit pixel art, white background. --ar 16:9"
-
-> **[IMAGEM — Alienígenas]**
-> *Prompt:* "Pixel art alien creature trio sprite sheet. Three small round beings, 16x16 each, no mouths, expressive eyes only. One red, one blue, one yellow. Minimalist friendly design. 8-bit pixel art, white background. --ar 16:9"
-
-- **Woody Adulto (jogável):** 30 anos, sprite 16×32. Casaco surrado, barba, olheiras. Cansado, irônico, com ternura escondida.
-- **Woody Jovem (companheiro / parcialmente jogável):** 7, 12, 15 ou 18 anos por fase. Sprite 16×16. Mochila aos 7, fones aos 12, skate aos 15, uniforme aos 18. Não reconhece o adulto como ele mesmo — vê como "tio estranho".
-- **Alienígenas (NPCs do hub):** trio de criaturas, cada uma com cor primária. Tutorial difuso, falam pouco.
-- **NPCs antagonistas:** bully, pais brigando, amigo da festa, relógio do vestibular. Não são vilões — são obstáculos cotidianos.
+- **Woody Adulto** (jogável, sprite `mendigos/Homeless_1/`, 16×32): 30 anos. Casaco surrado, barba. Cansado, irônico, com ternura escondida. Ancora puzzles — empurra `HeavyBox`, pisa em `PressurePlate.Requirement.Adult`, alcança alto.
+- **Woody Jovem** (jogável, sprite `criancas/Child_3/`, 16×16): idade varia por fase — **7** (M_01 pátio), **12** (M_02 domingo), **15** (M_03 floresta), **15–16** (M_04 mercado). Sprite reusado em todas as fases — sem variação visual de adereços (mochila/fones/skate/uniforme não foram implementados). Cabe em frestas, **arremessa pedras** (`K`) que destroem `BreakablePlank`, ativam `StoneSwitch` e derrotam o porteiro. Salto não inclui frame de jump (fallback pra Idle).
+- **Porteiro** (Memory_01, sprite `gangsters/Gangsters_2/`): único inimigo com IA no jogo. `BullyController` patrulha + persegue + leva pedrada → cai → dropa chave (`KeyDropper` + `KeyPickup`).
+- **Alienígenas** (Prologue, sprites `tiny-hero-sprites/Pink/Owlet/Dude_Monster`): trio decorativo nos painéis 5–6 (`IdleBob` em fase offset). **O Hub dos alienígenas foi dropado** — a cutscene final de auto-perdão cumpre a função narrativa (ver §2.1).
+- **Pais brigando** (Memory_02): referenciados apenas na fala de abertura (`IntroDialogue`); não aparecem em cena. ~~Amigo da festa, relógio do vestibular~~ cortados — M_04 virou mercado cyberpunk.
 
 #### Locations
 
-> **[IMAGEM — Mapa geral / hub estilo mood board]**
-> *Prompt:* "Pixel art map overview showing six interconnected scenes arranged like memory fragments: a rainy city square, an alien ship interior with portals, a school courtyard, a 2-story house at sunset, a teen party house with a pool at night, and a stark exam room. Side-scroller perspective tiles. 8-bit pixel art, varied color palettes per scene. --ar 16:9"
+| Fase / Cena | Setting | Idade | Mecânica-foco |
+|---|---|---|---|
+| **MainMenu** | Praça noturna (rain + lightning) | — | Botões + créditos |
+| **Prologue** | 7 painéis (praça → cabine → flash → aliens → relógio) | 30 (presente) | Cutscene |
+| **Memory_01_Patio** | Pátio escolar, paleta verde-amarelo | 7 | Dualidade Woody + porteiro |
+| **Memory_02_Domingo** | Interior basement (madeira marrom) | 12 | Co-op assimétrico estilo Pico Park |
+| **Memory_03_Floresta** | Floresta noturna, paleta verde-azul | 15 | Portais (`ReturnPad` com `E`) |
+| **Memory_04_Sala (mercado)** | Mercado cyberpunk noturno | 15-16 | Errands + arcades (Snake, Guitar Hero) |
+| **Memory_04_Cutscene_Placeholder** | Fundo preto + créditos | — | Cutscene outro + créditos rolando |
+
+*Hub (sala dos alienígenas) e Epílogo planejados originalmente foram dropados — a cutscene final cumpre a função.*
+
+##### Paletas e ambientação visual
 
 | Local | Paleta | Descrição |
 |---|---|---|
-| **Praça (presente)** | Cinzas, azul-marinho, laranja apagado | Praça chuvosa, banco, cabine alienígena |
-| **Hub — Sala dos Alienígenas** | Roxos, ciano, preto profundo | 4 portais + janela para a praça que vai mudando |
-| **Fase 1 — O Pátio (7 anos)** | Verde-amarelo escolar, marrom de tijolo | Pátio de escola pública com quadra, bebedouro |
-| **Fase 2 — Domingo (12 anos)** | Bege, marrom, vermelho desbotado | Casa de dois andares, cozinha, sala, quarto |
-| **Fase 3 — A Festa (15 anos)** | Magenta, azul neon, preto | Casa de festa adolescente com piscina e telhado |
-| **Fase 4 — A Sala (18 anos)** | Branco frio, cinza, vermelho do relógio | Sala de prova de vestibular, paredes que se movem |
+| **Praça (presente)** | Cinzas, azul-marinho, laranja apagado | MainMenu + Prologue. Chuva + lightning flash, banco, vending machine cyberpunk como portal alienígena |
+| ~~**Hub — Sala dos Alienígenas**~~ | — | **Dropado.** Alienígenas aparecem só nos painéis 5–6 do Prologue (trio decorativo `IdleBob`); a cutscene final cumpre a função narrativa |
+| **Memory_01 — Pátio (7 anos)** | Verde-amarelo escolar, marrom de tijolo, dourado quente | Tilemap `residential-area`, bench / lamp post / trashcan, BG night paralax 5 layers |
+| **Memory_02 — Domingo (12 anos)** | Marrom de madeira, bege, cinza escuro | Interior `basement-tileset`. Chão solid-color, pipes / boxes / decor decorativos. Pais brigando só no diálogo de abertura |
+| **Memory_03 — Floresta (15 anos)** | Verde-azul noturno, ciano dos portais | Floresta com portais como verbo principal. Switches acima dos portais (jovem pula pra acertar) |
+| **Memory_04 — Mercado (15–16 anos)** | Magenta, ciano neon, preto, vermelho de letreiro | Mercado cyberpunk noturno (`cyberpunk-market-street`). Vending machines, foodtruck, cabines arcade (Snake, Guitar Hero), NPCs cyberpunk |
+| **Cutscene final + créditos** | Preto profundo + texto branco | Auto-perdão em 5 painéis → créditos rolando → volta ao MainMenu |
 
-#### Heroes
-
-- **Woody Adulto** — protagonista principal, herói da auto-compaixão. Carrega o relógio alienígena.
-- **Woody Jovem** — co-protagonista, ele mesmo no passado. O herói que precisa ser cuidado.
+*Fases 3 e 4 mudaram completamente vs concept original: M_03 deixou de ser "festa adolescente com piscina" → floresta noturna com portais; M_04 deixou de ser "sala de vestibular com paredes que se movem" → mercado cyberpunk com arcades, idade 18 → 15–16 (conexão narrativa com M_02).*
 
 ### 2.2. Mechanics
 
 #### Game Objects
-- **Caixas pesadas** — só o adulto empurra
-- **Frestas e dutos** — só o jovem passa
-- **Interruptores de pressão pesados** — só o adulto ativa
-- **Interruptores delicados** — só o jovem ativa
-- **Relógio alienígena** — equipado pelo adulto, congela o tempo
-- **Fotografias coletáveis** — 3 escondidas por fase, desbloqueiam álbum no hub
-- **Inimigos contextuais** — bully, ondas sonoras, NPCs da festa, fantasmas das fases anteriores
-- **Ataque do jovem** — arremesso de pedras / objetos pequenos (curto alcance, atordoa)
-- **Ataque do adulto** — golpe corpo-a-corpo (empurra / derruba; reaproveita a animação de empurrar caixa)
+
+- **Caixas pesadas** — só o adulto empurra.
+- **Frestas baixas** — só o jovem passa (adulto bate a cabeça).
+- **Placas de pressão** — algumas só com adulto em cima, outras só com caixa, outras com qualquer um.
+- **Alvos de pedra** — o jovem mira e arremessa pra ativar.
+- **Cofre de senha** — três alvos coloridos que precisam ser acertados na ordem certa.
+- **Tábuas frágeis** — pedra do jovem destrói.
+- **Portas com regra** — só abrem quando todas as condições estão satisfeitas ao mesmo tempo.
+- **Chave** — derrubar o porteiro da fase 1 faz ele dropar a chave da escola.
+- **Portais** — teleporte entre dois pontos da fase, exigem apertar `E` pra entrar.
+- **Cabines arcade** — minigames embedded (Snake e Guitar Hero) que destravam a saída.
+- **Comidas coletáveis** — o jovem pega, entrega na barraca pra liberar passagem.
+- **Porteiro** — único inimigo do jogo, na fase 1: patrulha, persegue, leva pedrada e cai.
 
 #### Regras de Interação
-- O adulto tem **dobro da altura** do jovem (sistema de afinidades opostas)
-- O adulto pode **carregar** o jovem (sprite 16×40, movimento mais lento)
-- O congelamento de tempo **só funciona com o adulto** ativo
-- O congelamento tem **medidor de energia** (recarrega lentamente fora de uso)
-- Troca de personagem por botão dedicado; o inativo fica em idle ou patrulha curta
+
+- O adulto tem **dobro da altura** do jovem.
+- **`Tab` troca quem você controla.** O outro continua na cena parado, mas ainda **pesa em placas** — é assim que se resolve a maioria dos puzzles ("um segura, o outro age").
+- Só o jovem **arremessa pedra** (`K`).
+- Durante minigames o jogo congela; o overlay do minigame continua funcionando normal.
 
 #### Condições de Vitória e Derrota
-- **Vitória da fase:** ambos os Woodys chegam ao ponto final
-- **Derrota:** barra de vida do personagem ativo zerada, ou jovem cai/é pego → fase reinicia do último checkpoint
-- **Sem morte permanente, sem contador de mortes** — diálogo do adulto: *"Ok, de novo. A gente acerta dessa vez."*
-- **Vitória do jogo:** completar as 4 memórias → epílogo
+
+- **Vitória da fase**: os dois Woodys juntos na porta de saída (+ chave quando exigida).
+- **Derrota**: vida zerada ou cair no buraco → respawn no ponto inicial. Sem game over, sem contador de mortes.
+- **Vitória do jogo**: terminar a última fase → cutscene de auto-perdão + créditos rolando.
 
 #### Comportamentos
-- **Personagem inativo:** idle ou patrulha curta
-- **Inimigos:** patrulham, perseguem ou bloqueiam. Podem ser **combatidos (atordoados/empurrados, sem morte gráfica)**, evitados ou manipulados — combate é último recurso, não objetivo central
-- **Congelamento ativo:** filtro azul-acinzentado na tela, granulação, zumbido elétrico baixo
+
+- **Personagem inativo**: fica parado onde foi deixado (não anda, não patrulha).
+- **Porteiro**: patrulha um trecho, persegue quando o jogador chega perto, leva 3 pedradas até cair.
+- **Feedback visual**: poeirinha ao pousar, flash branco quando inimigo apanha, placa muda de cor quando ativada, tábua vira partículas ao quebrar.
 
 #### Sistemas
-- **Progressão por desbloqueio mecânico** (sem XP, sem loot, sem skill tree)
-  - Fase 1: dualidade de tamanho
-  - Fase 2: + congelamento do tempo
-  - Fase 3: + troca livre de personagem
-  - Fase 4: combina tudo, timing apertado
-- **Feedback de progresso:** janela do hub mostra a praça mudando
+
+- **Progressão por mecânica** (sem XP, sem loot, sem skill tree):
+  - **Fase 1 (Pátio)** — aprende dualidade Woody, fresta, caixa-como-degrau, ataque com pedra.
+  - **Fase 2 (Domingo)** — pedra como ferramenta de puzzle, cofre de senha, coordenação espacial.
+  - **Fase 3 (Floresta)** — portais como elevadores.
+  - **Fase 4 (Mercado)** — combina tudo + minigames + entrega de comidas + cofre de cores.
+- **Hub e congelamento de tempo foram cortados** — a cutscene final substitui o hub.
 
 ### 2.3. Interface
 
-> **[IMAGEM — HUD mockup]**
-> *Prompt:* "Pixel art HUD mockup for a retro side-scroller. Top-left corner shows a small energy bar with a clock icon (time-freeze meter). Bottom of screen has dialogue box with character portrait. Otherwise minimal — no map, no quest log. 8-bit pixel art, restricted palette. --ar 16:9"
+- **HUD minimalista**: barra de vida do Woody ativo, título da fase, hint de controles, inventário (chave ou comidas) quando aplicável.
+- **Sem mapa, sem minimapa, sem missões em texto, sem skill tree.**
+- **Diálogos**: caixa preta no rodapé com portrait do personagem, texto digitando (typewriter) e indicador piscante `[Espaço/Enter]` pra avançar.
+- **Animações-chave**: poeirinha ao pousar, flash branco quando o porteiro apanha, placas mudam de cor on/off, tábua frágil vira partículas ao quebrar.
 
-- HUD minimalista: barra de energia do congelamento (canto superior esquerdo) e barra de vida do personagem ativo (logo abaixo)
-- Sem mapa, sem minimapa, sem missões em texto
-- Diálogos: caixa pixelada estilo Pokémon clássico
-- Animações-chave: idle do adulto suspira a cada ~5s, idle do jovem muda por fase, transição suave do "carregar"
+*Barra de energia do congelamento, idle do adulto suspirando, idle do jovem variando por fase e animação de "carregar o jovem" foram cortados — congelamento de tempo e mecânica de carregar não foram implementados; o jovem usa o mesmo sprite em todas as fases.*
 
 #### Controles
-| Ação | Gamepad | Teclado |
-|---|---|---|
-| Mover | Analógico esquerdo | A / D ou ←/→ |
-| Pular | A / X | Espaço |
-| Interagir / pegar | B / Círculo | E |
-| Atacar | X / Quadrado | K |
-| Congelar tempo | RT / R2 | Shift |
-| Trocar personagem | Y / Triângulo | Tab |
-| Pausar | Start | Esc |
+
+| Ação | Teclado |
+|---|---|
+| Mover | `A` / `D` ou `←` / `→` |
+| Pular | `Espaço` / `W` / `↑` |
+| Arremessar pedra (Young) | `K` |
+| Trocar Woody | `Tab` |
+| Entrar em portal / arcade | `E` (portal) / `Espaço` (arcade) |
+| Snake | Setas direcionais |
+| Guitar Hero | `A`/`S`/`D` ou `←`/`↓`/`→` ; `Tab` troca guitarra |
+| Avançar diálogo | `Espaço` / `Enter` |
+| Pular cutscene | `Esc` |
+
+*Sem suporte a gamepad no estado atual (todos os reads usam `Keyboard.current` do New Input System).*
 
 ---
 
 ## 3. Dynamics
 
 ### 3.1. Player-Player
-**Não se aplica diretamente** — Retroself é single-player.
 
-Porém, há uma **dinâmica simbólica entre dois "jogadores"**: o jogador do presente (adulto) e o jogador-criança (passado). O jogador real ocupa os dois papéis em momentos diferentes.
-
-**Cooperação interna:** o jogador precisa pensar como adulto (planejamento, recursos, paciência) e como jovem (agilidade, ingenuidade, vulnerabilidade) — alternando entre as duas mentalidades.
+Single-player com **dois corpos co-presentes**. Toda a tensão vem da assimetria entre eles: o Adult ancora (pesa em plate, empurra caixa, alcança alto), o Young executa (cabe em fresta, atira pedra, pula em cima da caixa). Como o inativo continua na cena, o jogador aprende a **deixar um Woody numa posição-chave** antes de trocar.
 
 ### 3.2. Player-Game
 
-#### Curva de aprendizado
-- **Fase 1 (7 anos):** ensina movimento e dualidade de tamanho. Puzzle simples, foco em narrativa.
-- **Fase 2 (12 anos):** introduz congelamento do tempo. Curva sobe.
-- **Fase 3 (15 anos):** introduz troca livre, gameplay paralelo. Maior complexidade espacial.
-- **Fase 4 (18 anos):** combina tudo, timing apertado. Ponto alto de desafio.
+**Curva de aprendizado**:
+- **M_01**: ensina movimento, `Tab`, fresta, `HeavyBox` como degrau, ataque com pedra.
+- **M_02**: introduz `K` como verbo de puzzle (Stone como chave), cofre de senha, dependência espacial Adult↔Young, `ReturnPad` como portal de revisita.
+- **M_03**: portais como elevadores, switches **acima dos portais** (precisa pular pra acertar), portal exige `E` (anti-acidente).
+- **M_04**: combina tudo + minigames embedded (Snake, Guitar Hero) + inventário cross-puzzle (comidas) + senha 3 cores via `SequenceLock`.
 
-#### Tipos de interação
-- **Exploração:** descobrir os 3 colecionáveis (fotografias) escondidos em cada fase
-- **Confronto:** combate não-letal (atordoar/empurrar), evasão ou manipulação — preferir manipulação quando possível
-- **Estratégia:** decidir quando congelar, quando carregar, quando trocar personagem
-- **Resolução de puzzle:** o cenário inteiro é o quebra-cabeça
+**Tipos de interação**: plataforma, arremesso de pedra, empurrar caixa, ler pistas (números 1/2/3 espalhados pra deduzir senhas), minigames arcade.
 
 ### 3.3. Game-Game
 
-#### Sistemas que conversam entre si
-- **Tempo congelado ↔ Movimento de inimigos:** congelar abre janelas seguras
-- **Dualidade de tamanho ↔ Geometria do nível:** cada nível é desenhado para forçar cooperação
-- **Energia do relógio ↔ Tensão temporal:** recurso limitado força planejamento
-- **Progresso nas fases ↔ Estado do hub:** janela do hub muda visualmente a cada fase concluída
-- **Coletáveis ↔ Final:** 3 finais possíveis baseados em quantas fotos o jogador encontrou
+- **Stone ↔ EnemyHealth ↔ BreakablePlank/StoneSwitch/Bully**: uma única primitiva (Stone como trigger) interage com 3 alvos diferentes via componente compartilhado (`EnemyHealth` ou `StoneSwitch`).
+- **PressurePlate.latch ↔ HeavyBox**: caixa "encaixa" visualmente quando pisa pela 1ª vez (snap X + RB Static + componente HeavyBox desativado).
+- **ArcadeMachine ↔ GateSource**: cabine vira fonte de gate quando o minigame é vencido (sem novos tipos de gate).
+- **`SceneStartReset` ↔ KeyPickup/FoodInventory**: zera flags estáticas no Awake da cena (evita coleta cross-cena).
 
 ---
 
 ## 4. Experience
 
-### 4.1. Senses (feedback sensorial)
+### 4.1. Senses
 
-#### Audiovisual
-- **Visual:** pixel art 8-bits, paleta restrita por fase, CRT scanline sutil
-- **Filtro de congelamento:** azul-acinzentado, granulação leve, pulsação ciano de 3 frames na ativação
-- **Áudio:** chiptune lo-fi, blips de texto por personagem, SFX de zumbido elétrico no congelamento
-- **Háptica:** vibração leve no gamepad ao congelar/descongelar (se aplicável)
+- **Visual**: pixel art 8-bit, paleta restrita por fase, scanlines URP, Light2D manuais. Press Start 2P (logo + diálogos) + VT323 (fallback).
+- **Audio**: chiptune autoral (Carlos Hernani) + SFX procedural via `SfxBeep`.
+- **Feedback de hit**: flash branco no Bully, dust puff no pouso, plank vira partículas ao quebrar, plate troca de cor on/off.
 
 ### 4.2. Cerebellum (emoções)
-- **Nostalgia:** cenários reconhecíveis da infância brasileira
-- **Culpa:** o adulto revive erros que nunca resolveu
-- **Ternura:** carregar literalmente o seu eu mais novo
-- **Tensão:** recurso de tempo limitado, antagonistas que se aproximam
-- **Esperança:** o presente clareando a cada fase resolvida
-- **Auto-compaixão:** sentimento culminante do epílogo
 
-### 4.3. Cerebrum (cognição)
+- **Nostalgia**: cenários reconhecíveis (pátio escolar, basement, mercado de noite).
+- **Ternura**: ver o Young pular em cima da caixa que o Adult empurrou.
+- **Tensão**: minigame com `Time.timeScale=0` cria foco isolado.
+- **Auto-compaixão**: pico emocional na cutscene final (5 painéis de fala do Adult).
 
-#### Desafios
-- Planejamento espacial (qual Woody passa por onde)
-- Timing (quando congelar, quanto tempo segurar)
-- Gerenciamento de recurso (energia do relógio)
+### 4.3. Cerebrum
 
-#### Descobertas
-- Colecionáveis escondidos
-- Detalhes ambientais que enriquecem a narrativa (pôsteres, bilhetes, fotos)
-- Múltiplos finais
+- **Planejamento espacial**: qual Woody usa qual alavanca, em que ordem.
+- **Memória/observação**: senhas de 3 cores espalhadas como pistas numeradas (M_02 P4, M_04 P5).
+- **Ritmo/coordenação**: Guitar Hero co-op (Tab troca guitarra em runtime).
 
-#### Auto-expressão
-- Ordem livre de jogar as 4 memórias
-- Estilo de jogo (perfeccionista coletando tudo vs. apenas atravessando)
+### 4.4. Perception
 
-### 4.4. Perception (interpretação do mundo)
-
-O jogador deve perceber que:
-- **Os dois personagens são a mesma pessoa em tempos diferentes** — mas o jovem não sabe disso (vê o adulto como "tio estranho")
-- **O tempo congelado é uma metáfora de cuidado**, não de poder — você para o mundo para arrumar o caminho da sua versão jovem
-- **Os "vilões" são pessoas reais** — bully, pais, amigos — não monstros. Podem ser combatidos quando necessário, mas o combate é não-letal (atordoa/empurra) e nunca é o caminho mais elegante: manipular o cenário continua sendo a graça do jogo
-- **Falhar não é punido** — a fase reinicia com leveza, reforçando o tema de auto-compaixão
-- **O presente reflete o esforço**: a praça muda visualmente, dando sentido emocional à progressão
+O jogador percebe que:
+- **Os dois são a mesma pessoa em tempos diferentes**.
+- **Cooperar = aceitar quem você foi**. O Adult que rejeita o Young não atravessa as fases — só quando o adulto **espera, segura, empurra a caixa pro filho** o caminho abre.
+- **Falhar não é punido**. Sem contagem de mortes; respawn imediato. Reforça o tom de auto-compaixão.
+- **A cutscene final é a recompensa narrativa**, não uma boss fight.
 
 ---
 
 ## 5. Inspirações
 
-| Jogo / Obra | O que inspira |
+| Obra | O que inspira |
 |---|---|
-| *Braid* | Manipulação do tempo como narrativa |
+| *Braid* | Manipulação do tempo como narrativa (mantido no Prologue como motivo simbólico) |
 | *Celeste* | Plataforma com tema de saúde mental |
 | *Brothers: A Tale of Two Sons* | Dois personagens, dois corpos, uma história |
 | *Inside / Limbo* | Atmosfera melancólica em 2D |
-| *Undertale* | Estilo 8/16-bits com peso emocional |
-| *Filme "About Time"* | Viagem ao passado para corrigir o eu |
+| *Undertale* | Estilo retrô com peso emocional |
+| *Pico Park* | Co-op assimétrico em puzzles de plate/gate |
+| *Portal 2 (co-op)* | Cooperação espacial com ferramentas diferentes por personagem |
+| *Filme "About Time"* | Voltar ao passado pra corrigir o eu |
+
+---
+
+## 6. Estado atual vs. visão original
+
+Diferenças intencionais em relação à v0.2 do GDD:
+
+- **Congelamento de tempo** virou motivo narrativo (mencionado na cutscene final), **não mecânica implementada**. A coop assimétrica espacial substituiu o time-freeze como verbo principal.
+- **Carregar o jovem** foi dropado. Caixas (`HeavyBox`) cumprem a função de degrau.
+- **Hub dos alienígenas** dropado. Fluxo linear MainMenu → Prologue → M_01 → M_02 → M_03 → M_04 → Cutscene → MainMenu.
+- **Cenários reescritos**: festa adolescente (M_03 original) virou floresta noturna; sala de prova (M_04 original) virou mercado cyberpunk.
+- **Idade da Memory_04**: 18 → 15-16 anos (Woody adolescente fugindo de casa pro mercado, ligando narrativamente com M_02).
+- **3 fotografias coletáveis por fase + múltiplos finais** dropados. Final único (cutscene + créditos).
+- **Combate** restrito ao M_01 (porteiro). M_02/M_03/M_04 não têm inimigos AI — só hazards estáticos.
+- **Minigames embedded** (Snake + Guitar Hero co-op) adicionados na M_04 — não previstos no GDD original.
